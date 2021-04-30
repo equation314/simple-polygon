@@ -1,0 +1,38 @@
+{
+  "name": "simple-polygon-web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "simple polygon generation and shortest paths",
+  "scripts": {
+    "build": "webpack --mode production",
+    "build-dev": "webpack --mode development --watch",
+    "serve": "webpack-dev-server",
+    "clean": "rm -rf dist/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/equation314/simple-polygon.git"
+  },
+  "keywords": [
+    "simple polygon",
+    "computational geometry",
+    "shortest path",
+    "wasm",
+    "rust"
+  ],
+  "author": "Yuekai Jia <equation618@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/equation314/simple-polygon/issues"
+  },
+  "homepage": "https://github.com/equation314/simple-polygon",
+  "dependencies": {
+    "simple-polygon": "file:../pkg"
+  },
+  "devDependencies": {
+    "copy-webpack-plugin": "^5.0.0",
+    "webpack": "^4.29.3",
+    "webpack-cli": "^3.1.0",
+    "webpack-dev-server": "^3.1.5"
+  }
+}
