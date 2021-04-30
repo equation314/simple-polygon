@@ -1,0 +1,51 @@
+name: Build & Test
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: nightly
+        components: rustfmt
+    - name: Check code format
+      run: cargo fmt -- --check
+
+  clippy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: nightly
+        components: clippy
+    - name: Clippy
+      run: cargo clippy
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: nightly
+    - uses: actions-rs/install@v0.1
+      with:
+        crate: wasm-pack
+        version: latest
+        use-tool-cache: true
+    - name: Build
+      run: make build
+    - name: Build website
+      run: |
+        cd website
+        npm install
+        npm run build
