@@ -21,7 +21,7 @@ jobs:
     - name: Build
       run: |
         make build
-        cd website
+        cd web/site
         npm install
         npm run build
     - name: Deploy
@@ -29,4 +29,4 @@ jobs:
       with:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         BRANCH: gh-pages
-        FOLDER: website/dist
+        FOLDER: web/site/dist

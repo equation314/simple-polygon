@@ -46,6 +46,17 @@ jobs:
       run: make build
     - name: Build website
       run: |
-        cd website
+        cd web/site
         npm install
         npm run build
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: nightly
+    - name: Unit Test
+      run: cargo test
