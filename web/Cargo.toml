@@ -11,4 +11,4 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 simple-polygon-core = { path = "../core" }
-wasm-bindgen = "0.2"
+wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }

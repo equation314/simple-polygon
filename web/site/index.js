@@ -1,3 +1,5 @@
-import * as wasm from "simple-polygon";
+import * as SP from "simple-polygon";
 
-wasm.greet("Simple Polygon");
+SP.greet("Simple Polygon");
+
+console.log(SP.gen_polygon());
