@@ -11,10 +11,10 @@ pub fn hello() -> usize {
 
 pub fn gen_polygon() -> Vec<geo::Point> {
     vec![
-        Point::new(0.0, 0.0),
-        Point::new(1.0, 0.0),
-        Point::new(1.0, 1.0),
-        Point::new(0.0, 1.0),
+        Point::new(1.0, 1.0) * 100.0,
+        Point::new(2.0, 1.0) * 100.0,
+        Point::new(2.0, 2.0) * 100.0,
+        Point::new(1.0, 2.0) * 100.0,
     ]
 }
 

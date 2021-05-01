@@ -162,7 +162,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "simple-polygon-web"
+name = "simple-polygon-wasm"
 version = "0.1.0"
 dependencies = [
  "simple-polygon-core",
