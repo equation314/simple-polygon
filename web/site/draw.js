@@ -10,7 +10,7 @@ var drawing = false;
 
 var pointDragger = d3
     .drag()
-    .on("drag", function (event, d) {
+    .on("drag", function (event) {
         if (drawing) return;
         dragging = true;
         let cursor = [event.x, event.y];
@@ -24,7 +24,7 @@ var pointDragger = d3
             .data([newPoints])
             .attr("points", newPoints);
     })
-    .on("end", function (d) {
+    .on("end", function () {
         dragging = false;
     });
 
@@ -61,10 +61,11 @@ export function drawPolygon(points, config) {
         .attr("cy", (d) => d[1])
         .attr("r", c.vertexSize)
         .attr("fill", c.vertexColor)
-        .attr("stroke", "#000")
-        .attr("is-handle", "true");
+        .attr("stroke", "#000");
     if (c.close && !c.fixed) {
         circles.style("cursor", "move").call(pointDragger);
+    } else if (!c.close) {
+        circles.attr("is-handle", true).style("cursor", "pointer");
     }
     return g;
 }
@@ -102,7 +103,7 @@ svg.on("mousemove", function (event) {
     let cursor = d3.pointer(event);
     let g = d3.select("g.drawing");
     g.select("line").remove();
-    g.append("line")
+    g.insert("line", ":first-child")
         .attr("x1", lastDrawPoint[0])
         .attr("y1", lastDrawPoint[1])
         .attr("x2", cursor[0])
@@ -117,5 +118,5 @@ function getRandomColor() {
     for (let i = 0; i < 6; i++) {
         color += letters[Math.floor(Math.random() * 16)];
     }
-    return color;
+    return color + "CC";
 }

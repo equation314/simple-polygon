@@ -6,7 +6,7 @@ fn main() {
         .setting(AppSettings::ArgRequiredElseHelp)
         .subcommand(
             SubCommand::with_name("gen")
-                .about("Generate a random polygon")
+                .about("Generate a random simple polygon")
                 .display_order(1)
                 .arg(
                     Arg::with_name("n")

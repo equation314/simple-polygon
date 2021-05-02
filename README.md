@@ -2,7 +2,7 @@
 
 Simple polygon generator and find the shortest paths inside a simple polygon.
 
-## Generate a random polygon
+## Generate a random simple polygon
 
 ```
 cargo run -- gen [OPTIONS] -n <N>
