@@ -1,6 +1,5 @@
 import * as d3 from "d3";
 
-console.log(window.innerHeight);
 var svg = d3.select("body").append("svg");
 
 var currentPoints = [];
@@ -68,6 +67,19 @@ export function drawPolygon(points, config) {
         circles.attr("is-handle", true).style("cursor", "pointer");
     }
     return g;
+}
+
+export function drawLines(lines, lineColor = "#FDBC07") {
+    let g = svg.append("g");
+    g.selectAll("line")
+        .data(lines)
+        .join("line")
+        .attr("x1", (d) => d[0][0])
+        .attr("y1", (d) => d[0][1])
+        .attr("x2", (d) => d[1][0])
+        .attr("y2", (d) => d[1][1])
+        .attr("stroke", lineColor)
+        .attr("stroke-width", 1);
 }
 
 svg.on("mouseup", function (event) {

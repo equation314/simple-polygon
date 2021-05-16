@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use std::ops;
 
+const EPS: f64 = 1e-9;
+
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct Point {
     pub x: f64,
@@ -31,6 +33,36 @@ impl Point {
 
     pub fn dist(a: Self, b: Self) -> f64 {
         (a - b).len()
+    }
+
+    /// Does this point lie left to the line AB?
+    ///
+    /// Returns: 1: yes; -1: no; 0: on the line.
+    pub fn to_left(self, a: Self, b: Self) -> isize {
+        let t = (b - a) * (self - a);
+        if t > EPS {
+            1
+        } else if t < -EPS {
+            -1
+        } else {
+            0
+        }
+    }
+
+    /// Is this point in the triangle ABC?
+    ///
+    /// Returns: 1: yes; -1: no; 0: on one side of the triangle.
+    pub fn in_triangle(self, a: Self, b: Self, c: Self) -> isize {
+        let ab = self.to_left(a, b);
+        let bc = self.to_left(b, c);
+        let ca = self.to_left(c, a);
+        if ab > 0 && bc > 0 && ca > 0 {
+            1
+        } else if ab < 0 || bc < 0 || ca < 0 {
+            -1
+        } else {
+            0
+        }
     }
 }
 

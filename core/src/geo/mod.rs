@@ -1,3 +1,4 @@
+pub mod dcel;
 mod point;
 mod polygon;
 

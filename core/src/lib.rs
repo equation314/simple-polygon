@@ -1,6 +1,7 @@
 pub mod gen;
 pub mod geo;
 pub mod shortest;
+pub mod tri;
 
 pub fn hello() -> usize {
     println!("Hello World!");

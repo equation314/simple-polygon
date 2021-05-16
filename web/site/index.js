@@ -1,6 +1,18 @@
 import * as SP from "simple-polygon-wasm";
-import { drawPolygon } from "./draw.js";
+import { drawPolygon, drawLines } from "./draw.js";
 
-let points = SP.gen_polygon().points.map((p) => [p.x * 4, p.y * 4]);
+function scale(points) {
+    return points.map((p) => [p[0] * 10 - 600, p[1] * 10 - 800]);
+}
+
+let points = SP.gen_polygon();
+let pointsScale = scale(points);
 console.log(points);
-drawPolygon(points, { color: "green", vertexSize: 3 });
+drawPolygon(pointsScale, { color: "green", vertexSize: 3 });
+
+let diagonals = SP.triangulation(points);
+console.log(diagonals);
+drawLines(diagonals.map((d) => [pointsScale[d[0]], pointsScale[d[1]]]));
+
+let path = SP.find_shortest_path(points, [91, 104], [119, 119]);
+console.log(path);
