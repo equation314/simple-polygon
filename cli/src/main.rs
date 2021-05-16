@@ -1,5 +1,6 @@
 use clap::{App, AppSettings, Arg, SubCommand};
 use simple_polygon_core as sp;
+use sp::geo::{Point, Polygon};
 
 fn main() {
     let matches = App::new("Simple polygon generator and find the shortest paths")
@@ -79,8 +80,14 @@ fn main() {
             let n: usize = m.value_of("n").unwrap().parse().unwrap();
             let algo = m.value_of("algorithm").unwrap();
             let output = m.value_of("output");
-            println!("N: {}, algo: {}, output: {:?}", n, algo, output);
-            println!("{:?}", sp::gen_polygon());
+            let poly = sp::gen::gen_polygon(n, algo);
+            if let Some(fname) = output {
+                poly.save_to(fname).unwrap();
+            } else {
+                for p in poly.points {
+                    println!("{} {}", p.x, p.y);
+                }
+            }
         }
         ("sp", Some(m)) => {
             let input = m.value_of("input").unwrap();
@@ -94,7 +101,13 @@ fn main() {
                 .unwrap()
                 .map(|val| val.parse().unwrap())
                 .collect();
-            println!("input: {}, start: {:?}, end: {:?}", input, start, end);
+            let poly = Polygon::from_file(input).unwrap();
+            let path = sp::shortest::find_shortest_path(
+                &poly,
+                Point::new(start[0], start[1]),
+                Point::new(end[0], end[1]),
+            );
+            println!("{:?}", path);
         }
         _ => unreachable!(),
     }

@@ -7,6 +7,7 @@ pub struct Point {
     pub y: f64,
 }
 
+#[allow(clippy::len_without_is_empty)]
 impl Point {
     pub fn new(x: f64, y: f64) -> Self {
         Self { x, y }
@@ -20,7 +21,6 @@ impl Point {
         self.dot(self)
     }
 
-    #[allow(clippy::len_without_is_empty)]
     pub fn len(self) -> f64 {
         self.len2().sqrt()
     }

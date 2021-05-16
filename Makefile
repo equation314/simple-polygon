@@ -16,7 +16,7 @@ gen:
 	cargo run -- gen -n 10 -o gen.txt
 
 sp:
-	cargo run -- sp gen.txt -s 1 2 -e 3 4
+	cargo run -- sp gen.txt -s 91 104 -e 119 119
 
 clean:
 	cargo clean

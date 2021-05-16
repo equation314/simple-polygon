@@ -13,6 +13,6 @@ pub fn greet(name: &str) {
 
 #[wasm_bindgen]
 pub fn gen_polygon() -> JsValue {
-    let polygon = sp::gen_polygon();
+    let polygon = sp::gen::gen_polygon(10, "2opt");
     JsValue::from_serde(&polygon).unwrap()
 }
