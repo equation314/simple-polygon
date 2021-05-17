@@ -8,10 +8,11 @@ pub struct Edge {
     pub id: usize,
     pub start: usize,
     pub end: usize,
+
     pub twin: WeakEdge,
     pub prev: WeakEdge,
     pub next: WeakEdge,
-    pub face: WeakFace,
+    pub face: Option<RcFace>,
 }
 
 #[derive(Debug)]
@@ -24,8 +25,7 @@ pub type RcEdge = Rc<RefCell<Edge>>;
 pub type WeakEdge = Weak<RefCell<Edge>>;
 pub type EdgeVec = Vec<RcEdge>;
 
-pub type RcFace = Rc<RefCell<Face>>;
-pub type WeakFace = Weak<RefCell<Face>>;
+pub type RcFace = Rc<Face>;
 pub type FaceVec = Vec<RcFace>;
 
 impl Edge {
@@ -37,7 +37,7 @@ impl Edge {
             twin: Weak::new(),
             prev: Weak::new(),
             next: Weak::new(),
-            face: Weak::new(),
+            face: None,
         }
     }
 
@@ -57,9 +57,53 @@ impl Edge {
 
 impl Face {
     pub fn new(id: usize, edge: WeakEdge) -> RcFace {
-        Rc::new(RefCell::new(Self {
+        Rc::new(Self {
             id,
             first_edge: edge,
-        }))
+        })
+    }
+
+    pub fn edges(&self) -> EdgeIter {
+        EdgeIter::new(self.first_edge.clone())
+    }
+
+    pub fn vertices(&self) -> impl Iterator<Item = usize> {
+        self.edges().into_vertex_iter()
+    }
+}
+
+pub struct EdgeIter {
+    start: WeakEdge,
+    current: WeakEdge,
+    stopped: bool,
+}
+
+impl EdgeIter {
+    pub fn new(start: WeakEdge) -> Self {
+        Self {
+            current: start.clone(),
+            start,
+            stopped: false,
+        }
+    }
+
+    pub fn into_vertex_iter(self) -> impl Iterator<Item = usize> {
+        self.map(|e| e.borrow().end)
+    }
+}
+
+impl Iterator for EdgeIter {
+    type Item = RcEdge;
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.stopped {
+            None
+        } else {
+            let e = self.current.upgrade().unwrap();
+            self.current = e.borrow().next.clone();
+            if self.current.ptr_eq(&self.start) {
+                self.stopped = true;
+            }
+            Some(e)
+        }
     }
 }

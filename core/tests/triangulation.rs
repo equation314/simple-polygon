@@ -13,26 +13,20 @@ fn validate_result(poly: &Polygon, result: &TriangulationResult) {
 
     let mut visited = vec![false; result.edges.len()];
     for t in &result.triangles {
-        let e1_rc = t.borrow().first_edge.upgrade().unwrap();
-        let e1 = e1_rc.borrow();
-        let e2_rc = e1.next.upgrade().unwrap();
-        let e2 = e2_rc.borrow();
-        let e3_rc = e2.next.upgrade().unwrap();
-        let e3 = e3_rc.borrow();
-        assert!(Rc::ptr_eq(&e3.next.upgrade().unwrap(), &e1_rc));
-        assert!(Rc::ptr_eq(&e1.face.upgrade().unwrap(), t));
-        assert!(Rc::ptr_eq(&e2.face.upgrade().unwrap(), t));
-        assert!(Rc::ptr_eq(&e3.face.upgrade().unwrap(), t));
-        assert!(!visited[e1.id]);
-        assert!(!visited[e2.id]);
-        assert!(!visited[e3.id]);
-        visited[e1.id] = true;
-        visited[e2.id] = true;
-        visited[e3.id] = true;
+        let edges = t.edges().collect::<Vec<_>>();
+        let vertices = t.vertices().collect::<Vec<_>>();
+        assert_eq!(edges.len(), 3);
+        assert_eq!(vertices.len(), 3);
 
-        let a = e1.end;
-        let b = e2.end;
-        let c = e3.end;
+        for e in &edges {
+            let e = e.borrow();
+            assert!(Rc::ptr_eq(e.face.as_ref().unwrap(), &t));
+            assert!(!visited[e.id]);
+            visited[e.id] = true;
+        }
+
+        let (e1, e2, e3) = (edges[0].borrow(), edges[1].borrow(), edges[2].borrow());
+        let (a, b, c) = (vertices[0], vertices[1], vertices[2]);
         assert_eq!(a, e2.start);
         assert_eq!(b, e3.start);
         assert_eq!(c, e1.start);

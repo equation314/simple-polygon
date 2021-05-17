@@ -79,10 +79,10 @@ impl<'a> EarCutting<'a> {
         Edge::connect(&e2, &e3);
         Edge::connect(&e3, &e1);
 
-        let f = Rc::downgrade(&self.result.new_face(Rc::downgrade(&e3)));
-        e1.borrow_mut().face = f.clone();
-        e2.borrow_mut().face = f.clone();
-        e3.borrow_mut().face = f;
+        let f = self.result.new_face(Rc::downgrade(&e3));
+        e1.borrow_mut().face = Some(f.clone());
+        e2.borrow_mut().face = Some(f.clone());
+        e3.borrow_mut().face = Some(f);
 
         self.poly_edge[l] = e3.borrow().twin.upgrade().unwrap();
         self.next_vertex[l] = r;

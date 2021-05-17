@@ -1,7 +1,10 @@
 use crate::geo::dcel::{Edge, EdgeVec, Face, FaceVec, RcEdge, RcFace, WeakEdge};
-use crate::geo::Polygon;
+use crate::geo::{Point, Polygon};
 
 mod ear_cutting;
+mod graph;
+
+use graph::Graph;
 
 #[derive(Clone, Copy)]
 pub enum Algorithm {
@@ -16,8 +19,10 @@ pub struct TriangulationResult {
     pub triangles: FaceVec,
 }
 
-pub struct Triangulation {
+pub struct Triangulation<'a> {
+    poly: &'a Polygon,
     result: TriangulationResult,
+    dual: Graph<RcEdge>,
 }
 
 impl TriangulationResult {
@@ -54,18 +59,52 @@ impl Default for TriangulationResult {
     }
 }
 
-impl Triangulation {
-    pub fn build(poly: &Polygon, algo: Algorithm) -> Self {
+impl<'a> Triangulation<'a> {
+    pub fn build(poly: &'a Polygon, algo: Algorithm) -> Self {
         let result = match algo {
             Algorithm::EarCutting => ear_cutting::triangulation(poly),
             _ => unreachable!(),
         };
-        Self { result }
+        Self {
+            poly,
+            result,
+            dual: Graph::new(poly.size()),
+        }
     }
 
     pub fn result(&self) -> &TriangulationResult {
         &self.result
     }
 
-    pub fn build_dual_graph(&self) {}
+    pub fn dual(&self) -> &Graph<RcEdge> {
+        &self.dual
+    }
+
+    pub fn build_dual_graph(&mut self) {
+        for e in &self.result.edges {
+            if let Some(ref f1) = e.borrow().face {
+                if let Some(ref f2) = e.borrow().twin.upgrade().unwrap().borrow().face {
+                    self.dual.add_edge(f1.id, f2.id, e.clone());
+                }
+            }
+        }
+    }
+
+    pub fn location(&self, point: Point) -> Option<RcFace> {
+        for t in &self.result.triangles {
+            let mut iter = t.vertices();
+            let a = iter.next().unwrap();
+            let b = iter.next().unwrap();
+            let c = iter.next().unwrap();
+            if point.in_triangle(
+                self.poly.points[a],
+                self.poly.points[b],
+                self.poly.points[c],
+            ) >= 0
+            {
+                return Some(t.clone());
+            }
+        }
+        None
+    }
 }
