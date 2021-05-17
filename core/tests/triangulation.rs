@@ -42,11 +42,12 @@ fn validate_result(poly: &Polygon, result: &TriangulationResult) {
 }
 
 fn test_triangulation(algo: Algorithm) {
-    let paths = fs::read_dir("../testcases/").unwrap();
-    for path in paths {
-        let test_path = path.unwrap().path();
-        println!("Test polygon from {:?}", test_path);
-        let poly = Polygon::from_file(test_path).unwrap();
+    let test_num = fs::read_dir("../testcases/polygon").unwrap().count();
+    for i in 0..test_num {
+        let poly_path = format!("../testcases/polygon/{:02}.pts", i);
+        println!("Test triangulation from {:?}", poly_path);
+
+        let poly = Polygon::from_file(poly_path).unwrap();
         let tri = Triangulation::build(&poly, algo);
         validate_result(&poly, tri.result());
     }

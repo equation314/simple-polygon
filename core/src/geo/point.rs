@@ -3,7 +3,7 @@ use std::ops;
 
 const EPS: f64 = 1e-9;
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
 pub struct Point {
     pub x: f64,
     pub y: f64,
