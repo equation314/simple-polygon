@@ -5,6 +5,7 @@ use std::rc::{Rc, Weak};
 
 #[derive(Debug)]
 pub struct Edge {
+    pub id: usize,
     pub start: usize,
     pub end: usize,
     pub twin: WeakEdge,
@@ -28,8 +29,9 @@ pub type WeakFace = Weak<RefCell<Face>>;
 pub type FaceVec = Vec<RcFace>;
 
 impl Edge {
-    pub fn new(start: usize, end: usize) -> Self {
+    pub fn new(id: usize, start: usize, end: usize) -> Self {
         Self {
+            id,
             start,
             end,
             twin: Weak::new(),
@@ -39,9 +41,9 @@ impl Edge {
         }
     }
 
-    pub fn new_twin(start: usize, end: usize) -> (RcEdge, RcEdge) {
-        let e1 = Rc::new(RefCell::new(Self::new(start, end)));
-        let e2 = Rc::new(RefCell::new(Self::new(end, start)));
+    pub fn new_twin(id: usize, start: usize, end: usize) -> (RcEdge, RcEdge) {
+        let e1 = Rc::new(RefCell::new(Self::new(id, start, end)));
+        let e2 = Rc::new(RefCell::new(Self::new(id + 1, end, start)));
         e1.borrow_mut().twin = Rc::downgrade(&e2);
         e2.borrow_mut().twin = Rc::downgrade(&e1);
         (e1, e2)

@@ -58,5 +58,5 @@ jobs:
       with:
         profile: minimal
         toolchain: nightly
-    - name: Unit Test
-      run: cargo test
+    - name: Test
+      run: make test

@@ -18,6 +18,9 @@ gen:
 sp:
 	cargo run -- sp gen.txt -s 91 104 -e 119 119
 
+test:
+	cargo test -- --nocapture
+
 clean:
 	cargo clean
 	rm -rf web/pkg/ web/site/dist/

@@ -3,6 +3,7 @@ use crate::geo::Polygon;
 
 mod ear_cutting;
 
+#[derive(Clone, Copy)]
 pub enum Algorithm {
     EarCutting,
     MonoDecomposition,
@@ -22,7 +23,7 @@ pub struct Triangulation {
 impl TriangulationResult {
     /// Add two twin half-edges.
     pub fn new_edges(&mut self, start: usize, end: usize) -> RcEdge {
-        let (e1, e2) = Edge::new_twin(start, end);
+        let (e1, e2) = Edge::new_twin(self.edges.len(), start, end);
         self.edges.push(e1.clone());
         self.edges.push(e2);
         e1

@@ -82,7 +82,7 @@ fn main() {
             let output = m.value_of("output");
             let poly = sp::gen::gen_polygon(n, algo);
             if let Some(fname) = output {
-                poly.save_to(fname).unwrap();
+                poly.save_to_file(fname).unwrap();
             } else {
                 for p in poly.points {
                     println!("{} {}", p.x, p.y);

@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::{self, prelude::*, BufReader, BufWriter};
+use std::path::Path;
 
 use super::point::Point;
 
@@ -29,8 +30,8 @@ impl Polygon {
         Self { points }
     }
 
-    pub fn from_file(file_name: &str) -> io::Result<Self> {
-        let file = File::open(file_name)?;
+    pub fn from_file<P: AsRef<Path>>(path: P) -> io::Result<Self> {
+        let file = File::open(path)?;
         let reader = BufReader::new(file);
 
         let mut points = Vec::new();
@@ -54,8 +55,8 @@ impl Polygon {
         Ok(Self::new(points))
     }
 
-    pub fn save_to(&self, file_name: &str) -> io::Result<()> {
-        let file = File::create(file_name)?;
+    pub fn save_to_file<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
+        let file = File::create(path)?;
         let mut writer = BufWriter::new(file);
 
         for p in &self.points {

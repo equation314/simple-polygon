@@ -1,4 +1,3 @@
-use std::collections::VecDeque;
 use std::rc::Rc;
 
 use super::TriangulationResult;
@@ -93,43 +92,24 @@ impl<'a> EarCutting<'a> {
     /// Triangulation with the ear-cutting algorithm.
     pub fn triangulation(&mut self) {
         let n = self.poly.size();
-        let mut queue = VecDeque::new();
-        let mut in_queue = vec![false; n];
+        let mut is_ear = vec![false; n];
 
         for i in 0..n {
             if self.is_ear(i) {
-                queue.push_back(i);
-                in_queue[i] = true;
+                is_ear[i] = true;
             }
         }
 
-        while self.result.triangles.len() < n - 2 && !queue.is_empty() {
-            let p = queue.pop_front().unwrap();
-            if !in_queue[p] {
-                continue;
+        let mut p = 0;
+        while self.result.triangles.len() < n - 2 {
+            if is_ear[p] {
+                let l = self.prev_vertex[p];
+                let r = self.next_vertex[p];
+                self.add_diagonal(l, p, r);
+                is_ear[l] = self.is_ear(l);
+                is_ear[r] = self.is_ear(r);
             }
-
-            let l = self.prev_vertex[p];
-            let r = self.next_vertex[p];
-            self.add_diagonal(l, p, r);
-
-            if self.is_ear(l) {
-                if !in_queue[l] {
-                    queue.push_back(l);
-                }
-                in_queue[l] = true;
-            } else {
-                in_queue[l] = false;
-            }
-
-            if self.is_ear(r) {
-                if !in_queue[r] {
-                    queue.push_back(r);
-                }
-                in_queue[r] = true;
-            } else {
-                in_queue[r] = false;
-            }
+            p = self.next_vertex[p];
         }
     }
 }
