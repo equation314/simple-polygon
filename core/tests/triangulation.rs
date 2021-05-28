@@ -1,9 +1,12 @@
 use std::fs;
+use std::path::Path;
 use std::rc::Rc;
 
 use simple_polygon_core as sp;
 use sp::geo::Polygon;
 use sp::tri::{Algorithm, Triangulation, TriangulationResult};
+
+const TEST_DIR: &str = "../testcases";
 
 fn validate_result(poly: &Polygon, result: &TriangulationResult) {
     let n = poly.size();
@@ -42,12 +45,14 @@ fn validate_result(poly: &Polygon, result: &TriangulationResult) {
 }
 
 fn test_triangulation(algo: Algorithm) {
-    let test_num = fs::read_dir("../testcases/polygon").unwrap().count();
+    let test_path = Path::new(TEST_DIR);
+    let test_num = fs::read_dir(test_path.join("polygon")).unwrap().count();
+    println!("found {} testcases in {:?}:", test_num, TEST_DIR);
     for i in 0..test_num {
-        let poly_path = format!("../testcases/polygon/{:02}.pts", i);
-        println!("Test triangulation from {:?}", poly_path);
+        let poly_file = test_path.join(format!("polygon/{:02}.pts", i));
+        println!("test triangulation from {:?}", poly_file);
 
-        let poly = Polygon::from_file(poly_path).unwrap();
+        let poly = Polygon::from_file(poly_file).unwrap();
         let tri = Triangulation::build(&poly, algo);
         validate_result(&poly, tri.result());
     }

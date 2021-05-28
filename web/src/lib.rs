@@ -9,7 +9,7 @@ extern "C" {
 
 #[wasm_bindgen]
 pub fn greet(name: &str) {
-    alert(&format!("Hello {}, {}!", name, sp::hello()));
+    alert(&format!("Hello {}!", name));
 }
 
 #[wasm_bindgen]

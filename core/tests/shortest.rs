@@ -1,10 +1,13 @@
 use std::fs::{self, File};
 use std::io::{prelude::*, BufReader};
+use std::path::Path;
 
 use simple_polygon_core as sp;
 use sp::geo::Polygon;
 
-fn validate_result(res_file: &str, result: Option<&Vec<usize>>) {
+const TEST_DIR: &str = "../testcases";
+
+fn validate_result(res_file: &Path, result: Option<&Vec<usize>>) {
     let file = File::open(res_file).unwrap();
     let reader = BufReader::new(file);
     let lines = reader.lines();
@@ -28,17 +31,19 @@ fn validate_result(res_file: &str, result: Option<&Vec<usize>>) {
 
 #[test]
 fn shortest_path() {
-    let test_num = fs::read_dir("../testcases/polygon").unwrap().count();
+    let test_path = Path::new(TEST_DIR);
+    let test_num = fs::read_dir(test_path.join("polygon")).unwrap().count();
+    println!("found {} testcases in {:?}:", test_num, TEST_DIR);
     for i in 0..test_num {
-        let poly_path = format!("../testcases/polygon/{:02}.pts", i);
-        let start_end_path = format!("../testcases/start_end/{:02}.pts", i);
-        let res_path = format!("../testcases/shortest/{:02}.res", i);
-        println!("Test shortest path from {:?}", poly_path);
+        let poly_file = test_path.join(format!("polygon/{:02}.pts", i));
+        let start_end_file = test_path.join(format!("start_end/{:02}.pts", i));
+        let res_file = test_path.join(format!("shortest/{:02}.res", i));
+        println!("test shortest path from {:?}", poly_file);
 
-        let poly = Polygon::from_file(poly_path).unwrap();
-        let start_end = Polygon::from_file(start_end_path).unwrap();
+        let poly = Polygon::from_file(poly_file).unwrap();
+        let start_end = Polygon::from_file(start_end_file).unwrap();
         let res = sp::shortest::find_shortest_path(&poly, start_end.points[0], start_end.points[1]);
 
-        validate_result(&res_path, res.as_ref());
+        validate_result(&res_file, res.as_ref());
     }
 }

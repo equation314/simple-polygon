@@ -19,9 +19,9 @@ fn find_shortest_path_in_sleeve(
     points.push(start);
 
     let mut cusp_idx = n;
-    let (mut prev_u, mut prev_v) = diagonals[0];
-    let mut chain_l = VecDeque::from(vec![cusp_idx]);
-    let mut chain_r = VecDeque::from(vec![cusp_idx]);
+    let (mut prev_u, mut prev_v) = diagonals[0]; // the previous diagonal.
+    let mut chain_l = VecDeque::from(vec![cusp_idx]); // the left inward-convex chain.
+    let mut chain_r = VecDeque::from(vec![cusp_idx]); // tbe right inward-convex chain.
     if points[prev_u] != start {
         chain_l.push_back(prev_u);
     }
@@ -59,7 +59,7 @@ fn find_shortest_path_in_sleeve(
                 cl.pop_front();
                 path.push(cl[0]);
             }
-            cusp_idx = cl[0];
+            cusp_idx = cl[0]; // new cusp
             *cr = VecDeque::from(vec![cl[0], idx]);
         } else {
             // the cusp is the tangent point.
@@ -93,13 +93,15 @@ pub fn find_shortest_path(poly: &Polygon, start: Point, end: Point) -> Option<Ve
     tri.build_dual_graph();
 
     if let (Some(s), Some(e)) = (tri.location(start), tri.location(end)) {
-        let path = tri.dual().find_path(s.id, e.id);
-        let diagonals = path
-            .iter()
-            .map(|e| (e.weight.borrow().start, e.weight.borrow().end))
-            .collect::<Vec<_>>();
-        Some(find_shortest_path_in_sleeve(poly, start, end, &diagonals))
-    } else {
-        None
+        // find a path in the dual graph (tree).
+        if let Some(path) = tri.dual().find_path(s.id, e.id) {
+            let diagonals = path
+                .iter()
+                .map(|e| (e.weight.borrow().start, e.weight.borrow().end))
+                .collect::<Vec<_>>();
+            // find the shortest path in the sleeve polygon.
+            return Some(find_shortest_path_in_sleeve(poly, start, end, &diagonals));
+        }
     }
+    None
 }

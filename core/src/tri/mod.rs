@@ -80,6 +80,7 @@ impl<'a> Triangulation<'a> {
         &self.dual
     }
 
+    /// Build the dual graph of the triangluation.
     pub fn build_dual_graph(&mut self) {
         for e in &self.result.edges {
             if let Some(ref f1) = e.borrow().face {
@@ -90,6 +91,7 @@ impl<'a> Triangulation<'a> {
         }
     }
 
+    /// Find the triangle contains the given `point`.
     pub fn location(&self, point: Point) -> Option<RcFace> {
         for t in &self.result.triangles {
             let mut iter = t.vertices();

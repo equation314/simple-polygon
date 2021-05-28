@@ -8,7 +8,7 @@ pub struct GraphEdge<T> {
     pub weight: T,
 }
 
-/// An undirected graph with weight type `T`.
+/// A directed graph with weight type `T`.
 pub struct Graph<T> {
     n: usize,
     edges: Vec<Vec<GraphEdge<T>>>,
@@ -22,11 +22,13 @@ impl<T: Clone> Graph<T> {
         }
     }
 
+    /// Add a directed edge to the graph.
     pub fn add_edge(&mut self, u: usize, v: usize, weight: T) {
         self.edges[u].push(GraphEdge { u, v, weight })
     }
 
-    pub fn find_path(&self, start: usize, target: usize) -> Vec<GraphEdge<T>> {
+    /// Find the shortest path in the graph using BFS.
+    pub fn find_path(&self, start: usize, target: usize) -> Option<Vec<GraphEdge<T>>> {
         let mut path = Vec::new();
         let mut visited = vec![None; self.n];
         let mut queue = VecDeque::with_capacity(self.n);
@@ -52,10 +54,10 @@ impl<T: Clone> Graph<T> {
                 path.push(e.clone());
                 p = e.u;
             } else {
-                break;
+                return None;
             }
         }
         path.reverse();
-        path
+        Some(path)
     }
 }

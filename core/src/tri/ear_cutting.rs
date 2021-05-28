@@ -49,11 +49,11 @@ impl<'a> EarCutting<'a> {
         }
         let l = self.prev_vertex[p];
         let r = self.next_vertex[p];
-        for i in 0..self.poly.size() {
+        for (i, point) in self.poly.points.iter().enumerate() {
             if i != p
                 && i != l
                 && i != r
-                && self.poly.points[i].in_triangle(
+                && point.in_triangle(
                     self.poly.points[l],
                     self.poly.points[p],
                     self.poly.points[r],
