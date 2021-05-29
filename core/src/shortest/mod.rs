@@ -39,7 +39,7 @@ fn find_shortest_path_in_sleeve(
         };
 
         let to_left = |a: usize, b: usize, c: usize| -> isize {
-            let t = points[c].to_left(points[a], points[b]);
+            let t = points[c].to_left(&points[a], &points[b]);
             if rev {
                 -t
             } else {
@@ -74,12 +74,12 @@ fn find_shortest_path_in_sleeve(
     let (cl, cr) = (&mut chain_l, &mut chain_r);
     if cl.len() > 1 && cr.len() > 1 {
         let mut i = 0;
-        while i < cl.len() - 1 && end.to_left(points[cl[i]], points[cl[i + 1]]) <= 0 {
+        while i < cl.len() - 1 && end.to_left(&points[cl[i]], &points[cl[i + 1]]) <= 0 {
             path.push(cl[i + 1]);
             i += 1;
         }
         let mut i = 0;
-        while i < cr.len() - 1 && end.to_left(points[cr[i]], points[cr[i + 1]]) >= 0 {
+        while i < cr.len() - 1 && end.to_left(&points[cr[i]], &points[cr[i + 1]]) >= 0 {
             path.push(cr[i + 1]);
             i += 1;
         }
@@ -89,12 +89,12 @@ fn find_shortest_path_in_sleeve(
 }
 
 pub fn find_shortest_path(poly: &Polygon, start: Point, end: Point) -> Option<Vec<usize>> {
-    let mut tri = Triangulation::build(poly, Algorithm::EarCutting);
-    tri.build_dual_graph();
+    let tri = Triangulation::build(poly, Algorithm::EarCutting);
+    let dual = tri.result().plane_graph.build_dual_graph();
 
-    if let (Some(s), Some(e)) = (tri.location(start), tri.location(end)) {
+    if let (Some(s), Some(e)) = (tri.location(&start), tri.location(&end)) {
         // find a path in the dual graph (tree).
-        if let Some(path) = tri.dual().find_path(s.id, e.id) {
+        if let Some(path) = dual.find_path(s.id, e.id) {
             let diagonals = path
                 .iter()
                 .map(|e| (e.weight.borrow().start, e.weight.borrow().end))

@@ -15,31 +15,31 @@ impl Point {
         Self { x, y }
     }
 
-    pub fn dot(self, rhs: Self) -> f64 {
+    pub fn dot(&self, rhs: &Self) -> f64 {
         self.x * rhs.x + self.y * rhs.y
     }
 
-    pub fn len2(self) -> f64 {
+    pub fn len2(&self) -> f64 {
         self.dot(self)
     }
 
-    pub fn len(self) -> f64 {
+    pub fn len(&self) -> f64 {
         self.len2().sqrt()
     }
 
-    pub fn dist2(a: Self, b: Self) -> f64 {
-        (a - b).len2()
+    pub fn dist2(a: &Self, b: &Self) -> f64 {
+        (*a - *b).len2()
     }
 
-    pub fn dist(a: Self, b: Self) -> f64 {
-        (a - b).len()
+    pub fn dist(a: &Self, b: &Self) -> f64 {
+        (*a - *b).len()
     }
 
     /// Does this point lie left to the line AB?
     ///
     /// Returns: 1: yes; -1: no; 0: on the line.
-    pub fn to_left(self, a: Self, b: Self) -> isize {
-        let t = (b - a) * (self - a);
+    pub fn to_left(&self, a: &Self, b: &Self) -> isize {
+        let t = (*b - *a) * (*self - *a);
         if t > EPS {
             1
         } else if t < -EPS {
@@ -52,7 +52,7 @@ impl Point {
     /// Is this point in the triangle ABC?
     ///
     /// Returns: 1: yes; -1: no; 0: on one side of the triangle.
-    pub fn in_triangle(self, a: Self, b: Self, c: Self) -> isize {
+    pub fn in_triangle(&self, a: &Self, b: &Self, c: &Self) -> isize {
         let ab = self.to_left(a, b);
         let bc = self.to_left(b, c);
         let ca = self.to_left(c, a);

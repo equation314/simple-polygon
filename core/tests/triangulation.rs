@@ -11,11 +11,11 @@ const TEST_DIR: &str = "../testcases";
 fn validate_result(poly: &Polygon, result: &TriangulationResult) {
     let n = poly.size();
     assert_eq!(result.diagonals.len(), n - 3);
-    assert_eq!(result.edges.len(), 4 * n - 6);
-    assert_eq!(result.triangles.len(), n - 2);
+    assert_eq!(result.plane_graph.edges.len(), 4 * n - 6);
+    assert_eq!(result.plane_graph.faces.len(), n - 2);
 
-    let mut visited = vec![false; result.edges.len()];
-    for t in &result.triangles {
+    let mut visited = vec![false; result.plane_graph.edges.len()];
+    for t in &result.plane_graph.faces {
         let edges = t.edges().collect::<Vec<_>>();
         let vertices = t.vertices().collect::<Vec<_>>();
         assert_eq!(edges.len(), 3);
@@ -33,10 +33,10 @@ fn validate_result(poly: &Polygon, result: &TriangulationResult) {
         assert_eq!(a, e2.start);
         assert_eq!(b, e3.start);
         assert_eq!(c, e1.start);
-        assert!(poly.points[a].to_left(poly.points[b], poly.points[c]) > 0);
+        assert!(poly.points[a].to_left(&poly.points[b], &poly.points[c]) > 0);
     }
 
-    for e in &result.edges {
+    for e in &result.plane_graph.edges {
         let e = e.borrow();
         if !visited[e.id] {
             assert_eq!(e.start, (e.end + 1) % n);

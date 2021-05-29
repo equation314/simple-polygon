@@ -18,14 +18,14 @@ impl<'a> EarCutting<'a> {
         let n = poly.size();
         let mut ec = Self {
             poly,
-            result: TriangulationResult::default(),
+            result: TriangulationResult::new(n),
             poly_edge: Vec::with_capacity(n),
             prev_vertex: vec![0; n],
             next_vertex: vec![0; n],
         };
 
         for i in 0..n {
-            let e = ec.result.new_edges(i, (i + 1) % n);
+            let e = ec.result.plane_graph.new_edges(i, (i + 1) % n);
             ec.poly_edge.push(e);
             ec.prev_vertex[i] = (i + n - 1) % n;
             ec.next_vertex[i] = (i + 1) % n;
@@ -39,7 +39,7 @@ impl<'a> EarCutting<'a> {
     fn test_convex(&self, p: usize) -> isize {
         let l = self.prev_vertex[p];
         let r = self.next_vertex[p];
-        self.poly.points[r].to_left(self.poly.points[l], self.poly.points[p])
+        self.poly.points[r].to_left(&self.poly.points[l], &self.poly.points[p])
     }
 
     /// Whether the vertex `p` is an ear.
@@ -54,9 +54,9 @@ impl<'a> EarCutting<'a> {
                 && i != l
                 && i != r
                 && point.in_triangle(
-                    self.poly.points[l],
-                    self.poly.points[p],
-                    self.poly.points[r],
+                    &self.poly.points[l],
+                    &self.poly.points[p],
+                    &self.poly.points[r],
                 ) >= 0
             {
                 return false;
@@ -79,7 +79,7 @@ impl<'a> EarCutting<'a> {
         Edge::connect(&e2, &e3);
         Edge::connect(&e3, &e1);
 
-        let f = self.result.new_face(Rc::downgrade(&e3));
+        let f = self.result.plane_graph.new_face(Rc::downgrade(&e3));
         e1.borrow_mut().face = Some(f.clone());
         e2.borrow_mut().face = Some(f.clone());
         e3.borrow_mut().face = Some(f);
@@ -101,7 +101,7 @@ impl<'a> EarCutting<'a> {
         }
 
         let mut p = 0;
-        while self.result.triangles.len() < n - 2 {
+        while self.result.plane_graph.faces.len() < n - 2 {
             if is_ear[p] {
                 let l = self.prev_vertex[p];
                 let r = self.next_vertex[p];
