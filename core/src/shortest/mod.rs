@@ -89,7 +89,7 @@ fn find_shortest_path_in_sleeve(
 }
 
 pub fn find_shortest_path(poly: &Polygon, start: Point, end: Point) -> Option<Vec<usize>> {
-    let tri = Triangulation::build(poly, Algorithm::EarCutting);
+    let tri = Triangulation::build(poly, Algorithm::MonoPartition);
     let dual = tri.result().plane_graph.build_dual_graph();
 
     if let (Some(s), Some(e)) = (tri.location(&start), tri.location(&end)) {

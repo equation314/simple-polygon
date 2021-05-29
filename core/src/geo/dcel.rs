@@ -29,6 +29,26 @@ pub type EdgeVec = Vec<RcEdge>;
 pub type RcFace = Rc<Face>;
 pub type FaceVec = Vec<RcFace>;
 
+macro_rules! twin {
+    ($e: expr) => {
+        $e.borrow().twin.upgrade().unwrap()
+    };
+}
+
+macro_rules! prev {
+    ($e: expr) => {
+        $e.borrow().prev.upgrade().unwrap()
+    };
+}
+
+macro_rules! next {
+    ($e: expr) => {
+        $e.borrow().next.upgrade().unwrap()
+    };
+}
+
+pub(crate) use {next, prev, twin};
+
 impl Edge {
     pub fn new(id: usize, start: usize, end: usize) -> Self {
         Self {
@@ -184,8 +204,8 @@ impl PlaneGraph {
     }
 
     /// Add a face with the incident edge.
-    pub fn new_face(&mut self, edge: WeakEdge) -> RcFace {
-        let f = Face::new(self.faces.len(), edge);
+    pub fn new_face(&mut self, edge: &RcEdge) -> RcFace {
+        let f = Face::new(self.faces.len(), Rc::downgrade(edge));
         self.faces.push(f.clone());
         f
     }
@@ -195,7 +215,7 @@ impl PlaneGraph {
         let mut dual = Graph::new(self.n);
         for e in &self.edges {
             if let Some(ref f1) = e.borrow().face {
-                if let Some(ref f2) = e.borrow().twin.upgrade().unwrap().borrow().face {
+                if let Some(ref f2) = twin!(e).borrow().face {
                     dual.add_edge(f1.id, f2.id, e.clone());
                 }
             }

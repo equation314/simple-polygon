@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use super::TriangulationResult;
 use crate::geo::dcel::{Edge, EdgeVec};
 use crate::geo::Polygon;
@@ -79,7 +77,7 @@ impl<'a> EarCutting<'a> {
         Edge::connect(&e2, &e3);
         Edge::connect(&e3, &e1);
 
-        let f = self.result.plane_graph.new_face(Rc::downgrade(&e3));
+        let f = self.result.plane_graph.new_face(&e3);
         e1.borrow_mut().face = Some(f.clone());
         e2.borrow_mut().face = Some(f.clone());
         e3.borrow_mut().face = Some(f);

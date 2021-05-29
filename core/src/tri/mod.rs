@@ -2,6 +2,7 @@ use crate::geo::dcel::{PlaneGraph, RcEdge, RcFace};
 use crate::geo::{Point, Polygon};
 
 mod ear_cutting;
+mod mono_partition;
 
 #[derive(Clone, Copy)]
 pub enum Algorithm {
@@ -40,7 +41,7 @@ impl<'a> Triangulation<'a> {
     pub fn build(poly: &'a Polygon, algo: Algorithm) -> Self {
         let result = match algo {
             Algorithm::EarCutting => ear_cutting::triangulation(poly),
-            _ => unreachable!(),
+            Algorithm::MonoPartition => mono_partition::triangulation(poly),
         };
         Self { poly, result }
     }
