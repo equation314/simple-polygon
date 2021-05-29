@@ -3,7 +3,7 @@ use std::path::Path;
 use std::rc::Rc;
 
 use simple_polygon_core as sp;
-use sp::geo::Polygon;
+use sp::geo::{dcel::Edge, Polygon};
 use sp::tri::{Algorithm, Triangulation, TriangulationResult};
 
 const TEST_DIR: &str = "../testcases";
@@ -13,6 +13,7 @@ fn validate_result(poly: &Polygon, result: &TriangulationResult) {
     assert_eq!(result.diagonals.len(), n - 3);
     assert_eq!(result.plane_graph.edges.len(), 4 * n - 6);
     assert_eq!(result.plane_graph.faces.len(), n - 2);
+    assert_eq!(result.plane_graph.raw_faces().count(), n - 2);
 
     let mut visited = vec![false; result.plane_graph.edges.len()];
     for t in &result.plane_graph.faces {
@@ -41,6 +42,10 @@ fn validate_result(poly: &Polygon, result: &TriangulationResult) {
         if !visited[e.id] {
             assert_eq!(e.start, (e.end + 1) % n);
         }
+    }
+
+    for se in result.plane_graph.raw_faces() {
+        assert_eq!(Edge::as_iter(se).count(), 3);
     }
 }
 

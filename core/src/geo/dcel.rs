@@ -54,6 +54,10 @@ impl Edge {
         e1.borrow_mut().next = Rc::downgrade(&e2);
         e2.borrow_mut().prev = Rc::downgrade(&e1);
     }
+
+    pub fn as_iter(edge: &RcEdge) -> EdgeIter {
+        EdgeIter::new(Rc::downgrade(edge))
+    }
 }
 
 impl std::fmt::Debug for Edge {
@@ -99,7 +103,7 @@ impl EdgeIter {
     }
 
     pub fn into_vertex_iter(self) -> impl Iterator<Item = usize> {
-        self.map(|e| e.borrow().end)
+        self.map(|e| e.borrow().start)
     }
 }
 
@@ -109,13 +113,49 @@ impl Iterator for EdgeIter {
         if self.stopped {
             None
         } else {
-            let e = self.current.upgrade().unwrap();
-            self.current = e.borrow().next.clone();
-            if self.current.ptr_eq(&self.start) {
-                self.stopped = true;
+            if let Some(e) = self.current.upgrade() {
+                self.current = e.borrow().next.clone();
+                if self.current.ptr_eq(&self.start) {
+                    self.stopped = true;
+                }
+                Some(e)
+            } else {
+                None
             }
-            Some(e)
         }
+    }
+}
+
+pub struct FaceIter<'a> {
+    current_edge_idx: usize,
+    edges: &'a EdgeVec,
+    visited: Vec<bool>,
+}
+
+impl<'a> FaceIter<'a> {
+    fn new(edges: &'a EdgeVec) -> Self {
+        Self {
+            current_edge_idx: 0,
+            edges,
+            visited: vec![false; edges.len()],
+        }
+    }
+}
+
+impl<'a> Iterator for FaceIter<'a> {
+    type Item = &'a RcEdge;
+    fn next(&mut self) -> Option<Self::Item> {
+        while self.current_edge_idx < self.edges.len() {
+            let start = &self.edges[self.current_edge_idx];
+            if !self.visited[start.borrow().id] && start.borrow().next.upgrade().is_some() {
+                for e in Edge::as_iter(start) {
+                    self.visited[e.borrow().id] = true;
+                }
+                return Some(&start);
+            }
+            self.current_edge_idx += 1;
+        }
+        None
     }
 }
 
@@ -161,5 +201,9 @@ impl PlaneGraph {
             }
         }
         dual
+    }
+
+    pub fn raw_faces(&self) -> FaceIter {
+        FaceIter::new(&self.edges)
     }
 }
