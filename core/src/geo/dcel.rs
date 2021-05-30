@@ -30,21 +30,24 @@ pub type RcFace = Rc<Face>;
 pub type FaceVec = Vec<RcFace>;
 
 macro_rules! twin {
-    ($e: expr) => {
-        $e.borrow().twin.upgrade().unwrap()
-    };
+    ($e: expr) => {{
+        let t = $e.borrow().twin.upgrade().unwrap();
+        t
+    }};
 }
 
 macro_rules! prev {
-    ($e: expr) => {
-        $e.borrow().prev.upgrade().unwrap()
-    };
+    ($e: expr) => {{
+        let t = $e.borrow().prev.upgrade().unwrap();
+        t
+    }};
 }
 
 macro_rules! next {
-    ($e: expr) => {
-        $e.borrow().next.upgrade().unwrap()
-    };
+    ($e: expr) => {{
+        let t = $e.borrow().next.upgrade().unwrap();
+        t
+    }};
 }
 
 pub(crate) use {next, prev, twin};
@@ -163,7 +166,7 @@ impl<'a> FaceIter<'a> {
 }
 
 impl<'a> Iterator for FaceIter<'a> {
-    type Item = &'a RcEdge;
+    type Item = RcEdge;
     fn next(&mut self) -> Option<Self::Item> {
         while self.current_edge_idx < self.edges.len() {
             let start = &self.edges[self.current_edge_idx];
@@ -171,7 +174,7 @@ impl<'a> Iterator for FaceIter<'a> {
                 for e in Edge::as_iter(start) {
                     self.visited[e.borrow().id] = true;
                 }
-                return Some(&start);
+                return Some(start.clone());
             }
             self.current_edge_idx += 1;
         }

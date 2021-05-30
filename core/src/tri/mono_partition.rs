@@ -80,7 +80,7 @@ impl Helper {
         }
     }
 
-    fn from_stalactile(idx: usize, next_edge: RcEdge) -> Self {
+    fn new_stalactile(idx: usize, next_edge: RcEdge) -> Self {
         Self {
             idx,
             next_edge,
@@ -174,13 +174,9 @@ impl<'a> MonoPartition<'a> {
         mp
     }
 
-    /// Add a diagonal between the helper and the vertex `u` which at the
-    /// bottom of the trapezoid, the previous edge of `u` is `uprev`.
-    fn add_diagonal(&mut self, tz: &Trapezoid, u: usize, uprev: &RcEdge) -> RcEdge {
-        // Add a diagonal (u, v), the previous edge of `u` is `uprev`, and the next edge if `v` is `vnext`.
-        let v = tz.helper.idx;
-        println!("DIAGONAL {} {}", u, v);
-        let vnext = &tz.helper.next_edge;
+    /// Add a diagonal (u, v), the previous edge of `u` is `uprev`, and the next
+    /// edge if `v` is `vnext`.
+    fn add_diagonal(&mut self, u: usize, v: usize, uprev: &RcEdge, vnext: &RcEdge) -> RcEdge {
         let unext = &next!(uprev);
         let vprev = &prev!(vnext);
         if uprev.borrow().start == v {
@@ -198,18 +194,24 @@ impl<'a> MonoPartition<'a> {
         e1
     }
 
+    /// Add a diagonal between the helper and the vertex `u` which at the
+    /// bottom of the trapezoid, the previous edge of `u` is `uprev`.
+    fn add_diagonal_in_trapezoid(&mut self, tz: &Trapezoid, u: usize, uprev: &RcEdge) -> RcEdge {
+        self.add_diagonal(u, tz.helper.idx, uprev, &tz.helper.next_edge)
+    }
+
     /// Monotone partition using plane sweep and trapezoidalization.
     fn trapezoidalization(&mut self) {
         let n = self.poly.size();
-        let points = &self.poly.points;
+        let pts = &self.poly.points;
         let mut idx = (0..n).collect::<Vec<_>>();
         idx.sort_by(|&a, &b| {
-            (-points[a].y, points[a].x)
-                .partial_cmp(&(-points[b].y, points[b].x))
+            (-pts[a].y, pts[a].x)
+                .partial_cmp(&(-pts[b].y, pts[b].x))
                 .unwrap()
         });
 
-        let mut status = SweepLineStatus::new(points);
+        let mut status = SweepLineStatus::new(pts);
         let mut visited = vec![false; n];
         for mut p in idx {
             if visited[p] {
@@ -218,28 +220,27 @@ impl<'a> MonoPartition<'a> {
 
             // skip horizontal edges
             let (mut l, mut r, mut q) = (p, p, p);
-            while points[l].y == points[p].y {
+            while pts[l].y == pts[p].y {
                 p = l;
                 l = (l + n - 1) % n;
                 visited[p] = true;
             }
-            while points[r].y == points[q].y {
+            while pts[r].y == pts[q].y {
                 q = r;
                 r = (r + 1) % n;
                 visited[q] = true;
             }
-            assert_eq!(points[p].y, points[q].y);
-            assert_ne!(points[l].y, points[p].y);
-            assert_ne!(points[r].y, points[q].y);
-            SWEEP_LINE_Y.with(|y| y.set(points[p].y));
-            println!("{} {} {}   {:?}", p, l, r, SWEEP_LINE_Y.with(|y| y.get()));
+            assert_eq!(pts[p].y, pts[q].y);
+            assert_ne!(pts[l].y, pts[p].y);
+            assert_ne!(pts[r].y, pts[q].y);
+            SWEEP_LINE_Y.with(|y| y.set(pts[p].y));
 
             let mut e1 = self.poly_edge[l].clone();
             let e2 = self.poly_edge[q].clone();
             let mut e1_next = next!(e1);
             let mut e2_prev = prev!(e2);
 
-            if points[l].y > points[p].y && points[r].y < points[p].y {
+            if pts[l].y > pts[p].y && pts[r].y < pts[p].y {
                 // left adjacency
                 //
                 //          Case A              Case B
@@ -248,21 +249,24 @@ impl<'a> MonoPartition<'a> {
                 //    p -- q ...... |    q -- p ...... |
                 //          \ ..... |     \ .......... |
                 //           \ e2 . |      \ e2 ...... |
-                // (need to add diagonal)
+                //                      (need to add diagonal)
                 //
-                let old = status.remove(points[p].x);
-                if points[p].x < points[q].x {
-                    // Case A
-                    self.add_diagonal(&old, q, &e2_prev); // need to add diagonal
-                    status.insert(e2.clone(), old.right, Helper::new(q, e2));
-                } else {
+                let old = status.remove(pts[p].x);
+                if pts[q].x < pts[p].x {
                     // Case B
                     if old.helper.is_stalactile {
-                        self.add_diagonal(&old, p, &e1);
+                        self.add_diagonal_in_trapezoid(&old, p, &e1);
                     }
-                    status.insert(e2, old.right, Helper::new(p, e1_next));
+                    // treat p as a stalactile to add the diagonal later.
+                    status.insert(e2, old.right, Helper::new_stalactile(p, e1_next));
+                } else {
+                    // Case A
+                    if old.helper.is_stalactile {
+                        self.add_diagonal_in_trapezoid(&old, q, &e2_prev);
+                    }
+                    status.insert(e2.clone(), old.right, Helper::new(q, e2));
                 }
-            } else if points[l].y < points[p].y && points[r].y > points[p].y {
+            } else if pts[l].y < pts[p].y && pts[r].y > pts[p].y {
                 // right adjacency
                 //
                 //      Case A              Case B
@@ -273,18 +277,18 @@ impl<'a> MonoPartition<'a> {
                 //    | ...... e1 /      | . e1 /
                 //                       (need to add diagonal)
                 //
-                let old = status.get_left_mut(points[p].x);
-                if points[p].x < points[q].x {
+                let old = status.get_left_mut(pts[p].x);
+                if pts[p].x < pts[q].x {
                     // Case B
-                    self.add_diagonal(&old, p, &e1); // need to add diagonal
+                    self.add_diagonal_in_trapezoid(&old, p, &e1); // need to add diagonal
                 } else if old.helper.is_stalactile {
                     // Case A
-                    self.add_diagonal(&old, q, &e2_prev);
+                    self.add_diagonal_in_trapezoid(&old, q, &e2_prev);
                 }
                 e1_next = next!(e1);
                 old.modify(e1.clone(), Helper::new(p, e1_next));
-            } else if points[l].y < points[p].y && points[r].y < points[p].y {
-                if points[(p + 1) % n].to_left(&points[l], &points[p]) > 0 {
+            } else if pts[l].y < pts[p].y && pts[r].y < pts[p].y {
+                if pts[(p + 1) % n].to_left(&pts[l], &pts[p]) > 0 {
                     // start vertex
                     //
                     //      q -- p
@@ -300,23 +304,23 @@ impl<'a> MonoPartition<'a> {
                     //    | ..... /      \ ..... |
                     //    | . e1 /        \ e2 . |
                     //
-                    let left_tz = status.get_left_mut(points[p].x);
+                    let left_tz = status.get_left_mut(pts[p].x);
                     let right_edge = left_tz.right.clone();
-                    let d = self.add_diagonal(left_tz, p, &e1);
+                    let d = self.add_diagonal_in_trapezoid(left_tz, p, &e1);
                     left_tz.modify(e1, Helper::new(p, d));
                     status.insert(e2.clone(), right_edge, Helper::new(q, e2));
                 }
-            } else if points[l].y > points[p].y && points[r].y > points[p].y {
-                if points[(p + 1) % n].to_left(&points[l], &points[p]) > 0 {
+            } else if pts[l].y > pts[p].y && pts[r].y > pts[p].y {
+                if pts[(p + 1) % n].to_left(&pts[l], &pts[p]) > 0 {
                     // end vertex
                     //
                     //    \ e1  e2 /
                     //     \ .... /
                     //      p -- q
                     //
-                    let tz = status.remove(points[p].x);
+                    let tz = status.remove(pts[p].x);
                     if tz.helper.is_stalactile {
-                        self.add_diagonal(&tz, p, &e1);
+                        self.add_diagonal_in_trapezoid(&tz, p, &e1);
                     }
                 } else {
                     // stalactile
@@ -326,57 +330,136 @@ impl<'a> MonoPartition<'a> {
                     //    | ...... q -- p ...... |
                     //    | .................... |
                     //
-                    let right_tz = status.remove(points[p].x);
+                    let right_tz = status.remove(pts[p].x);
                     if right_tz.helper.is_stalactile {
-                        e1 = twin!(self.add_diagonal(&right_tz, p, &e1));
+                        e1 = twin!(self.add_diagonal_in_trapezoid(&right_tz, p, &e1));
                     }
 
-                    let left_tz = status.get_left_mut(points[q].x);
+                    let left_tz = status.get_left_mut(pts[q].x);
                     if left_tz.helper.is_stalactile {
                         e2_prev = prev!(e2);
-                        self.add_diagonal(&left_tz, q, &e2_prev);
+                        self.add_diagonal_in_trapezoid(&left_tz, q, &e2_prev);
                     }
 
-                    left_tz.modify(right_tz.right, Helper::from_stalactile(p, next!(e1)));
+                    left_tz.modify(right_tz.right, Helper::new_stalactile(p, next!(e1)));
                 }
             } else {
                 unreachable!();
             }
-            // println!("{:?}", status.status.values());
         }
+    }
+
+    // Get two montone chains of the monotone polygon and sort them by y-coordinate.
+    fn get_and_sort_mono_chains(&mut self, start_edge: &RcEdge) -> Vec<(usize, u8)> {
+        use std::rc::Rc;
+        let pts = &self.poly.points;
+
+        let mut top_edge = start_edge.clone();
+        for e in Edge::as_iter(start_edge) {
+            let start = e.borrow().start;
+            let top_start = top_edge.borrow().start;
+            self.poly_edge[start] = e.clone();
+            if (-pts[start].y, pts[start].x) < (-pts[top_start].y, pts[top_start].x) {
+                top_edge = e;
+            }
+        }
+
+        let mut chain_l = Vec::new();
+        let mut chain_r = Vec::new();
+        let mut e = top_edge.clone();
+        while pts[e.borrow().start].y >= pts[e.borrow().end].y {
+            chain_l.push((e.borrow().start, 0));
+            e = next!(e);
+        }
+        while pts[e.borrow().start].y <= pts[e.borrow().end].y && !Rc::ptr_eq(&e, &top_edge) {
+            chain_r.push((e.borrow().start, 1));
+            e = next!(e);
+        }
+        chain_r.reverse();
+
+        merge_sorted(&chain_l, &chain_r, |&a, &b| {
+            (-pts[a.0].y, pts[a.0].x)
+                .partial_cmp(&(-pts[b.0].y, pts[b.0].x))
+                .unwrap()
+        })
     }
 
     /// Triangulate a monotone polygon, one of its edge is `start_edge`.
     fn mono_triangulation(&mut self, start_edge: &RcEdge) {
-        println!("{:?}", start_edge);
-        println!(
-            "{:?}",
-            Edge::as_iter(&start_edge)
-                .into_vertex_iter()
-                .collect::<Vec<_>>()
-        );
+        // get tow montone chains and sort them.
+        let sorted_chains = self.get_and_sort_mono_chains(start_edge);
+
+        // triangulate a monotone polygon using a stack.
+        let pts = &self.poly.points;
+        let mut stack = vec![sorted_chains[0], sorted_chains[1]];
+        for &(idx, side) in &sorted_chains[2..] {
+            let &(top_idx, top_side) = stack.last().unwrap();
+            let mut sp = stack.len();
+            if side == top_side {
+                // same side
+                if top_side == 0 {
+                    // left side
+                    let mut uprev = prev!(self.poly_edge[idx]);
+                    while sp > 1
+                        && pts[idx].to_left(&pts[stack[sp - 2].0], &pts[stack[sp - 1].0]) > 0
+                    {
+                        let v = stack[sp - 2].0;
+                        let vnext = self.poly_edge[v].clone();
+                        uprev = twin!(self.add_diagonal(idx, v, &uprev, &vnext));
+                        stack.pop();
+                        sp -= 1;
+                    }
+                    self.poly_edge[stack[sp - 1].0] = uprev;
+                } else {
+                    // right side
+                    let mut vnext = self.poly_edge[idx].clone();
+                    while sp > 1
+                        && pts[idx].to_left(&pts[stack[sp - 2].0], &pts[stack[sp - 1].0]) < 0
+                    {
+                        let u = stack[sp - 2].0;
+                        let uprev = prev!(self.poly_edge[u]);
+                        vnext = twin!(self.add_diagonal(u, idx, &uprev, &vnext));
+                        stack.pop();
+                        sp -= 1;
+                    }
+                    self.poly_edge[idx] = vnext;
+                }
+                stack.push((idx, side));
+            } else {
+                // opposite side
+                assert!(sp >= 2);
+                if top_side == 0 {
+                    // left side
+                    let uprev = prev!(self.poly_edge[idx]);
+                    let mut e = self.poly_edge[idx].clone();
+                    for &(v, _) in &stack[1..] {
+                        let vnext = self.poly_edge[v].clone();
+                        e = self.add_diagonal(idx, v, &uprev, &vnext);
+                    }
+                    self.poly_edge[idx] = e;
+                } else {
+                    // right side
+                    let vnext = self.poly_edge[idx].clone();
+                    let mut e = self.poly_edge[top_idx].clone();
+                    for &(u, _) in &stack[1..] {
+                        let uprev = prev!(self.poly_edge[u]);
+                        e = self.add_diagonal(u, idx, &uprev, &vnext);
+                    }
+                    self.poly_edge[top_idx] = e;
+                }
+                stack = vec![(top_idx, top_side), (idx, side)];
+            }
+        }
     }
 
     pub fn triangulation(&mut self) {
         self.trapezoidalization();
 
-        for start_edge in self
-            .result
-            .plane_graph
-            .raw_faces()
-            .cloned()
-            .collect::<Vec<_>>()
-        {
+        for start_edge in self.result.plane_graph.raw_faces().collect::<Vec<_>>() {
             self.mono_triangulation(&start_edge);
         }
 
-        for start_edge in self
-            .result
-            .plane_graph
-            .raw_faces()
-            .cloned()
-            .collect::<Vec<_>>()
-        {
+        for start_edge in self.result.plane_graph.raw_faces().collect::<Vec<_>>() {
             let mut iter = Edge::as_iter(&start_edge);
             let e1 = iter.next().unwrap();
             let e2 = iter.next().unwrap();
@@ -388,6 +471,30 @@ impl<'a> MonoPartition<'a> {
             e3.borrow_mut().face = Some(f);
         }
     }
+}
+
+fn merge_sorted<T, F>(a: &[T], b: &[T], compare: F) -> Vec<T>
+where
+    T: Copy,
+    F: Fn(&T, &T) -> Ordering,
+{
+    let len_a = a.len();
+    let len_b = b.len();
+    let mut res = Vec::with_capacity(len_a + len_b);
+    let mut p = 0;
+    let mut q = 0;
+
+    while p < len_a || q < len_b {
+        if p < len_a && compare(&a[p], &b[q]) == Ordering::Less {
+            res.push(a[p]);
+            p += 1;
+        } else {
+            res.push(b[q]);
+            q += 1;
+        }
+    }
+
+    res
 }
 
 pub(super) fn triangulation(poly: &Polygon) -> TriangulationResult {

@@ -4,7 +4,7 @@ use crate::geo::{Point, Polygon};
 mod ear_cutting;
 mod mono_partition;
 
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub enum Algorithm {
     EarCutting,
     MonoPartition,

@@ -31,9 +31,9 @@ fn validate_result(poly: &Polygon, result: &TriangulationResult) {
 
         let (e1, e2, e3) = (edges[0].borrow(), edges[1].borrow(), edges[2].borrow());
         let (a, b, c) = (vertices[0], vertices[1], vertices[2]);
-        assert_eq!(a, e2.start);
-        assert_eq!(b, e3.start);
-        assert_eq!(c, e1.start);
+        assert_eq!(a, e1.start);
+        assert_eq!(b, e2.start);
+        assert_eq!(c, e3.start);
         assert!(poly.points[a].to_left(&poly.points[b], &poly.points[c]) > 0);
     }
 
@@ -45,7 +45,7 @@ fn validate_result(poly: &Polygon, result: &TriangulationResult) {
     }
 
     for se in result.plane_graph.raw_faces() {
-        assert_eq!(Edge::as_iter(se).count(), 3);
+        assert_eq!(Edge::as_iter(&se).count(), 3);
     }
 }
 
@@ -55,7 +55,7 @@ fn test_triangulation(algo: Algorithm) {
     println!("found {} testcases in {:?}:", test_num, TEST_DIR);
     for i in 0..test_num {
         let poly_file = test_path.join(format!("polygon/{:02}.pts", i));
-        println!("test triangulation from {:?}", poly_file);
+        println!("{:?}: test triangulation from {:?}", algo, poly_file);
 
         let poly = Polygon::from_file(poly_file).unwrap();
         let tri = Triangulation::build(&poly, algo);
@@ -66,4 +66,9 @@ fn test_triangulation(algo: Algorithm) {
 #[test]
 fn ear_cutting() {
     test_triangulation(Algorithm::EarCutting);
+}
+
+#[test]
+fn mono_partition() {
+    test_triangulation(Algorithm::MonoPartition);
 }
