@@ -45,7 +45,7 @@ fn validate_result(poly: &Polygon, result: &TriangulationResult) {
     }
 
     for se in result.plane_graph.raw_faces() {
-        assert_eq!(Edge::as_iter(&se).count(), 3);
+        assert_eq!(Edge::new_edge_iter(&se).count(), 3);
     }
 }
 

@@ -17,10 +17,7 @@ struct TrapezoidKey {
 }
 
 impl TrapezoidKey {
-    const EPS: f64 = 1e-9;
-
     fn new(left_edge_start: &Point, left_edge_end: &Point) -> Self {
-        assert_ne!(left_edge_start.y, left_edge_end.y);
         let k = (left_edge_end.x - left_edge_start.x) / (left_edge_end.y - left_edge_start.y);
         Self {
             k,
@@ -55,7 +52,7 @@ impl PartialOrd for TrapezoidKey {
 
 impl PartialEq for TrapezoidKey {
     fn eq(&self, other: &Self) -> bool {
-        (self.x() - other.x()).abs() < Self::EPS
+        (self.x() - other.x()).abs() < Point::EPS
     }
 }
 
@@ -220,19 +217,19 @@ impl<'a> MonoPartition<'a> {
 
             // skip horizontal edges
             let (mut l, mut r, mut q) = (p, p, p);
-            while pts[l].y == pts[p].y {
+            while (pts[l].y - pts[p].y).abs() < Point::EPS {
                 p = l;
                 l = (l + n - 1) % n;
                 visited[p] = true;
             }
-            while pts[r].y == pts[q].y {
+            while (pts[r].y - pts[q].y).abs() < Point::EPS {
                 q = r;
                 r = (r + 1) % n;
                 visited[q] = true;
             }
-            assert_eq!(pts[p].y, pts[q].y);
-            assert_ne!(pts[l].y, pts[p].y);
-            assert_ne!(pts[r].y, pts[q].y);
+            assert!((pts[p].y - pts[q].y).abs() < Point::EPS);
+            assert!((pts[l].y - pts[p].y).abs() >= Point::EPS);
+            assert!((pts[r].y - pts[q].y).abs() >= Point::EPS);
             SWEEP_LINE_Y.with(|y| y.set(pts[p].y));
 
             let mut e1 = self.poly_edge[l].clone();
@@ -306,8 +303,8 @@ impl<'a> MonoPartition<'a> {
                     //
                     let left_tz = status.get_left_mut(pts[p].x);
                     let right_edge = left_tz.right.clone();
-                    let d = self.add_diagonal_in_trapezoid(left_tz, p, &e1);
-                    left_tz.modify(e1, Helper::new(p, d));
+                    let diagonal = self.add_diagonal_in_trapezoid(left_tz, p, &e1);
+                    left_tz.modify(e1, Helper::new(p, diagonal));
                     status.insert(e2.clone(), right_edge, Helper::new(q, e2));
                 }
             } else if pts[l].y > pts[p].y && pts[r].y > pts[p].y {
@@ -355,7 +352,7 @@ impl<'a> MonoPartition<'a> {
         let pts = &self.poly.points;
 
         let mut top_edge = start_edge.clone();
-        for e in Edge::as_iter(start_edge) {
+        for e in Edge::new_edge_iter(start_edge) {
             let start = e.borrow().start;
             let top_start = top_edge.borrow().start;
             self.poly_edge[start] = e.clone();
@@ -460,7 +457,7 @@ impl<'a> MonoPartition<'a> {
         }
 
         for start_edge in self.result.plane_graph.raw_faces().collect::<Vec<_>>() {
-            let mut iter = Edge::as_iter(&start_edge);
+            let mut iter = Edge::new_edge_iter(&start_edge);
             let e1 = iter.next().unwrap();
             let e2 = iter.next().unwrap();
             let e3 = iter.next().unwrap();

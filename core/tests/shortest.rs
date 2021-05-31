@@ -4,6 +4,7 @@ use std::path::Path;
 
 use simple_polygon_core as sp;
 use sp::geo::Polygon;
+use sp::tri::Algorithm;
 
 const TEST_DIR: &str = "../testcases";
 
@@ -42,7 +43,12 @@ fn shortest_path() {
 
         let poly = Polygon::from_file(poly_file).unwrap();
         let start_end = Polygon::from_file(start_end_file).unwrap();
-        let res = sp::shortest::find_shortest_path(&poly, start_end.points[0], start_end.points[1]);
+        let res = sp::shortest::find_shortest_path(
+            &poly,
+            start_end.points[0],
+            start_end.points[1],
+            Algorithm::MonoPartition,
+        );
 
         validate_result(&res_file, res.as_ref());
     }

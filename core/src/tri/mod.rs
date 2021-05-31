@@ -1,3 +1,5 @@
+use std::convert::TryFrom;
+
 use crate::geo::dcel::{PlaneGraph, RcEdge, RcFace};
 use crate::geo::{Point, Polygon};
 
@@ -8,6 +10,17 @@ mod mono_partition;
 pub enum Algorithm {
     EarCutting,
     MonoPartition,
+}
+
+impl<'a> TryFrom<&'a str> for Algorithm {
+    type Error = &'a str;
+    fn try_from(algo_str: &'a str) -> Result<Self, Self::Error> {
+        match algo_str {
+            "ear_cutting" => Ok(Algorithm::EarCutting),
+            "mono_partition" => Ok(Algorithm::MonoPartition),
+            _ => Err(algo_str),
+        }
+    }
 }
 
 #[derive(Debug)]

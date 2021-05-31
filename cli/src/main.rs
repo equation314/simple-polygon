@@ -1,6 +1,7 @@
 use clap::{App, AppSettings, Arg, SubCommand};
 use simple_polygon_core as sp;
 use sp::geo::{Point, Polygon};
+use std::convert::TryInto;
 
 fn main() {
     let matches = App::new("Simple polygon generator and find the shortest paths")
@@ -26,7 +27,7 @@ fn main() {
                         .takes_value(true)
                         .possible_values(&["growth", "space", "2opt"])
                         .default_value("2opt")
-                        .help("The algorithm of generator"),
+                        .help("The algorithm of the generator"),
                 )
                 .arg(
                     Arg::with_name("output")
@@ -71,6 +72,16 @@ fn main() {
                         .number_of_values(2)
                         .display_order(2)
                         .help("The end point"),
+                )
+                .arg(
+                    Arg::with_name("algorithm")
+                        .value_name("ALGORITHM")
+                        .long("algo")
+                        .short("a")
+                        .takes_value(true)
+                        .possible_values(&["ear_cutting", "mono_partition"])
+                        .default_value("mono_partition")
+                        .help("The triangulation algorithm"),
                 ),
         )
         .get_matches();
@@ -101,11 +112,13 @@ fn main() {
                 .unwrap()
                 .map(|val| val.parse().unwrap())
                 .collect();
+            let algo = m.value_of("algorithm").unwrap();
             let poly = Polygon::from_file(input).unwrap();
             let path = sp::shortest::find_shortest_path(
                 &poly,
                 Point::new(start[0], start[1]),
                 Point::new(end[0], end[1]),
+                algo.try_into().unwrap(),
             );
             println!("{:?}", path);
         }

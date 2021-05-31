@@ -1,8 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::ops;
 
-const EPS: f64 = 1e-9;
-
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
 pub struct Point {
     pub x: f64,
@@ -11,6 +9,8 @@ pub struct Point {
 
 #[allow(clippy::len_without_is_empty)]
 impl Point {
+    pub const EPS: f64 = 1e-9;
+
     pub fn new(x: f64, y: f64) -> Self {
         Self { x, y }
     }
@@ -40,9 +40,9 @@ impl Point {
     /// Returns: 1: yes; -1: no; 0: on the line.
     pub fn to_left(&self, a: &Self, b: &Self) -> isize {
         let t = (*b - *a) * (*self - *a);
-        if t > EPS {
+        if t > Self::EPS {
             1
-        } else if t < -EPS {
+        } else if t < -Self::EPS {
             -1
         } else {
             0

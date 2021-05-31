@@ -78,7 +78,7 @@ impl Edge {
         e2.borrow_mut().prev = Rc::downgrade(&e1);
     }
 
-    pub fn as_iter(edge: &RcEdge) -> EdgeIter {
+    pub fn new_edge_iter(edge: &RcEdge) -> EdgeIter {
         EdgeIter::new(Rc::downgrade(edge))
     }
 }
@@ -135,28 +135,26 @@ impl Iterator for EdgeIter {
     fn next(&mut self) -> Option<Self::Item> {
         if self.stopped {
             None
-        } else {
-            if let Some(e) = self.current.upgrade() {
-                self.current = e.borrow().next.clone();
-                if self.current.ptr_eq(&self.start) {
-                    self.stopped = true;
-                }
-                Some(e)
-            } else {
-                None
+        } else if let Some(e) = self.current.upgrade() {
+            self.current = e.borrow().next.clone();
+            if self.current.ptr_eq(&self.start) {
+                self.stopped = true;
             }
+            Some(e)
+        } else {
+            None
         }
     }
 }
 
 pub struct FaceIter<'a> {
     current_edge_idx: usize,
-    edges: &'a EdgeVec,
+    edges: &'a [RcEdge],
     visited: Vec<bool>,
 }
 
 impl<'a> FaceIter<'a> {
-    fn new(edges: &'a EdgeVec) -> Self {
+    fn new(edges: &'a [RcEdge]) -> Self {
         Self {
             current_edge_idx: 0,
             edges,
@@ -171,7 +169,7 @@ impl<'a> Iterator for FaceIter<'a> {
         while self.current_edge_idx < self.edges.len() {
             let start = &self.edges[self.current_edge_idx];
             if !self.visited[start.borrow().id] && start.borrow().next.upgrade().is_some() {
-                for e in Edge::as_iter(start) {
+                for e in Edge::new_edge_iter(start) {
                     self.visited[e.borrow().id] = true;
                 }
                 return Some(start.clone());
