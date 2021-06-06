@@ -3,7 +3,7 @@ import { drawPolygon, drawLines } from "./draw.js";
 
 let points = SP.gen_polygon();
 console.log(points);
-drawPolygon(points, { color: "green", vertexSize: 3, fixed: false });
+drawPolygon(points, { color: "#00FF0077", vertexSize: 3, fixed: false });
 
 let diagonals = SP.triangulation(points, "mono_partition");
 console.log(diagonals);

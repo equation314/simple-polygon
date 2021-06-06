@@ -3,6 +3,7 @@ import * as d3 from "d3";
 var width = window.innerWidth;
 var height = window.innerHeight;
 var svg = d3.select("body").append("svg");
+var gGrid = svg.append("g");
 var canvas = svg.append("g");
 var gX = svg.append("g");
 var gY = svg.append("g");
@@ -16,16 +17,8 @@ var lastDrawPoint;
 var dragging = false;
 var drawing = false;
 
-var xScale = d3
-    .scaleLinear()
-    .domain([0, width])
-    .range([30, width - 10])
-    .nice();
-var yScale = d3
-    .scaleLinear()
-    .domain([0, height])
-    .range([height - 20, 10])
-    .nice();
+var xScale = d3.scaleLinear().domain([0, width]).range([0, width]).nice();
+var yScale = d3.scaleLinear().domain([0, height]).range([height, 0]).nice();
 
 var xAxis = (g, scale) =>
     g
@@ -35,14 +28,46 @@ var xAxis = (g, scale) =>
 var yAxis = (g, scale) =>
     g
         .attr("transform", `translate(${0},0)`)
-        .call(d3.axisRight(scale).ticks(12))
+        .call(d3.axisRight(scale).ticks((12 * height) / width))
         .call(g => g.select(".domain").attr("display", "none"));
+
+var grid = (g, x, y) =>
+    g
+        .attr("stroke", "currentColor")
+        .attr("stroke-opacity", 0.1)
+        .call(g =>
+            g
+                .selectAll(".x")
+                .data(x.ticks(12))
+                .join(
+                    enter => enter.append("line").attr("class", "x").attr("y2", height),
+                    update => update,
+                    exit => exit.remove(),
+                )
+                .attr("x1", d => x(d))
+                .attr("x2", d => x(d)),
+        )
+        .call(g =>
+            g
+                .selectAll(".y")
+                .data(y.ticks((12 * height) / width))
+                .join(
+                    enter => enter.append("line").attr("class", "y").attr("x2", width),
+                    update => update,
+                    exit => exit.remove(),
+                )
+                .attr("y1", d => y(d))
+                .attr("y2", d => y(d)),
+        );
 
 function zoomed({ transform }) {
     currentTransform = transform;
     applyTransform();
-    gX.call(xAxis, transform.rescaleX(xScale));
-    gY.call(yAxis, transform.rescaleY(yScale));
+    let tx = transform.rescaleX(xScale);
+    let ty = transform.rescaleY(yScale);
+    gX.call(xAxis, tx);
+    gY.call(yAxis, ty);
+    gGrid.call(grid, tx, ty);
 }
 
 function updateInitTransform(points) {
