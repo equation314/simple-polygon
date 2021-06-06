@@ -1,25 +1,45 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-    <title>Simple Polygon Generation and Shortest Paths</title>
-    <style>
-      html, body {
-        margin: 0;
-        padding: 0;
-        overflow: hidden
-      }
-      svg {
-        position: fixed;
-        top: 0;
-        left: 0;
-        height: 100%;
-        width: 100%;
-      }
-    </style>
-  </head>
-  <body>
-    <script src="./bundle.js"></script>
-  </body>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Simple Polygon Generation and Shortest Paths</title>
+  <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.0.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+  <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.0.1/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+    }
+    svg {
+      position: fixed;
+      height: calc(100vh - 3.5rem);
+      width: 100%;
+    }
+    .btn-action {
+      border-color: #ccc;
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="navbar navbar-light bg-light border-bottom" style="height: 3.5rem">
+    <div class="container-fluid justify-content-start">
+      <button class="btn btn-outline-secondary me-2 btn-action active" type="button" id="move-btn">Move</button>
+      <div class="dropdown">
+        <button class="btn btn-outline-secondary me-2 btn-action dropdown-toggle" type="button" data-bs-toggle="dropdown"
+          aria-expanded="false" id="polygon-btn">Polygon</button>
+        <ul class="dropdown-menu" aria-labelledby="polygon-btn">
+          <li><a class="dropdown-item" href="#">Draw</a></li>
+          <li><a class="dropdown-item" href="#">Random</a></li>
+          <li><a class="dropdown-item" href="#">Load from...</a></li>
+        </ul>
+      </div>
+      <button class="btn btn-outline-secondary me-2 btn-action" type="button" id="path-btn">Path</button>
+    </div>
+  </nav>
+  <script src="./bundle.js"></script>
+</body>
+
 </html>

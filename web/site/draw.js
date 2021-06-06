@@ -1,8 +1,10 @@
 import * as d3 from "d3";
+import $ from "jquery";
 
-var width = window.innerWidth;
-var height = window.innerHeight;
 var svg = d3.select("body").append("svg");
+var width = $("svg").width();
+var height = $("svg").height();
+
 var gGrid = svg.append("g");
 var canvas = svg.append("g");
 var gX = svg.append("g");

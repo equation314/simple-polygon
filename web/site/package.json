@@ -29,6 +29,7 @@
   "homepage": "https://github.com/equation314/simple-polygon",
   "dependencies": {
     "d3": "^6.7.0",
+    "jquery": "^3.6.0",
     "simple-polygon-wasm": "file:../pkg"
   },
   "devDependencies": {
