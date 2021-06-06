@@ -29,14 +29,14 @@
       <button class="btn btn-outline-secondary me-2 btn-action active" type="button" id="move-btn">Move</button>
       <div class="dropdown">
         <button class="btn btn-outline-secondary me-2 btn-action dropdown-toggle" type="button" data-bs-toggle="dropdown"
-          aria-expanded="false" id="polygon-btn">Polygon</button>
+          aria-expanded="false" id="polygon-btn" mode="draw">Draw</button>
         <ul class="dropdown-menu" aria-labelledby="polygon-btn">
-          <li><a class="dropdown-item" href="#">Draw</a></li>
-          <li><a class="dropdown-item" href="#">Random</a></li>
-          <li><a class="dropdown-item" href="#">Load from...</a></li>
+          <li><a class="dropdown-item" id="draw-btn" href="#">Draw</a></li>
+          <li><a class="dropdown-item" id="random-btn" href="#">Random</a></li>
+          <li><a class="dropdown-item" id="load-btn" href="#">Load from...</a></li>
         </ul>
       </div>
-      <button class="btn btn-outline-secondary me-2 btn-action" type="button" id="path-btn">Path</button>
+      <button class="btn btn-outline-secondary me-2 btn-action disabled" type="button" id="path-btn">Path</button>
     </div>
   </nav>
   <script src="./bundle.js"></script>
