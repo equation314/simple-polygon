@@ -3,16 +3,23 @@
 
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <title>Simple Polygon Generation and Shortest Paths</title>
   <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.0.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
   <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.0.1/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
   <style>
     html, body {
+      overflow:hidden;
       margin: 0;
       padding: 0;
+      height: 100%;
     }
     svg {
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
       position: fixed;
       height: calc(100vh - 3.5rem);
       width: 100%;
@@ -28,12 +35,11 @@
     <div class="container-fluid justify-content-start">
       <button class="btn btn-outline-secondary me-2 btn-action active" type="button" id="move-btn">Move</button>
       <div class="dropdown">
-        <button class="btn btn-outline-secondary me-2 btn-action dropdown-toggle" type="button" data-bs-toggle="dropdown"
-          aria-expanded="false" id="polygon-btn" mode="draw">Draw</button>
+        <button class="btn btn-outline-secondary me-2 btn-action dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="polygon-btn" mode="draw">Draw</button>
         <ul class="dropdown-menu" aria-labelledby="polygon-btn">
-          <li><a class="dropdown-item" id="draw-btn" href="#">Draw</a></li>
-          <li><a class="dropdown-item" id="random-btn" href="#">Random</a></li>
-          <li><a class="dropdown-item" id="load-btn" href="#">Load from...</a></li>
+          <li><button class="dropdown-item" id="draw-btn" type="button">Draw</button></li>
+          <li><button class="dropdown-item" id="random-btn">Random</button></li>
+          <li><button class="dropdown-item" id="load-btn">Load from...</button></li>
         </ul>
       </div>
       <button class="btn btn-outline-secondary me-2 btn-action disabled" type="button" id="path-btn">Path</button>

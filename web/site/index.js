@@ -5,15 +5,10 @@ import { Draw, getRandomColor } from "./draw.js";
 var draw = new Draw();
 var points = [];
 
-function drawPolygon() {
-    draw.removeAllShapes();
-}
-
 function randomPolygon() {
     points = SP.gen_polygon();
     console.log(points);
-    draw.removeAllShapes();
-    draw.drawPolygon(points, { color: getRandomColor(), vertexSize: 3 });
+    draw.drawPolygon(points, { color: getRandomColor(), vertexSize: 3, class: "fixed" });
     draw.autoScale(points);
     $("#path-btn").removeClass("disabled");
 }
@@ -35,7 +30,6 @@ $(() => {
         switch ($("#polygon-btn").attr("mode")) {
             case "draw":
                 draw.setMode("draw");
-                drawPolygon();
                 break;
             case "random":
                 draw.setMode("fixed");

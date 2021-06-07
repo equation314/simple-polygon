@@ -6,7 +6,7 @@
   "scripts": {
     "build": "webpack --mode production",
     "build-dev": "webpack --mode development --watch",
-    "serve": "webpack-dev-server",
+    "serve": "webpack-dev-server --host 0.0.0.0",
     "fmt": "prettier *.js --write",
     "clean": "rm -rf dist/"
   },

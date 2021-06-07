@@ -12,18 +12,25 @@ export class Draw {
         let gX = svg.append("g");
         let gY = svg.append("g");
 
+        let xticks = 12;
+        let yticks = Math.floor((12 * height) / width);
+        if (height > width) {
+            xticks = Math.floor((12 * width) / height);
+            yticks = 12;
+        }
+
         let xScale = d3.scaleLinear().domain([0, width]).range([0, width]).nice();
         let yScale = d3.scaleLinear().domain([0, height]).range([height, 0]).nice();
 
         let xAxis = (g, scale) =>
             g
                 .attr("transform", `translate(0,${height})`)
-                .call(d3.axisTop(scale).ticks(12))
+                .call(d3.axisTop(scale).ticks(xticks))
                 .call(g => g.select(".domain").attr("display", "none"));
         let yAxis = (g, scale) =>
             g
                 .attr("transform", `translate(${0},0)`)
-                .call(d3.axisRight(scale).ticks((12 * height) / width))
+                .call(d3.axisRight(scale).ticks(Math.floor(yticks)))
                 .call(g => g.select(".domain").attr("display", "none"));
 
         let grid = (g, x, y) =>
@@ -33,7 +40,7 @@ export class Draw {
                 .call(g =>
                     g
                         .selectAll(".x")
-                        .data(x.ticks(12))
+                        .data(x.ticks(xticks))
                         .join(
                             enter => enter.append("line").attr("class", "x").attr("y2", height),
                             update => update,
@@ -45,7 +52,7 @@ export class Draw {
                 .call(g =>
                     g
                         .selectAll(".y")
-                        .data(y.ticks((12 * height) / width))
+                        .data(y.ticks(yticks))
                         .join(
                             enter => enter.append("line").attr("class", "y").attr("x2", width),
                             update => update,
@@ -56,8 +63,6 @@ export class Draw {
                 );
 
         let dragging = false;
-        let drawing = false;
-        let currentPoints = [];
         let lastDrawPoint;
         let zoomed = ({ transform }) => {
             this.currentTransform = transform;
@@ -69,7 +74,7 @@ export class Draw {
             gGrid.call(grid, tx, ty);
         };
         let ondrag = (target, event) => {
-            if (drawing || this.mode == "fixed") return;
+            if (this.drawing || this.mode == "fixed") return;
             dragging = true;
             let itx = this.invertTransX();
             let ity = this.invertTransY();
@@ -81,29 +86,29 @@ export class Draw {
         };
         let onmouseup = event => {
             if (dragging || this.drawn || this.mode != "draw") return;
-            drawing = true;
+            this.drawing = true;
             let itx = this.invertTransX();
             let ity = this.invertTransY();
             let cursor = d3.pointer(event);
             let point = [itx(cursor[0]), ity(cursor[1])];
             lastDrawPoint = point;
             if (event.target.hasAttribute("is-handle")) {
-                if (currentPoints.length <= 2) {
+                if (this.currentDrawPoints.length <= 2) {
                     return;
                 }
                 this.canvas.select("g.drawing").remove();
-                this.drawPolygon(currentPoints, {
+                this.drawPolygon(this.currentDrawPoints, {
                     color: getRandomColor(),
                     vertexColor: "#FDBC07",
                     fixed: false,
                 });
-                currentPoints = [];
-                drawing = false;
+                this.currentDrawPoints = [];
+                this.drawing = false;
                 this.drawn = true;
             } else {
-                currentPoints.push(point);
+                this.currentDrawPoints.push(point);
                 svg.select("g.drawing").remove();
-                let g = this.drawPolygon(currentPoints, {
+                let g = this.drawPolygon(this.currentDrawPoints, {
                     vertexColor: "yellow",
                     close: false,
                 });
@@ -111,9 +116,7 @@ export class Draw {
             }
         };
         let onmousemove = event => {
-            if (!drawing || this.mode != "draw") return;
-            let tx = this.transX();
-            let ty = this.transY();
+            if (!this.drawing || this.mode != "draw") return;
             let itx = this.invertTransX();
             let ity = this.invertTransY();
             let cursor = d3.pointer(event);
@@ -121,12 +124,10 @@ export class Draw {
             let g = this.canvas.select("g.drawing");
             g.select("line").remove();
             g.insert("line", ":first-child")
-                .attr("x1", tx(lastDrawPoint[0]))
-                .attr("y1", ty(lastDrawPoint[1]))
-                .attr("x2", tx(point[0]))
-                .attr("y2", ty(point[1]))
+                .data([[lastDrawPoint, point]])
                 .attr("stroke", "#53DBF3")
                 .attr("stroke-width", 1);
+            this.applyTransform();
         };
 
         this.zoom = d3.zoom().scaleExtent([0.2, 50]).on("zoom", zoomed);
@@ -140,7 +141,10 @@ export class Draw {
         svg.on("mousemove", onmousemove);
         svg.call(this.zoom);
 
+        this.drawing = false;
         this.drawn = false;
+        this.currentDrawPoints = [];
+
         this.mode = "move";
         this.width = width;
         this.height = height;
@@ -160,11 +164,16 @@ export class Draw {
                 break;
             case "draw":
                 this.mode = mode;
-                this.drawn = false;
+                this.removeShape("fixed");
+                this.removeShape("lines");
                 this.svg.on(".zoom", null);
                 break;
             case "fixed":
                 this.mode = mode;
+                this.drawing = false;
+                this.drawn = false;
+                this.currentDrawPoints = [];
+                this.removeAllShapes();
                 this.svg.on(".zoom", null);
                 break;
         }
@@ -224,6 +233,7 @@ export class Draw {
     removeAllShapes() {
         this.removeShape("polygon");
         this.removeShape("lines");
+        this.removeShape("drawing");
     }
 
     removeShape(className) {
@@ -237,12 +247,13 @@ export class Draw {
             vertexSize: 5,
             close: true,
             fixed: true,
+            class: "",
         };
         let c = {
             ...defaultConfig,
             ...config,
         };
-        let g = this.canvas.append("g").attr("class", "polygon");
+        let g = this.canvas.append("g").attr("class", `polygon ${c.class}`);
         if (c.close) {
             g.append("polygon").data([points]).style("fill", c.color);
         } else {
