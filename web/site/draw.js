@@ -98,7 +98,7 @@ export class Draw {
                 }
                 this.canvas.select("g.drawing").remove();
                 this.drawPolygon(this.currentDrawPoints, {
-                    color: getRandomColor(),
+                    color: $("#pick-color").val(),
                     vertexColor: "#FDBC07",
                     fixed: false,
                 });
@@ -164,16 +164,13 @@ export class Draw {
                 break;
             case "draw":
                 this.mode = mode;
-                this.removeShape("fixed");
-                this.removeShape("lines");
+                this.drawing = false;
+                this.drawn = false;
+                this.currentDrawPoints = [];
                 this.svg.on(".zoom", null);
                 break;
             case "fixed":
                 this.mode = mode;
-                this.drawing = false;
-                this.drawn = false;
-                this.currentDrawPoints = [];
-                this.removeAllShapes();
                 this.svg.on(".zoom", null);
                 break;
         }
@@ -247,13 +244,12 @@ export class Draw {
             vertexSize: 5,
             close: true,
             fixed: true,
-            class: "",
         };
         let c = {
             ...defaultConfig,
             ...config,
         };
-        let g = this.canvas.append("g").attr("class", `polygon ${c.class}`);
+        let g = this.canvas.append("g").attr("class", "polygon");
         if (c.close) {
             g.append("polygon").data([points]).style("fill", c.color);
         } else {
@@ -290,7 +286,12 @@ export class Draw {
             .attr("stroke", lineColor)
             .attr("stroke-width", 1);
         this.applyTransform();
+        this.hideLines();
         return g;
+    }
+    hideLines(){
+        console.log(this.canvas.select(`g.lines`).selectChildren())
+        //this.canvas.selectAll(`g.lines`).childNodes.style("fill","black");
     }
 }
 
