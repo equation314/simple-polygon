@@ -21,7 +21,6 @@ export class Draw {
 
         let xScale = d3.scaleLinear().domain([0, width]).range([0, width]).nice();
         let yScale = d3.scaleLinear().domain([0, height]).range([height, 0]).nice();
-
         let xAxis = (g, scale) =>
             g
                 .attr("transform", `translate(0,${height})`)
@@ -85,14 +84,16 @@ export class Draw {
             this.applyTransform();
         };
         let onmouseup = event => {
-            if (dragging || this.drawn || this.mode != "draw") return;
+            if (dragging || this.drawn || (this.mode != "draw" && this.mode != "drawpoints")) return;
             this.drawing = true;
             let itx = this.invertTransX();
             let ity = this.invertTransY();
             let cursor = d3.pointer(event);
             let point = [itx(cursor[0]), ity(cursor[1])];
             lastDrawPoint = point;
-            if (event.target.hasAttribute("is-handle")) {
+            if(this.mode == "drawpoints"){
+                this.drawPoints([point]);
+            } else if (event.target.hasAttribute("is-handle")) {
                 if (this.currentDrawPoints.length <= 2) {
                     return;
                 }
@@ -173,6 +174,10 @@ export class Draw {
                 this.mode = mode;
                 this.svg.on(".zoom", null);
                 break;
+            case "drawpoints":
+                this.drawing = false;
+                this.drawn = false;
+                this.mode = mode;
         }
     }
 
@@ -191,7 +196,6 @@ export class Draw {
     invertTransY() {
         return this.currentTransform.rescaleY(this.yScale).invert;
     }
-
     applyTransform() {
         let tx = this.transX();
         let ty = this.transY();
@@ -229,7 +233,9 @@ export class Draw {
 
     removeAllShapes() {
         this.removeShape("polygon");
-        this.removeShape("lines");
+        this.removeShape("tri-lines");
+        this.removeShape("path-lines");
+        this.removeShape("endpoints");
         this.removeShape("drawing");
     }
 
@@ -273,9 +279,9 @@ export class Draw {
         return g;
     }
 
-    drawLines(lines, lineColor = "#FDBC07") {
-        this.removeShape("lines");
-        let g = this.canvas.append("g").attr("class", "lines");
+    drawLines(lines, lineColor = "#FDBC07", classname = "lines") {
+        this.removeShape(classname);
+        let g = this.canvas.append("g").attr("class", classname);
         g.selectAll("line")
             .data(lines)
             .join("line")
@@ -284,14 +290,55 @@ export class Draw {
             .attr("x2", d => d[1][0])
             .attr("y2", d => d[1][1])
             .attr("stroke", lineColor)
+            .attr("opacity", 1)
             .attr("stroke-width", 1);
         this.applyTransform();
-        this.hideLines();
         return g;
     }
-    hideLines(){
-        console.log(this.canvas.select(`g.lines`).selectChildren())
-        //this.canvas.selectAll(`g.lines`).childNodes.style("fill","black");
+
+    drawPoints(points, pointSize = 5, pointColor = "#996f6e") {
+        this.restartDrawPoints();
+        let g = this.canvas.append("g").attr("class","endpoints");
+        g.selectAll("circle")
+            .data(points)
+            .join("circle")
+            .attr("r", pointSize)
+            .attr("fill", pointColor)
+            .attr("stroke", "#000");
+        
+        this.applyTransform();
+        return g;
+    }
+    
+    restartDrawPoints(){
+        let points = this.canvas.selectAll(`g.endpoints`);
+        if(points.size() >= 2){
+            this.removeShape("endpoints");
+            this.removeShape("path-lines");
+        }
+    }
+    hasTwoPoints(){
+        let points = this.canvas.selectAll(`g.endpoints`);
+        return points.size() == 2;
+    }
+    getTwoPoints(){
+        let points = this.canvas.selectAll(`g.endpoints circle`);
+        let ans = []
+        points.each( function(d,i) {
+            ans.push([d3.select(this).attr("cx"),d3.select(this).attr("cy")]);
+        });
+        let itx = this.invertTransX();
+        let ity = this.invertTransY();
+        return ans.map( p => [itx(p[0]), ity(p[1])]);
+    }
+    existLines(classname) {
+        return !this.canvas.selectAll(`g.${classname}`).empty();
+    }
+    hideLines(classname) {
+        let lines = this.canvas.selectAll(`g.${classname} line`);
+        lines.attr("opacity", ~lines.attr("opacity"));
+        //this.canvas.selectAll(`g.lines line`).attr("stroke", "red");
+        //
     }
 }
 

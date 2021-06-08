@@ -51,15 +51,13 @@
               <li><button class="dropdown-item" id="draw-btn" type="button">Draw</button></li>
               <li><button class="dropdown-item" id="random-btn">Random</button></li>
               <li><button class="dropdown-item" id="load-btn">Load from...</button></li>
+              <li><input id="file-opt" type="file" style="display:none" /></li>
             </ul>
           </div>
         </li>
         <li class="nav-item">
           <button class="btn btn-outline-secondary me-2 btn-action disabled" type="button"
             id="adv-btn">Advanced</button>
-        </li>
-        <li class="nav-item">
-          <button class="btn btn-outline-secondary me-2 btn-action" type="button" id="clear-btn">Clear</button>
         </li>
       </ul>
     </div>
@@ -83,7 +81,7 @@
             name="favcolor" value="#5A7D29">
         </li>
         <li class="nav-item visually-hidden">
-          <span class="input-group-text bg-dark text-white-50" id="size-text">VertexSz: </span>
+          <span class="input-group-text bg-dark text-white-50" id="size-text">Vertex Num: </span>
         </li>
         <li class="nav-item visually-hidden">
           <div class="col-xs-1">
@@ -94,7 +92,7 @@
         <li class="nav-item visually-hidden">
           <div class="dropdown">
             <button class="btn btn-outline-secondary me-2 btn-action dropdown-toggle ms-2" type="button"
-              data-bs-toggle="dropdown" aria-expanded="false" >Algorithm</button>
+              data-bs-toggle="dropdown" aria-expanded="false" id="algo-btn"><span id='text'>Algorithm</span></button>
             <ul class="dropdown-menu" aria-labelledby="algo-btn">
               <li><button class="dropdown-item" id="algo1-btn">Algo1</button></li>
               <li><button class="dropdown-item" id="algo2-btn">Algo2</button></li>
@@ -112,6 +110,9 @@
         </li> -->
         <li class="nav-item visually-hidden">
           <button class="btn btn-outline-secondary me-2 btn-action" type="button" id="gen-btn">Gen</button>
+        </li>
+        <li class="nav-item visually-hidden">
+          <button class="btn btn-outline-secondary me-2 btn-action" type="button" id="clear-btn">Clear</button>
         </li>
       </ul>
     </div>
