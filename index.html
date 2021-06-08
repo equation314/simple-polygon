@@ -46,7 +46,7 @@
         <li class="nav-item">
           <div class="dropdown">
             <button class="btn btn-outline-secondary me-2 btn-action dropdown-toggle" type="button"
-              data-bs-toggle="dropdown" aria-expanded="false" id="polygon-btn" mode="draw">Draw</button>
+              data-bs-toggle="dropdown" aria-expanded="false" id="polygon-btn" mode="draw">Polygon</button>
             <ul class="dropdown-menu" aria-labelledby="polygon-btn">
               <li><button class="dropdown-item" id="draw-btn" type="button">Draw</button></li>
               <li><button class="dropdown-item" id="random-btn">Random</button></li>
@@ -55,10 +55,11 @@
           </div>
         </li>
         <li class="nav-item">
-          <button class="btn btn-outline-secondary me-2 btn-action disabled" type="button" id="path-btn">Path</button>
+          <button class="btn btn-outline-secondary me-2 btn-action disabled" type="button"
+            id="adv-btn">Advanced</button>
         </li>
         <li class="nav-item">
-          <button class="btn btn-outline-secondary me-2 btn-action " type="button" id="clear-btn">Clear</button>
+          <button class="btn btn-outline-secondary me-2 btn-action" type="button" id="clear-btn">Clear</button>
         </li>
       </ul>
     </div>
@@ -69,37 +70,62 @@
       </button>
     </div>
     <div class="navbar-collapse collapse w-100 order-3 dual-collapse2 mr-auto">
-      <ul class="navbar-nav ms-auto" id = "right-opts">
-        <li class="nav-item">
+      <ul class=" navbar-nav ms-auto" id="cfg-opts">
+        <li class="nav-item visually-hidden">
           <div class="input-group">
             <div class="input-group-prepend">
               <span class="input-group-text bg-dark text-white-50" id="color-text">Color: </span>
             </div>
           </div>
         </li>
-        <li class="nav-item">
+        <li class="nav-item visually-hidden">
           <input class="me-2 bg-dark border border-white rounded" style="height:100%" type="color" id="pick-color"
-            name="favcolor" value="#ff0000">
+            name="favcolor" value="#5A7D29">
         </li>
-        <li class="nav-item">
-          <span class="input-group-text bg-dark text-white-50" id="size-text">Size: </span>
+        <li class="nav-item visually-hidden">
+          <span class="input-group-text bg-dark text-white-50" id="size-text">VertexSz: </span>
         </li>
-        <li class="nav-item">
+        <li class="nav-item visually-hidden">
           <div class="col-xs-1">
-            <input type="number" class="form-control" placeholder="Input nums" maxlength="10" size="10" min="1"
-              id="pick-number">
+            <input type="number" class="form-control" placeholder="Input" maxlength="10" size="5" min="1" id="pick-size"
+              value="5">
           </div>
         </li>
-        <li class="nav-item">
+        <li class="nav-item visually-hidden">
           <div class="dropdown">
             <button class="btn btn-outline-secondary me-2 btn-action dropdown-toggle ms-2" type="button"
-              data-bs-toggle="dropdown" aria-expanded="false" id="algo-btn">Algorithm</button>
+              data-bs-toggle="dropdown" aria-expanded="false" >Algorithm</button>
             <ul class="dropdown-menu" aria-labelledby="algo-btn">
               <li><button class="dropdown-item" id="algo1-btn">Algo1</button></li>
               <li><button class="dropdown-item" id="algo2-btn">Algo2</button></li>
               <li><button class="dropdown-item" id="algo3-btn">Algo3</button></li>
             </ul>
           </div>
+        </li>
+        <!-- <li class="nav-item visually-hidden">
+          <select class="form-select dropdown-toggle me-2 bg-dark text-white-50 border border-white rounded" aria-label="Default select example" id="algo-btn">
+            <option selected>Algorithm</option>
+            <option value="1" id="algo1-btn">Algo1</option>
+            <option value="2" id="algo2-btn">Algo2</option>
+            <option value="3" id="algo3-btn">Algo3</option>
+          </select>
+        </li> -->
+        <li class="nav-item visually-hidden">
+          <button class="btn btn-outline-secondary me-2 btn-action" type="button" id="gen-btn">Gen</button>
+        </li>
+      </ul>
+    </div>
+
+    <div class="visually-hidden navbar-collapse collapse w-100 order-3 dual-collapse2 mr-auto" id="path-opts">
+      <ul class=" navbar-nav ms-auto">
+        <li class="nav-item">
+          <button class="btn btn-outline-secondary me-2 btn-action" type="button" id="point-btn">Start/End</button>
+        </li>
+        <li class="nav-item">
+          <button class="btn btn-outline-secondary me-2 btn-action" type="button" id="tri-btn">Triangulation</button>
+        </li>
+        <li class="nav-item">
+          <button class="btn btn-outline-secondary me-2 btn-action" type="button" id="path-btn">Path</button>
         </li>
       </ul>
     </div>
