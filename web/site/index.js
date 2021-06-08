@@ -10,8 +10,10 @@ function drawPolygon() {
 }
 
 function randomPolygon(opts, config) {
-    points = SP.gen_polygon();  // para: config.vertexNum, gen poly with vertexNum points.
+    points = SP.gen_polygon(10, "space");
     console.log(points);
+    console.log(SP.is_ccw(points));
+    console.log(SP.is_simple_polygon(points));
     draw.removeAllShapes();
     if (!opts) {
         draw.drawPolygon(points, { color: getRandomColor(), vertexSize: 5 });
@@ -94,7 +96,7 @@ $(() => {
             console.log(path);
             let k = [];
             if(path == null)
-                return 
+                return
             else if(path.length == 0)
                 k.push([endpoints[0], endpoints[1]]);
             else{
@@ -107,7 +109,7 @@ $(() => {
                 k.push([points[path[path.length - 1]],endpoints[1]]);
             }
             draw.drawLines(k, "#2c507b" , pathClassname);
-            
+
         }
     });
 

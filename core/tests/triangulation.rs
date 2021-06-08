@@ -58,6 +58,10 @@ fn test_triangulation(algo: Algorithm) {
         println!("{:?}: test triangulation from {:?}", algo, poly_file);
 
         let poly = Polygon::from_file(poly_file).unwrap();
+        if poly.size() < 10000 {
+            assert!(poly.is_simple());
+        }
+
         let tri = Triangulation::build(&poly, algo);
         validate_result(&poly, tri.result());
     }

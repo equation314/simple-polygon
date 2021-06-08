@@ -1,5 +1,5 @@
 use simple_polygon_core as sp;
-use sp::geo::{Point, Polygon};
+use sp::geo::Polygon;
 use sp::tri::Triangulation;
 use std::convert::TryInto;
 use wasm_bindgen::prelude::*;
@@ -15,10 +15,24 @@ pub fn greet(name: &str) {
 }
 
 #[wasm_bindgen]
-pub fn gen_polygon() -> JsValue {
-    let poly = sp::gen::gen_polygon(10, "2opt");
+pub fn gen_polygon(n: usize, algo_str: Option<String>) -> JsValue {
+    let poly = sp::gen::gen_polygon(n, &algo_str.unwrap_or_else(|| "2opt".into()));
     let points: Vec<[f64; 2]> = poly.points.iter().map(|p| [p.x, p.y]).collect();
     JsValue::from_serde(&points).unwrap()
+}
+
+#[wasm_bindgen]
+pub fn is_ccw(points: &JsValue) -> bool {
+    let points: Vec<[f64; 2]> = points.into_serde().unwrap();
+    let poly = Polygon::from_slice(&points);
+    poly.is_ccw()
+}
+
+#[wasm_bindgen]
+pub fn is_simple_polygon(points: &JsValue) -> bool {
+    let points: Vec<[f64; 2]> = points.into_serde().unwrap();
+    let poly = Polygon::from_slice(&points);
+    poly.is_simple()
 }
 
 #[wasm_bindgen]
@@ -54,12 +68,7 @@ pub fn find_shortest_path(
         .as_str()
         .try_into()
     {
-        let path = sp::shortest::find_shortest_path(
-            &poly,
-            Point::new(start[0], start[1]),
-            Point::new(end[0], end[1]),
-            algo,
-        );
+        let path = sp::shortest::find_shortest_path(&poly, start.into(), end.into(), algo);
         JsValue::from_serde(&path).unwrap()
     } else {
         JsValue::null()

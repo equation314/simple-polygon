@@ -42,6 +42,10 @@ fn shortest_path() {
         println!("test shortest path from {:?}", poly_file);
 
         let poly = Polygon::from_file(poly_file).unwrap();
+        if poly.size() < 10000 {
+            assert!(poly.is_simple());
+        }
+
         let start_end = Polygon::from_file(start_end_file).unwrap();
         let res = sp::shortest::find_shortest_path(
             &poly,

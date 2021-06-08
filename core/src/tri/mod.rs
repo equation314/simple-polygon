@@ -52,6 +52,7 @@ impl TriangulationResult {
 
 impl<'a> Triangulation<'a> {
     pub fn build(poly: &'a Polygon, algo: Algorithm) -> Self {
+        assert!(poly.is_ccw());
         let result = match algo {
             Algorithm::EarCutting => ear_cutting::triangulation(poly),
             Algorithm::MonoPartition => mono_partition::triangulation(poly),

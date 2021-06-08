@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::ops;
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct Point {
     pub x: f64,
     pub y: f64,
@@ -64,6 +64,46 @@ impl Point {
             0
         }
     }
+
+    /// Does the segment AB contain the point C? (not at the end point)
+    pub fn segment_contains(a: &Self, b: &Self, c: &Self) -> bool {
+        let ca = *a - *c;
+        let cb = *b - *c;
+        (ca * cb).abs() < Self::EPS && ca.dot(&cb) < -Self::EPS
+    }
+
+    /// Do the two segments AB and CD intersect? (not at the end point)
+    pub fn segment_intersection(a: &Self, b: &Self, c: &Self, d: &Self) -> bool {
+        if a == c && b == d || a == d && b == c {
+            return true;
+        }
+        if Self::segment_contains(a, b, c)
+            || Self::segment_contains(a, b, d)
+            || Self::segment_contains(c, d, a)
+            || Self::segment_contains(c, d, b)
+        {
+            return true;
+        }
+        let ac = *c - *a;
+        let ab = *b - *a;
+        let ad = *d - *a;
+        if (ac * ab) * (ab * ad) < Self::EPS {
+            return false;
+        }
+        let ca = *a - *c;
+        let cb = *b - *c;
+        let cd = *d - *c;
+        if (ca * cd) * (cd * cb) < Self::EPS {
+            return false;
+        }
+        true
+    }
+}
+
+impl PartialEq for Point {
+    fn eq(&self, other: &Self) -> bool {
+        (self.x - other.x).abs() < Point::EPS && (self.y - other.y).abs() < Point::EPS
+    }
 }
 
 impl ops::Add for Point {
@@ -95,5 +135,95 @@ impl ops::Mul<Point> for Point {
 
     fn mul(self, rhs: Point) -> Self::Output {
         self.x * rhs.y - self.y * rhs.x
+    }
+}
+
+impl<T> From<[T; 2]> for Point
+where
+    T: Copy + Into<f64>,
+{
+    fn from(p: [T; 2]) -> Self {
+        Self::new(p[0].into(), p[1].into())
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::Point;
+
+    #[test]
+    fn test_segment_contains() {
+        assert!(Point::segment_contains(
+            &[-1, 0].into(),
+            &[1, 0].into(),
+            &[0, 0].into()
+        ));
+        assert!(!Point::segment_contains(
+            &[-1, 0].into(),
+            &[1, 0].into(),
+            &[1, 0].into(),
+        ));
+        assert!(!Point::segment_contains(
+            &[1, 1].into(),
+            &[1, 0].into(),
+            &[0, 0].into()
+        ));
+        assert!(!Point::segment_contains(
+            &[1, 0].into(),
+            &[1, 1].into(),
+            &[1.0 + 1e-10, 0.0].into(),
+        ));
+    }
+
+    #[test]
+    fn test_segment_intersection() {
+        assert!(Point::segment_intersection(
+            &[-1, 0].into(),
+            &[1, 0].into(),
+            &[0, 1].into(),
+            &[0, -1].into(),
+        ));
+        assert!(Point::segment_intersection(
+            &[-1, 0].into(),
+            &[1, 0].into(),
+            &[0, 0].into(),
+            &[0, 1].into(),
+        ));
+        assert!(Point::segment_intersection(
+            &[-1, 0].into(),
+            &[1, 0].into(),
+            &[0, 0].into(),
+            &[2, 0].into(),
+        ));
+        assert!(Point::segment_intersection(
+            &[0, 0].into(),
+            &[-1, 0].into(),
+            &[-1, 0].into(),
+            &[1, 0].into(),
+        ));
+        assert!(Point::segment_intersection(
+            &[1, 0].into(),
+            &[-1, 0].into(),
+            &[-1, 0].into(),
+            &[1, 0].into(),
+        ));
+        assert!(!Point::segment_intersection(
+            &[-1, 0].into(),
+            &[1, 0].into(),
+            &[0, 1].into(),
+            &[1, 0].into(),
+        ));
+        assert!(!Point::segment_intersection(
+            &[-1, 0].into(),
+            &[1, 0].into(),
+            &[2, 0].into(),
+            &[1.0 - 1e-10, 0.0].into(),
+        ));
+        assert!(!Point::segment_intersection(
+            &[-1, 0].into(),
+            &[1, 0].into(),
+            &[2, 0].into(),
+            &[1.5, 0.0].into(),
+        ));
     }
 }
