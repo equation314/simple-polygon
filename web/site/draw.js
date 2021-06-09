@@ -145,16 +145,17 @@ export class Draw {
             .on("end", () => (dragging = false));
         svg.on("mouseup", onmouseup);
         svg.on("mousemove", onmousemove);
-        svg.call(this.zoom);
 
         this.drawing = false;
         this.drawn = false;
         this.currentDrawPoints = [];
         this.currentPolygon = [];
+        this.polygonDrawnCallback = this.polygonDestroyedCallback = () => {};
 
-        this.mode = "move";
+        this.mode = "draw-polygon";
         this.width = width;
         this.height = height;
+
         this.svg = svg;
         this.canvas = gCanvas;
         this.currentTransform = d3.zoomIdentity;
@@ -163,14 +164,23 @@ export class Draw {
         this.autoScale([]);
     }
 
+    onPolygonDrawn(callback) {
+        this.polygonDrawnCallback = callback;
+    }
+
+    onPolygonDestroyed(callback) {
+        this.polygonDestroyedCallback = callback;
+    }
+
     clearCanvas() {
         this.drawing = false;
         this.drawn = false;
         this.currentDrawPoints = [];
-        this.currentPolygon = [];
         this.removeShape("polygon");
         this.removeShape("endpoints");
         this.removeShape("drawing");
+        this.polygonDestroyedCallback(this.currentPolygon);
+        this.currentPolygon = [];
     }
 
     setMode(mode) {
@@ -180,14 +190,6 @@ export class Draw {
                 this.svg.call(this.zoom);
                 break;
             case "draw-polygon":
-                this.mode = mode;
-                this.removeShape("fixed-polygon");
-                this.removeShape("tri-lines");
-                this.removeShape("path-lines");
-                this.removeShape("endpoints");
-                this.svg.on(".zoom", null);
-                break;
-            case "fixed":
                 this.mode = mode;
                 this.svg.on(".zoom", null);
                 break;
@@ -295,6 +297,9 @@ export class Draw {
         }
 
         this.applyTransform();
+        if (c.close) {
+            this.polygonDrawnCallback(points);
+        }
     }
 
     drawLines(lines, lineColor = "#FDBC07", classname = "lines") {

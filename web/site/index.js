@@ -3,6 +3,15 @@ import $ from "jquery";
 import { Draw, getRandomColor } from "./draw.js";
 
 var draw = new Draw();
+draw.onPolygonDrawn(points => {
+    console.log(points);
+    $("#tri-btn").removeClass("disabled");
+    $("#path-btn").removeClass("disabled");
+});
+draw.onPolygonDestroyed(() => {
+    $("#tri-btn").addClass("disabled");
+    $("#path-btn").addClass("disabled");
+});
 
 function randomPolygon(n, algo) {
     let points = SP.gen_polygon(n, algo);
@@ -32,62 +41,29 @@ function showError(message) {
 }
 
 $(() => {
-    $("#move-btn").on("click", () => {
-        $("#move-btn").addClass("active");
-        $("#polygon-btn").removeClass("active");
-        $("#adv-btn").removeClass("active");
-        $("#draw-opts").hide();
-        $("#gen-opts").hide();
-        $("#adv-opts").hide();
-        draw.setMode("move");
-    });
     document.getElementById("polygon-btn").addEventListener("hidden.bs.dropdown", () => {
-        $("#move-btn").removeClass("active");
-        $("#polygon-btn").addClass("active");
-        $("#adv-btn").removeClass("active");
-        $("#adv-opts").hide();
         switch ($("#polygon-btn").val()) {
             case "draw":
+                $("#move-btn").removeClass("active");
                 $("#draw-opts").show();
                 $("#gen-opts").hide();
                 draw.setMode("draw-polygon");
+                draw.clearCanvas();
                 break;
             case "random":
                 $("#draw-opts").hide();
                 $("#gen-opts").show();
-                draw.setMode("fixed");
+                draw.setMode("move");
+                draw.clearCanvas();
                 break;
             case "load":
                 $("#draw-opts").hide();
                 $("#gen-opts").hide();
-                draw.setMode("fixed");
+                draw.setMode("move");
                 loadPolygon();
                 break;
         }
     });
-    $("#adv-btn").on("click", () => {
-        $("#move-btn").removeClass("active");
-        $("#polygon-btn").removeClass("active");
-        $("#adv-btn").addClass("active");
-        $("#draw-opts").hide();
-        $("#gen-opts").hide();
-        $("#adv-opts").show();
-    });
-
-    $("#algo-btn")
-        .next()
-        .children()
-        .on("click", function (e) {
-            let target = $(e.target);
-            $("#algo-btn").val(target.val()).text(target.text());
-        });
-    $("#polygon-btn")
-        .next()
-        .children()
-        .on("click", function (e) {
-            let target = $(e.target);
-            $("#polygon-btn").val(target.val()).text(target.text());
-        });
 
     $("#tri-btn").on("click", () => {
         let triClassname = "tri-lines";
@@ -144,16 +120,33 @@ $(() => {
             draw.drawLines(k, "#2c507b", pathClassname);
         }
     });
-    $("#point-btn").on("click", () => {
-        draw.setMode("draw-points");
-        //draw.drawPoints([[91, 104], [119, 119]]);
-    });
+    // $("#point-btn").on("click", () => {
+    //     draw.setMode("draw-points");
+    //     //draw.drawPoints([[91, 104], [119, 119]]);
+    // });
 
+    $("#algo-btn")
+        .next()
+        .children()
+        .on("click", function (e) {
+            let target = $(e.target);
+            $("#algo-btn").val(target.val()).text(target.text());
+        });
+    $("#polygon-btn")
+        .next()
+        .children()
+        .on("click", function (e) {
+            let target = $(e.target);
+            $("#polygon-btn").val(target.val()).text(target.text());
+        });
+
+    $("#move-btn").on("click", () => {
+        draw.setMode($("#move-btn").hasClass("active") ? "move" : "draw-polygon");
+    });
     $("#clear-btn").on("click", () => {
         draw.clearCanvas();
     });
     $("#gen-btn").on("click", () => {
-        // TODO: algorithm choice
         randomPolygon($("#pick-size").val(), $("#algo-btn").val());
     });
 });

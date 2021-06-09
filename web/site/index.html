@@ -45,9 +45,6 @@
 
       <div class="d-flex align-items-center" style="height: 3rem">
         <div class="m-1">
-          <button class="btn btn-outline-secondary active" id="move-btn">Move</button>
-        </div>
-        <div class="m-1">
           <div class="dropdown">
             <button class="btn btn-outline-secondary btn-action dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" id="polygon-btn" value="draw">Draw</button>
             <ul class="dropdown-menu" aria-labelledby="polygon-btn">
@@ -59,14 +56,20 @@
           </div>
         </div>
         <div class="m-1">
-          <button class="btn btn-outline-secondary" id="adv-btn">Advanced</button>
+          <button class="btn btn-outline-secondary disabled" id="tri-btn">Triangulation</button>
+        </div>
+        <div class="m-1">
+          <button class="btn btn-outline-secondary disabled" id="path-btn">Path</button>
         </div>
       </div>
 
-      <div id="draw-opts" style="display: none">
+      <div id="draw-opts">
         <div class="d-flex">
           <div class="m-1">
             <input type="color" class="form-control form-control-color" style="width:3rem" id="pick-color" value="#5A7D29" title="Oolygon color">
+          </div>
+          <div class="m-1">
+            <button class="btn btn-outline-secondary" id="move-btn" data-bs-toggle="button">Move View</button>
           </div>
           <div class="m-1">
             <button class="btn btn-outline-secondary" id="clear-btn">Clear</button>
@@ -93,20 +96,6 @@
           </div>
           <div class="m-1">
             <button class="btn btn-outline-secondary" id="gen-btn">Gen</button>
-          </div>
-        </div>
-      </div>
-
-      <div id="adv-opts" style="display: none">
-        <div class="d-flex">
-          <div class="m-1">
-            <button class="btn btn-outline-secondary" id="point-btn">Start/End</button>
-          </div>
-          <div class="m-1">
-            <button class="btn btn-outline-secondary" id="tri-btn">Triangulation</button>
-          </div>
-          <div class="m-1">
-            <button class="btn btn-outline-secondary" id="path-btn">Path</button>
           </div>
         </div>
       </div>
