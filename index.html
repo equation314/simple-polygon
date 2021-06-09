@@ -28,11 +28,6 @@
       z-index: -1;
     }
 
-    .navbar {
-      position: fixed;
-      width: 100%;
-    }
-
     #algo-btn {
       width: 12rem;
       display: flex;
@@ -44,7 +39,8 @@
 </head>
 
 <body>
-  <nav class="navbar navbar-dark bg-dark">
+  <div id="alert" class="alert alert-danger fixed-bottom mx-3" style="display: none" role="alert"></div>
+  <nav class="navbar navbar-dark bg-dark fixed-top">
     <div class="container-fluid">
 
       <div class="d-flex align-items-center" style="height: 3rem">
@@ -53,7 +49,7 @@
         </div>
         <div class="m-1">
           <div class="dropdown">
-            <button class="btn btn-outline-secondary btn-action dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" id="polygon-btn" data="draw">Draw</button>
+            <button class="btn btn-outline-secondary btn-action dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" id="polygon-btn" value="draw">Draw</button>
             <ul class="dropdown-menu" aria-labelledby="polygon-btn">
               <li><button class="dropdown-item" id="draw-btn" value="draw">Draw</button></li>
               <li><button class="dropdown-item" id="random-btn" value="random">Random</button></li>
@@ -82,12 +78,12 @@
         <div class="d-flex">
           <div class="m-1">
             <div style="width: 7rem">
-              <input type="number" class="form-control" id="pick-size" placeholder="Vertices" min="1" max="999999" value="5" title="Number of polygon vertices">
+              <input type="number" class="form-control" id="pick-size" placeholder="Vertices" min="3" max="999999" value="5" title="Number of polygon vertices">
             </div>
           </div>
           <div class="m-1">
             <div class="dropdown">
-              <button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" id="algo-btn" data="growth">Steady Growth</button>
+              <button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" id="algo-btn" value="growth">Steady Growth</button>
               <ul class="dropdown-menu" aria-labelledby="algo-btn">
                 <li><button class="dropdown-item" id="algo1-btn" value="growth">Steady Growth</button></li>
                 <li><button class="dropdown-item" id="algo2-btn" value="space">Space Partitioning</button></li>
