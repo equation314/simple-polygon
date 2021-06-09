@@ -84,14 +84,15 @@ export class Draw {
             this.applyTransform();
         };
         let onmouseup = event => {
-            if (dragging || this.drawn || (this.mode != "draw" && this.mode != "drawpoints")) return;
+            if (dragging || this.drawn || (this.mode != "draw" && this.mode != "drawpoints"))
+                return;
             this.drawing = true;
             let itx = this.invertTransX();
             let ity = this.invertTransY();
             let cursor = d3.pointer(event);
             let point = [itx(cursor[0]), ity(cursor[1])];
             lastDrawPoint = point;
-            if(this.mode == "drawpoints"){
+            if (this.mode == "drawpoints") {
                 this.drawPoints([point]);
             } else if (event.target.hasAttribute("is-handle")) {
                 if (this.currentDrawPoints.length <= 2) {
@@ -298,38 +299,38 @@ export class Draw {
 
     drawPoints(points, pointSize = 5, pointColor = "#996f6e") {
         this.restartDrawPoints();
-        let g = this.canvas.append("g").attr("class","endpoints");
+        let g = this.canvas.append("g").attr("class", "endpoints");
         g.selectAll("circle")
             .data(points)
             .join("circle")
             .attr("r", pointSize)
             .attr("fill", pointColor)
             .attr("stroke", "#000");
-        
+
         this.applyTransform();
         return g;
     }
-    
-    restartDrawPoints(){
+
+    restartDrawPoints() {
         let points = this.canvas.selectAll(`g.endpoints`);
-        if(points.size() >= 2){
+        if (points.size() >= 2) {
             this.removeShape("endpoints");
             this.removeShape("path-lines");
         }
     }
-    hasTwoPoints(){
+    hasTwoPoints() {
         let points = this.canvas.selectAll(`g.endpoints`);
         return points.size() == 2;
     }
-    getTwoPoints(){
+    getTwoPoints() {
         let points = this.canvas.selectAll(`g.endpoints circle`);
-        let ans = []
-        points.each( function(d,i) {
-            ans.push([d3.select(this).attr("cx"),d3.select(this).attr("cy")]);
+        let ans = [];
+        points.each(function (d, i) {
+            ans.push([d3.select(this).attr("cx"), d3.select(this).attr("cy")]);
         });
         let itx = this.invertTransX();
         let ity = this.invertTransY();
-        return ans.map( p => [itx(p[0]), ity(p[1])]);
+        return ans.map(p => [itx(p[0]), ity(p[1])]);
     }
     existLines(classname) {
         return !this.canvas.selectAll(`g.${classname}`).empty();
