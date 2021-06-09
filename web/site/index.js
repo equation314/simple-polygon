@@ -5,17 +5,13 @@ import { Draw, getRandomColor } from "./draw.js";
 var draw = new Draw();
 var points = [];
 
-function randomPolygon(opts, config) {
-    points = SP.gen_polygon(10, "space");
-    console.log(points);
+function randomPolygon(n, algo) {
+    points = SP.gen_polygon(n, algo);
+    console.log(n, algo, points);
     console.log(SP.is_ccw(points));
     console.log(SP.is_simple_polygon(points));
-    draw.removeAllShapes();
-    if (!opts) {
-        draw.drawPolygon(points, { color: getRandomColor(), vertexSize: 5 });
-    } else {
-        draw.drawPolygon(points, { color: config.color, vertexSize: 5 });
-    }
+    draw.clearCanvas();
+    draw.drawPolygon(points, { color: getRandomColor(), vertexSize: 3 });
     draw.autoScale(points);
 }
 
@@ -45,11 +41,11 @@ $(() => {
         $("#polygon-btn").addClass("active");
         $("#adv-btn").removeClass("active");
         $("#adv-opts").hide();
-        switch ($("#polygon-btn").attr("data")) {
+        switch ($("#polygon-btn").val()) {
             case "draw":
                 $("#draw-opts").show();
                 $("#gen-opts").hide();
-                draw.setMode("draw");
+                draw.setMode("draw-polygon");
                 break;
             case "random":
                 $("#draw-opts").hide();
@@ -78,14 +74,14 @@ $(() => {
         .children()
         .on("click", function (e) {
             let target = $(e.target);
-            $("#algo-btn").attr("data", target.val()).text(target.text());
+            $("#algo-btn").val(target.val()).text(target.text());
         });
     $("#polygon-btn")
         .next()
         .children()
         .on("click", function (e) {
             let target = $(e.target);
-            $("#polygon-btn").attr("data", target.val()).text(target.text());
+            $("#polygon-btn").val(target.val()).text(target.text());
         });
 
     $("#tri-btn").on("click", () => {
@@ -128,16 +124,15 @@ $(() => {
         }
     });
     $("#point-btn").on("click", () => {
-        draw.removeShape("endpoints");
-        draw.setMode("drawpoints");
+        draw.setMode("draw-points");
         //draw.drawPoints([[91, 104], [119, 119]]);
     });
 
     $("#clear-btn").on("click", () => {
-        draw.removeAllShapes();
+        draw.clearCanvas();
     });
     $("#gen-btn").on("click", () => {
         // TODO: algorithm choice
-        randomPolygon(true, { color: getRandomColor(), vertexNum: $("#pick-size").val() });
+        randomPolygon($("#pick-size").val(), $("#algo-btn").val());
     });
 });
