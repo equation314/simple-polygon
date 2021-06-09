@@ -31,7 +31,7 @@ $(() => {
         $("#move-btn").addClass("active");
         $("#polygon-btn").removeClass("active");
         $("#adv-btn").removeClass("active");
-        $("#path-opts").removeClass("visually-hidden");
+        $("#path-opts").addClass("visually-hidden");
         $("#cfg-opts").children().each(function () {
             $(this).addClass("visually-hidden");
         });
