@@ -28,11 +28,6 @@
       z-index: -1;
     }
 
-    .navbar {
-      position: fixed;
-      width: 100%;
-    }
-
     #algo-btn {
       width: 12rem;
       display: flex;
@@ -44,7 +39,8 @@
 </head>
 
 <body>
-  <nav class="navbar navbar-dark bg-dark">
+  <div id="alert" class="alert alert-danger fixed-bottom mx-3" style="display: none" role="alert"></div>
+  <nav class="navbar navbar-dark bg-dark fixed-top">
     <div class="container-fluid">
 
       <div class="d-flex align-items-center" style="height: 3rem">

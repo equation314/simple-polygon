@@ -3,10 +3,9 @@ import $ from "jquery";
 import { Draw, getRandomColor } from "./draw.js";
 
 var draw = new Draw();
-var points = [];
 
 function randomPolygon(n, algo) {
-    points = SP.gen_polygon(n, algo);
+    let points = SP.gen_polygon(n, algo);
     console.log(n, algo, points);
     console.log(SP.is_ccw(points));
     console.log(SP.is_simple_polygon(points));
@@ -24,6 +23,12 @@ function loadPolygon() {
         var fileString = e.target.result; // read content
         console.log("file content is", fileString);
     };
+}
+
+function showError(message) {
+    let alert = $("#alert");
+    alert.text(message);
+    alert.slideDown("slow", () => setTimeout(() => alert.slideUp("slow"), 1000));
 }
 
 $(() => {
@@ -89,8 +94,15 @@ $(() => {
         if (draw.existLines(triClassname)) {
             draw.hideLines(triClassname);
         } else {
+            let points = draw.getCurrentPolygon();
+            if (!SP.is_simple_polygon(points)) {
+                showError("Not a simple polygon!");
+                return;
+            }
+            if (!SP.is_ccw(points)) {
+                points.reverse();
+            }
             let diagonals = SP.triangulation(points, "mono_partition");
-            console.log(diagonals);
             draw.drawLines(
                 diagonals.map(d => [points[d[0]], points[d[1]]]),
                 "#9c3829",
@@ -103,6 +115,15 @@ $(() => {
         if (draw.existLines(pathClassname)) {
             draw.hideLines(pathClassname);
         } else if (draw.hasTwoPoints()) {
+            let points = draw.getCurrentPolygon();
+            if (!SP.is_simple_polygon(points)) {
+                showError("Not a simple polygon!");
+                return;
+            }
+            if (!SP.is_ccw(points)) {
+                points.reverse();
+            }
+
             let endpoints = draw.getTwoPoints();
             console.log(endpoints);
             //TODO :transform back

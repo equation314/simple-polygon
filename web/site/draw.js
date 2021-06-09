@@ -78,6 +78,9 @@ export class Draw {
             d3.select(target.parentNode)
                 .select("polyline")
                 .data([newPoints.concat([newPoints[0]])]);
+            this.currentPolygon = newPoints;
+            this.removeShape("tri-lines");
+            this.removeShape("path-lines");
             this.applyTransform();
         };
         let onmouseup = event => {
@@ -107,12 +110,15 @@ export class Draw {
                 this.drawn = true;
             } else {
                 this.currentDrawPoints.push(point);
-                svg.select("g.drawing").remove();
-                let g = this.drawPolygon(this.currentDrawPoints, {
-                    vertexColor: "yellow",
-                    close: false,
-                });
-                g.attr("class", "drawing");
+                this.canvas.select("g.drawing").remove();
+                let g = this.drawPolygon(
+                    this.currentDrawPoints,
+                    {
+                        vertexColor: "yellow",
+                        close: false,
+                    },
+                    "drawing",
+                );
             }
         };
         let onmousemove = event => {
@@ -144,6 +150,7 @@ export class Draw {
         this.drawing = false;
         this.drawn = false;
         this.currentDrawPoints = [];
+        this.currentPolygon = [];
 
         this.mode = "move";
         this.width = width;
@@ -160,7 +167,10 @@ export class Draw {
         this.drawing = false;
         this.drawn = false;
         this.currentDrawPoints = [];
-        this.removeAllShapes();
+        this.currentPolygon = [];
+        this.removeShape("polygon");
+        this.removeShape("endpoints");
+        this.removeShape("drawing");
     }
 
     setMode(mode) {
@@ -240,19 +250,11 @@ export class Draw {
         this.svg.call(this.zoom.transform, this.currentTransform);
     }
 
-    removeAllShapes() {
-        this.removeShape("polygon");
-        this.removeShape("tri-lines");
-        this.removeShape("path-lines");
-        this.removeShape("endpoints");
-        this.removeShape("drawing");
-    }
-
     removeShape(className) {
         this.canvas.selectAll(`g.${className}`).remove();
     }
 
-    drawPolygon(points, config) {
+    drawPolygon(points, config, classname = "") {
         const defaultConfig = {
             color: "red",
             vertexColor: "#FDBC07",
@@ -264,12 +266,17 @@ export class Draw {
             ...defaultConfig,
             ...config,
         };
-        let g = this.canvas.append("g").attr("class", `polygon ${c.fixed ? "fixed-polygon" : ""}`);
+
+        if (c.close && c.fixed) {
+            classname += " fixed-polygon";
+        }
+        let g = this.canvas.append("g").attr("class", "polygon " + classname);
         if (c.close) {
             g.append("polyline")
                 .data([points.concat([points[0]])])
                 .style("fill", c.color)
                 .attr("stroke", "#ccc");
+            this.currentPolygon = points;
         } else {
             g.append("polyline").data([points]).style("fill", "none").attr("stroke", "#000");
         }
@@ -288,12 +295,12 @@ export class Draw {
         }
 
         this.applyTransform();
-        return g;
     }
 
     drawLines(lines, lineColor = "#FDBC07", classname = "lines") {
         this.removeShape(classname);
-        let g = this.canvas.append("g").attr("class", classname);
+        let parent = this.canvas.select(".polygon");
+        let g = parent.insert("g", ":nth-child(2)").attr("class", classname);
         g.selectAll("line")
             .data(lines)
             .join("line")
@@ -305,7 +312,6 @@ export class Draw {
             .attr("opacity", 1)
             .attr("stroke-width", 1);
         this.applyTransform();
-        return g;
     }
 
     drawPoints(points, pointSize = 5, pointColor = "#996f6e") {
@@ -318,7 +324,6 @@ export class Draw {
             .attr("fill", pointColor)
             .attr("stroke", "#000");
         this.applyTransform();
-        return g;
     }
 
     restartDrawPoints() {
@@ -350,6 +355,10 @@ export class Draw {
         lines.attr("opacity", ~lines.attr("opacity"));
         //this.canvas.selectAll(`g.lines line`).attr("stroke", "red");
         //
+    }
+
+    getCurrentPolygon() {
+        return this.currentPolygon;
     }
 }
 
