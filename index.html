@@ -5,11 +5,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <title>Simple Polygon Generation and Shortest Paths</title>
-  <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.0.1/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
-  <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.0.1/js/bootstrap.bundle.min.js"
-    integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4"
-    crossorigin="anonymous"></script>
+  <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.0.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+  <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.0.1/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
   <style>
     html,
     body {
@@ -26,109 +23,95 @@
       -ms-user-select: none;
       user-select: none;
       position: fixed;
-      height: calc(100vh - 3.5rem);
+      height: calc(100vh - 4rem);
       width: 100%;
     }
 
-    .btn-action {
-      border-color: #ccc;
+    #algo-btn {
+      width: 12rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
+
   </style>
 </head>
 
 <body>
   <nav class="navbar navbar-expand-md navbar-dark bg-dark">
-    <div class="navbar-collapse collapse w-100 order-1 order-md-0 dual-collapse2">
-      <ul class="navbar-nav mr-auto">
-        <li class="nav-item active">
-          <button class="btn btn-outline-secondary me-2 btn-action active" type="button" id="move-btn">Move</button>
-        </li>
-        <li class="nav-item">
-          <div class="dropdown">
-            <button class="btn btn-outline-secondary me-2 btn-action dropdown-toggle" type="button"
-              data-bs-toggle="dropdown" aria-expanded="false" id="polygon-btn" mode="draw">Polygon</button>
-            <ul class="dropdown-menu" aria-labelledby="polygon-btn">
-              <li><button class="dropdown-item" id="draw-btn" type="button">Draw</button></li>
-              <li><button class="dropdown-item" id="random-btn">Random</button></li>
-              <li><button class="dropdown-item" id="load-btn">Load from...</button></li>
-              <li><input id="file-opt" type="file" style="display:none" /></li>
-            </ul>
-          </div>
-        </li>
-        <li class="nav-item">
-          <button class="btn btn-outline-secondary me-2 btn-action disabled" type="button"
-            id="adv-btn">Advanced</button>
-        </li>
-      </ul>
-    </div>
-    <div class="me-auto order-0">
-      <a class="navbar-brand me-auto" href="#">CG</a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".dual-collapse2">
+    <div class="container-fluid">
+
+      <a class="navbar-brand my-1" href="#">CG</a>
+      <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target=".navbar-opts" aria-controls="navbar-opts" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
-    </div>
-    <div class="navbar-collapse collapse w-100 order-3 dual-collapse2 mr-auto">
-      <ul class=" navbar-nav ms-auto" id="cfg-opts">
-        <li class="nav-item visually-hidden">
-          <div class="input-group">
-            <div class="input-group-prepend">
-              <span class="input-group-text bg-dark text-white-50" id="color-text">Color: </span>
-            </div>
-          </div>
-        </li>
-        <li class="nav-item visually-hidden">
-          <input class="me-2 bg-dark border border-white rounded" style="height:100%" type="color" id="pick-color"
-            name="favcolor" value="#5A7D29">
-        </li>
-        <li class="nav-item visually-hidden">
-          <span class="input-group-text bg-dark text-white-50" id="size-text">Vertex Num: </span>
-        </li>
-        <li class="nav-item visually-hidden">
-          <div class="col-xs-1">
-            <input type="number" class="form-control" placeholder="Input" maxlength="10" size="5" min="1" id="pick-size"
-              value="5">
-          </div>
-        </li>
-        <li class="nav-item visually-hidden">
-          <div class="dropdown">
-            <button class="btn btn-outline-secondary me-2 btn-action dropdown-toggle ms-2" type="button"
-              data-bs-toggle="dropdown" aria-expanded="false" id="algo-btn"><span id='text'>Algorithm</span></button>
-            <ul class="dropdown-menu" aria-labelledby="algo-btn">
-              <li><button class="dropdown-item" id="algo1-btn">Algo1</button></li>
-              <li><button class="dropdown-item" id="algo2-btn">Algo2</button></li>
-              <li><button class="dropdown-item" id="algo3-btn">Algo3</button></li>
-            </ul>
-          </div>
-        </li>
-        <!-- <li class="nav-item visually-hidden">
-          <select class="form-select dropdown-toggle me-2 bg-dark text-white-50 border border-white rounded" aria-label="Default select example" id="algo-btn">
-            <option selected>Algorithm</option>
-            <option value="1" id="algo1-btn">Algo1</option>
-            <option value="2" id="algo2-btn">Algo2</option>
-            <option value="3" id="algo3-btn">Algo3</option>
-          </select>
-        </li> -->
-        <li class="nav-item visually-hidden">
-          <button class="btn btn-outline-secondary me-2 btn-action" type="button" id="gen-btn">Gen</button>
-        </li>
-        <li class="nav-item visually-hidden">
-          <button class="btn btn-outline-secondary me-2 btn-action" type="button" id="clear-btn">Clear</button>
-        </li>
-      </ul>
-    </div>
 
-    <div class="visually-hidden navbar-collapse collapse w-100 order-3 dual-collapse2 mr-auto" id="path-opts">
-      <ul class=" navbar-nav ms-auto">
-        <li class="nav-item">
-          <button class="btn btn-outline-secondary me-2 btn-action" type="button" id="point-btn">Start/End</button>
-        </li>
-        <li class="nav-item">
-          <button class="btn btn-outline-secondary me-2 btn-action" type="button" id="tri-btn">Triangulation</button>
-        </li>
-        <li class="nav-item">
-          <button class="btn btn-outline-secondary me-2 btn-action" type="button" id="path-btn">Path</button>
-        </li>
-      </ul>
+      <div class="collapse navbar-collapse navbar-opts">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item my-1 me-2">
+            <button class="btn btn-outline-secondary active" id="move-btn">Move</button>
+          </li>
+          <li class="nav-item my-1 me-2">
+            <div class="dropdown">
+              <button class="btn btn-outline-secondary btn-action dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" id="polygon-btn" data="draw">Draw</button>
+              <ul class="dropdown-menu" aria-labelledby="polygon-btn">
+                <li><button class="dropdown-item" id="draw-btn" value="draw">Draw</button></li>
+                <li><button class="dropdown-item" id="random-btn" value="random">Random</button></li>
+                <li><button class="dropdown-item" id="load-btn" value="load">Load from...</button></li>
+              </ul>
+              <input id="file-opt" type="file" hidden />
+            </div>
+          </li>
+          <li class="nav-item my-1 me-2">
+            <button class="btn btn-outline-secondary" id="adv-btn">Advanced</button>
+          </li>
+        </ul>
+      </div>
+
+      <div class="collapse navbar-collapse navbar-opts">
+        <ul class="navbar-nav ms-auto" id="draw-opts" style="display: none">
+          <li class="nav-item my-1 me-2">
+            <input type="color" class="form-control form-control-color" style="width:3rem" id="pick-color" value="#5A7D29" title="Oolygon color">
+          </li>
+          <li class="nav-item my-1 me-2">
+            <button class="btn btn-outline-secondary" id="clear-btn">Clear</button>
+          </li>
+        </ul>
+
+        <ul class="navbar-nav ms-auto" id="gen-opts" style="display: none">
+          <li class="nav-item my-1 me-2">
+            <div style="width: 7rem">
+              <input type="number" class="form-control" id="pick-size" placeholder="Vertices" min="1" max="999999" value="5" title="Number of polygon vertices">
+            </div>
+          </li>
+          <li class="nav-item my-1 me-2">
+            <div class="dropdown">
+              <button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" id="algo-btn" data="growth">Steady Growth</button>
+              <ul class="dropdown-menu" aria-labelledby="algo-btn">
+                <li><button class="dropdown-item" id="algo1-btn" value="growth">Steady Growth</button></li>
+                <li><button class="dropdown-item" id="algo2-btn" value="space">Space Partitioning</button></li>
+                <li><button class="dropdown-item" id="algo3-btn" value="2opt">2-opt Moves</button></li>
+              </ul>
+            </div>
+          </li>
+          <li class="nav-item my-1 me-2">
+            <button class="btn btn-outline-secondary" id="gen-btn">Gen</button>
+          </li>
+        </ul>
+
+        <ul class="navbar-nav ms-auto" id="adv-opts" style="display: none">
+          <li class="nav-item my-1 me-2">
+            <button class="btn btn-outline-secondary" id="point-btn">Start/End</button>
+          </li>
+          <li class="nav-item my-1 me-2">
+            <button class="btn btn-outline-secondary" id="tri-btn">Triangulation</button>
+          </li>
+          <li class="nav-item my-1 me-2">
+            <button class="btn btn-outline-secondary" id="path-btn">Path</button>
+          </li>
+        </ul>
+      </div>
+
     </div>
   </nav>
 
