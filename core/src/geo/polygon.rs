@@ -1,11 +1,10 @@
-use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::{self, prelude::*, BufReader, BufWriter};
 use std::path::Path;
 
 use super::point::Point;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug)]
 pub struct Polygon {
     pub points: Vec<Point>,
 }

@@ -27,6 +27,8 @@ def draw(points, start, end, path, output_file):
         u = path_points[i]
         v = path_points[i + 1]
         ax.plot([u[0], v[0]], [u[1], v[1]], '-', color='y', lw=1, alpha=0.75)
+    for i, p in enumerate(points):
+        plt.annotate('%d' % i, xy=p, xytext=[2,2], textcoords='offset points')
 
     ax.plot(points[:, 0], points[:, 1], '.', color='k')
     ax.plot(start[0], start[1], '.', color='r', ms=10)
