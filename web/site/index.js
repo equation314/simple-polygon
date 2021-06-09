@@ -41,7 +41,7 @@ function showError(message) {
 }
 
 $(() => {
-    document.getElementById("polygon-btn").addEventListener("hidden.bs.dropdown", () => {
+    $("#polygon-btn").on("change", () => {
         switch ($("#polygon-btn").val()) {
             case "draw":
                 $("#move-btn").removeClass("active");
@@ -137,7 +137,9 @@ $(() => {
         .children()
         .on("click", function (e) {
             let target = $(e.target);
-            $("#polygon-btn").val(target.val()).text(target.text());
+            if (target.val() != $("#polygon-btn").val()) {
+                $("#polygon-btn").val(target.val()).text(target.text()).trigger("change");
+            }
         });
 
     $("#move-btn").on("click", () => {
