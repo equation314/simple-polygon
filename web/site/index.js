@@ -2,6 +2,9 @@ import * as SP from "simple-polygon-wasm";
 import $ from "jquery";
 import { Draw, getRandomColor } from "./draw.js";
 
+const DIAGONAL_COLOR = "#9c3829";
+const PATH_COLOR = "#2c507b";
+
 var draw = new Draw();
 draw.onPolygonDrawn(points => {
     console.log(points);
@@ -12,6 +15,7 @@ draw.onPolygonDestroyed(() => {
     $("#tri-btn").addClass("disabled");
     $("#path-btn").addClass("disabled");
 });
+draw.onEndpointsDrawn(points => showShortestPath(points[0], points[1]));
 
 function randomPolygon(n, algo) {
     let points = SP.gen_polygon(n, algo);
@@ -40,6 +44,48 @@ function showError(message) {
     alert.slideDown("slow", () => setTimeout(() => alert.slideUp("slow"), 1000));
 }
 
+function showTriangulation() {
+    let points = draw.getCurrentPolygon();
+    if (!SP.is_simple_polygon(points)) {
+        showError("Not a simple polygon!");
+        return;
+    }
+    if (!SP.is_ccw(points)) {
+        points.reverse();
+    }
+    let diagonals = SP.triangulation(points, "mono_partition");
+    let lines = diagonals.map(d => [points[d[0]], points[d[1]]]);
+    draw.drawLines(lines, DIAGONAL_COLOR, "tri-lines");
+}
+
+function showShortestPath(start, end) {
+    let points = draw.getCurrentPolygon();
+    if (!SP.is_simple_polygon(points)) {
+        showError("Not a simple polygon!");
+        return;
+    }
+    if (!SP.is_ccw(points)) {
+        points.reverse();
+    }
+
+    let pathIdx = SP.find_shortest_path(points, start, end, "mono_partition");
+    if (pathIdx == null) {
+        showError("Unreachable!");
+        return;
+    }
+    let path = Array.prototype.concat(
+        [start],
+        pathIdx.map(idx => points[idx]),
+        [end],
+    );
+
+    let lines = [];
+    for (let i = 0; i < path.length - 1; i++) {
+        lines.push([path[i], path[i + 1]]);
+    }
+    draw.drawLines(lines, PATH_COLOR, "path-lines");
+}
+
 $(() => {
     $("#polygon-btn").on("change", () => {
         switch ($("#polygon-btn").val()) {
@@ -66,63 +112,22 @@ $(() => {
 
     $("#tri-btn").on("click", () => {
         let triClassname = "tri-lines";
-        if (draw.existLines(triClassname)) {
-            draw.hideLines(triClassname);
+        if (draw.hasShape(triClassname)) {
+            draw.toggleShape(triClassname);
         } else {
-            let points = draw.getCurrentPolygon();
-            if (!SP.is_simple_polygon(points)) {
-                showError("Not a simple polygon!");
-                return;
-            }
-            if (!SP.is_ccw(points)) {
-                points.reverse();
-            }
-            let diagonals = SP.triangulation(points, "mono_partition");
-            draw.drawLines(
-                diagonals.map(d => [points[d[0]], points[d[1]]]),
-                "#9c3829",
-                triClassname,
-            );
+            showTriangulation();
         }
     });
     $("#path-btn").on("click", () => {
         let pathClassname = "path-lines";
-        if (draw.existLines(pathClassname)) {
-            draw.hideLines(pathClassname);
-        } else if (draw.hasTwoPoints()) {
-            let points = draw.getCurrentPolygon();
-            if (!SP.is_simple_polygon(points)) {
-                showError("Not a simple polygon!");
-                return;
-            }
-            if (!SP.is_ccw(points)) {
-                points.reverse();
-            }
-
-            let endpoints = draw.getTwoPoints();
-            console.log(endpoints);
-            //TODO :transform back
-            let path = SP.find_shortest_path(points, endpoints[0], endpoints[1], "mono_partition");
-            console.log(path);
-            let k = [];
-            if (path == null) return;
-            else if (path.length == 0) k.push([endpoints[0], endpoints[1]]);
-            else {
-                path.forEach(function (item, index) {
-                    if (index != path.length - 1) {
-                        k.push([points[item], points[path[index + 1]]]);
-                    }
-                });
-                k.unshift([endpoints[0], points[path[0]]]);
-                k.push([points[path[path.length - 1]], endpoints[1]]);
-            }
-            draw.drawLines(k, "#2c507b", pathClassname);
+        if (draw.hasShape(pathClassname)) {
+            draw.toggleShape(pathClassname);
+        } else if (draw.currentEndpoints.length) {
+            showShortestPath(draw.currentEndpoints[0], draw.currentEndpoints[1]);
+        } else {
+            draw.setMode("draw-points");
         }
     });
-    // $("#point-btn").on("click", () => {
-    //     draw.setMode("draw-points");
-    //     //draw.drawPoints([[91, 104], [119, 119]]);
-    // });
 
     $("#algo-btn")
         .next()
@@ -143,6 +148,7 @@ $(() => {
 
     $("#clear-btn").on("click", () => {
         draw.clearCanvas();
+        draw.setMode("draw-polygon");
     });
     $("#gen-btn").on("click", () => {
         randomPolygon($("#pick-size").val(), $("#algo-btn").val());

@@ -1,6 +1,13 @@
 import * as d3 from "d3";
 import $ from "jquery";
 
+const ENDPOINT_COLOR = "#996f6e";
+const POLY_EDGE_COLOR = "#ccc";
+const POLY_EDGE_COLOR_DRAWING = "#000";
+const POLY_EDGE_COLOR_CURRENT = "#53DBF3";
+const POLY_VERTEX_COLOR = "#FDBC07";
+const POLY_VERTEX_COLOR_DRAWING = "yellow";
+
 export class Draw {
     constructor() {
         let svg = d3.select("body").append("svg");
@@ -8,7 +15,7 @@ export class Draw {
         let height = $("svg").height();
 
         let gGrid = svg.append("g");
-        let gCanvas = svg.append("g");
+        let gCanvas = svg.append("g").attr("class", "canvas");
         let gX = svg.append("g");
         let gY = svg.append("g");
 
@@ -68,57 +75,81 @@ export class Draw {
             gGrid.call(grid, tx, ty);
         };
         let ondrag = (target, event) => {
-            if (this.drawing || this.mode == "fixed") return;
+            if (this.drawing) return;
             dragging = true;
             let itx = this.invertTransX();
             let ity = this.invertTransY();
             let point = [itx(event.x), ity(event.y)];
             d3.select(target).data([point]);
-            let newPoints = d3.select(target.parentNode).selectAll("circle").data();
-            d3.select(target.parentNode)
-                .select("polyline")
-                .data([newPoints.concat([newPoints[0]])]);
-            this.currentPolygon = newPoints;
-            this.removeShape("tri-lines");
-            this.removeShape("path-lines");
+
+            let parent = d3.select(target.parentNode);
+            if (parent.classed("polygon")) {
+                let newPoints = parent.selectAll(".polygon > circle").data();
+                parent.select("polyline").data([newPoints.concat([newPoints[0]])]);
+                this.currentPolygon = newPoints;
+                this.removeShape("tri-lines");
+                this.removeShape("path-lines");
+            } else if (parent.classed("endpoint")) {
+                let newPoints = this.canvas.selectAll(".endpoint > circle").data();
+                this.currentEndpoints = newPoints;
+                this.removeShape("path-lines");
+            }
             this.applyTransform();
         };
         let onmouseup = event => {
-            if (dragging || this.drawn) return;
-            if (this.mode != "draw-polygon" && this.mode != "draw-points") return;
+            if (dragging) return;
+            switch (this.mode) {
+                case "draw-polygon":
+                    if (this.currentPolygon.length) return;
+                    break;
+                case "draw-points":
+                    if (this.currentEndpoints.length) return;
+                    break;
+                default:
+                    return;
+            }
             this.drawing = true;
             let itx = this.invertTransX();
             let ity = this.invertTransY();
             let cursor = d3.pointer(event);
             let point = [itx(cursor[0]), ity(cursor[1])];
-            lastDrawPoint = point;
-            if (this.mode == "draw-points") {
-                this.drawPoints([point]);
-            } else if (event.target.hasAttribute("is-handle")) {
-                if (this.currentDrawPoints.length <= 2) {
-                    return;
+            if (this.mode == "draw-polygon") {
+                lastDrawPoint = point;
+                if (event.target.hasAttribute("is-handle")) {
+                    if (this.currentDrawPoints.length <= 2) {
+                        return;
+                    }
+                    this.canvas.select("g.drawing").remove();
+                    let rgba = $("#pick-color").val() + "77";
+                    this.drawPolygon(this.currentDrawPoints, {
+                        color: rgba,
+                        vertexColor: POLY_VERTEX_COLOR,
+                        fixed: false,
+                    });
+                    this.currentDrawPoints = [];
+                    this.drawing = false;
+                } else {
+                    this.currentDrawPoints.push(point);
+                    this.canvas.select("g.drawing").remove();
+                    this.drawPolygon(
+                        this.currentDrawPoints,
+                        {
+                            vertexColor: POLY_VERTEX_COLOR_DRAWING,
+                            close: false,
+                        },
+                        "drawing",
+                    );
                 }
-                this.canvas.select("g.drawing").remove();
-                let rgba = $("#pick-color").val() + "77";
-                this.drawPolygon(this.currentDrawPoints, {
-                    color: rgba,
-                    vertexColor: "#FDBC07",
-                    fixed: false,
-                });
-                this.currentDrawPoints = [];
-                this.drawing = false;
-                this.drawn = true;
-            } else {
+            } else if (this.mode == "draw-points") {
                 this.currentDrawPoints.push(point);
-                this.canvas.select("g.drawing").remove();
-                let g = this.drawPolygon(
-                    this.currentDrawPoints,
-                    {
-                        vertexColor: "yellow",
-                        close: false,
-                    },
-                    "drawing",
-                );
+                this.drawPoints([point]);
+                if (this.currentDrawPoints.length == 2) {
+                    this.currentEndpoints = this.currentDrawPoints;
+                    this.onEndpointsDrawnCallback(this.currentEndpoints);
+                    this.currentDrawPoints = [];
+                    this.drawing = false;
+                    this.mode = "move";
+                }
             }
         };
         let onmousemove = event => {
@@ -131,7 +162,7 @@ export class Draw {
             g.select("line").remove();
             g.insert("line", ":first-child")
                 .data([[lastDrawPoint, point]])
-                .attr("stroke", "#53DBF3")
+                .attr("stroke", POLY_EDGE_COLOR_CURRENT)
                 .attr("stroke-width", 1);
             this.applyTransform();
         };
@@ -146,11 +177,10 @@ export class Draw {
             .on("zoom", zoomed)
             .on("end", () => svg.attr("cursor", "default"))
             .filter(event => {
-                if (this.mode == "move" || this.drawn) {
-                    return true;
-                } else {
-                    return event.type != "mouseup" && event.type != "mousedown";
-                }
+                if (this.mode == "move") return true;
+                else if (this.mode == "draw-polygon" && this.currentPolygon.length) return true;
+                else if (this.mode == "draw-points" && this.currentEndpoints.length) return true;
+                else return event.type != "mouseup" && event.type != "mousedown";
             });
 
         this.pointDragger = d3
@@ -164,10 +194,10 @@ export class Draw {
         svg.call(this.zoom);
 
         this.drawing = false;
-        this.drawn = false;
         this.currentDrawPoints = [];
         this.currentPolygon = [];
-        this.polygonDrawnCallback = this.polygonDestroyedCallback = () => {};
+        this.currentEndpoints = [];
+        this.polygonDrawnCallback = this.polygonDestroyedCallback = this.onEndpointsDrawnCallback = () => {};
 
         this.mode = "move";
         this.width = width;
@@ -189,30 +219,24 @@ export class Draw {
         this.polygonDestroyedCallback = callback;
     }
 
+    onEndpointsDrawn(callback) {
+        this.onEndpointsDrawnCallback = callback;
+    }
+
     clearCanvas() {
         this.drawing = false;
-        this.drawn = false;
-        this.currentDrawPoints = [];
         this.removeShape("polygon");
-        this.removeShape("endpoints");
+        this.removeShape("endpoint");
         this.removeShape("drawing");
         this.polygonDestroyedCallback(this.currentPolygon);
+        this.currentDrawPoints = [];
         this.currentPolygon = [];
+        this.currentEndpoints = [];
     }
 
     setMode(mode) {
-        switch (mode) {
-            case "move":
-                this.mode = mode;
-                break;
-            case "draw-polygon":
-                this.mode = mode;
-                break;
-            case "draw-points":
-                this.mode = mode;
-                // this.drawing = false;
-                // this.drawn = false;
-                break;
+        if (["move", "draw-polygon", "draw-points"].includes(mode)) {
+            this.mode = mode;
         }
     }
 
@@ -267,14 +291,23 @@ export class Draw {
         this.svg.call(this.zoom.transform, this.currentTransform);
     }
 
-    removeShape(className) {
-        this.canvas.selectAll(`g.${className}`).remove();
+    hasShape(classname) {
+        return !this.canvas.selectAll(`g.${classname}`).empty();
+    }
+
+    removeShape(classname) {
+        this.canvas.selectAll(`g.${classname}`).remove();
+    }
+
+    toggleShape(classname) {
+        let shape = this.canvas.selectAll(`g.${classname}`);
+        shape.attr("opacity", 1 - shape.attr("opacity"));
     }
 
     drawPolygon(points, config, classname = "") {
         const defaultConfig = {
             color: "red",
-            vertexColor: "#FDBC07",
+            vertexColor: POLY_VERTEX_COLOR,
             vertexSize: 5,
             close: true,
             fixed: true,
@@ -292,10 +325,13 @@ export class Draw {
             g.append("polyline")
                 .data([points.concat([points[0]])])
                 .style("fill", c.color)
-                .attr("stroke", "#ccc");
+                .attr("stroke", POLY_EDGE_COLOR);
             this.currentPolygon = points;
         } else {
-            g.append("polyline").data([points]).style("fill", "none").attr("stroke", "#000");
+            g.append("polyline")
+                .data([points])
+                .style("fill", "none")
+                .attr("stroke", POLY_EDGE_COLOR_DRAWING);
         }
 
         let circles = g
@@ -320,7 +356,8 @@ export class Draw {
     drawLines(lines, lineColor = "#FDBC07", classname = "lines") {
         this.removeShape(classname);
         let parent = this.canvas.select(".polygon");
-        let g = parent.insert("g", ":nth-child(2)").attr("class", classname);
+        let before = !parent.selectChild(".path-lines").empty() ? ".path-lines" : "circle";
+        let g = parent.insert("g", before).attr("opacity", 1).attr("class", classname);
         g.selectAll("line")
             .data(lines)
             .join("line")
@@ -329,56 +366,41 @@ export class Draw {
             .attr("x2", d => d[1][0])
             .attr("y2", d => d[1][1])
             .attr("stroke", lineColor)
-            .attr("opacity", 1)
             .attr("stroke-width", 1);
         this.applyTransform();
     }
 
-    drawPoints(points, pointSize = 5, pointColor = "#996f6e") {
-        this.restartDrawPoints();
-        let g = this.canvas.append("g").attr("class", "endpoints");
-        g.selectAll("circle")
+    drawPoints(points, config, classname = "endpoint") {
+        const defaultConfig = {
+            color: ENDPOINT_COLOR,
+            size: 5,
+            fixed: false,
+        };
+        let c = {
+            ...defaultConfig,
+            ...config,
+        };
+
+        let g = this.canvas.append("g").attr("class", classname);
+        let circle = g
+            .selectAll("circle")
             .data(points)
             .join("circle")
-            .attr("r", pointSize)
-            .attr("fill", pointColor)
+            .attr("r", c.size)
+            .attr("fill", c.color)
             .attr("stroke", "#000");
-        this.applyTransform();
-    }
-
-    restartDrawPoints() {
-        let points = this.canvas.selectAll(`g.endpoints`);
-        if (points.size() >= 2) {
-            this.removeShape("endpoints");
-            this.removeShape("path-lines");
+        if (!c.fixed) {
+            circle.style("cursor", "move").call(this.pointDragger);
         }
-    }
-    hasTwoPoints() {
-        let points = this.canvas.selectAll(`g.endpoints`);
-        return points.size() == 2;
-    }
-    getTwoPoints() {
-        let points = this.canvas.selectAll(`g.endpoints circle`);
-        let ans = [];
-        points.each(function (d, i) {
-            ans.push([d3.select(this).attr("cx"), d3.select(this).attr("cy")]);
-        });
-        let itx = this.invertTransX();
-        let ity = this.invertTransY();
-        return ans.map(p => [itx(p[0]), ity(p[1])]);
-    }
-    existLines(classname) {
-        return !this.canvas.selectAll(`g.${classname}`).empty();
-    }
-    hideLines(classname) {
-        let lines = this.canvas.selectAll(`g.${classname} line`);
-        lines.attr("opacity", ~lines.attr("opacity"));
-        //this.canvas.selectAll(`g.lines line`).attr("stroke", "red");
-        //
+        this.applyTransform();
     }
 
     getCurrentPolygon() {
         return this.currentPolygon;
+    }
+
+    getCurrentEndpoints() {
+        return this.currentEndpoints;
     }
 }
 
