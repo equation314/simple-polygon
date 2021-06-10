@@ -25,7 +25,7 @@ export class Draw {
         let yAxis = (g, scale) =>
             g
                 .attr("transform", `translate(${0},0)`)
-                .call(d3.axisRight(scale).ticks(Math.floor(yticks)))
+                .call(d3.axisRight(scale).ticks(yticks))
                 .call(g => g.select(".domain").attr("display", "none"));
         let grid = (g, x, y) =>
             g
@@ -61,8 +61,8 @@ export class Draw {
         let zoomed = ({ transform }) => {
             this.currentTransform = transform;
             this.applyTransform();
-            let tx = transform.rescaleX(xScale);
-            let ty = transform.rescaleY(yScale);
+            let tx = this.transX();
+            let ty = this.transY();
             gX.call(xAxis, tx);
             gY.call(yAxis, ty);
             gGrid.call(grid, tx, ty);
@@ -136,7 +136,23 @@ export class Draw {
             this.applyTransform();
         };
 
-        this.zoom = d3.zoom().scaleExtent([0.2, 50]).on("zoom", zoomed);
+        this.zoom = d3
+            .zoom()
+            .scaleExtent([0.2, 50])
+            .on("start", event => {
+                if (event.sourceEvent && event.sourceEvent.type != "wheel")
+                    svg.attr("cursor", "grab");
+            })
+            .on("zoom", zoomed)
+            .on("end", () => svg.attr("cursor", "default"))
+            .filter(event => {
+                if (this.mode == "move" || this.drawn) {
+                    return true;
+                } else {
+                    return event.type != "mouseup" && event.type != "mousedown";
+                }
+            });
+
         this.pointDragger = d3
             .drag()
             .on("drag", function (event) {
@@ -145,6 +161,7 @@ export class Draw {
             .on("end", () => (dragging = false));
         svg.on("mouseup", onmouseup);
         svg.on("mousemove", onmousemove);
+        svg.call(this.zoom);
 
         this.drawing = false;
         this.drawn = false;
@@ -152,7 +169,7 @@ export class Draw {
         this.currentPolygon = [];
         this.polygonDrawnCallback = this.polygonDestroyedCallback = () => {};
 
-        this.mode = "draw-polygon";
+        this.mode = "move";
         this.width = width;
         this.height = height;
 
@@ -187,11 +204,9 @@ export class Draw {
         switch (mode) {
             case "move":
                 this.mode = mode;
-                this.svg.call(this.zoom);
                 break;
             case "draw-polygon":
                 this.mode = mode;
-                this.svg.on(".zoom", null);
                 break;
             case "draw-points":
                 this.mode = mode;

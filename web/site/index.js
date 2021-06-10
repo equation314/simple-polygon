@@ -44,7 +44,6 @@ $(() => {
     $("#polygon-btn").on("change", () => {
         switch ($("#polygon-btn").val()) {
             case "draw":
-                $("#move-btn").removeClass("active");
                 $("#draw-opts").show();
                 $("#gen-opts").hide();
                 draw.setMode("draw-polygon");
@@ -142,9 +141,6 @@ $(() => {
             }
         });
 
-    $("#move-btn").on("click", () => {
-        draw.setMode($("#move-btn").hasClass("active") ? "move" : "draw-polygon");
-    });
     $("#clear-btn").on("click", () => {
         draw.clearCanvas();
     });
