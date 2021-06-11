@@ -7,7 +7,6 @@ const PATH_COLOR = "#2c507b";
 
 var draw = new Draw();
 draw.onPolygonDrawn(points => {
-    console.log(points);
     $("#tri-btn").removeClass("disabled");
     $("#path-btn").removeClass("disabled");
 });
@@ -17,11 +16,29 @@ draw.onPolygonDestroyed(() => {
 });
 draw.onEndpointsDrawn(points => showShortestPath(points[0], points[1]));
 
+function maxPolygonSize(algo) {
+    return {
+        growth: 1000,
+        space: 1000,
+        "2opt": 200,
+        permute: 10,
+    }[algo];
+}
+
 function randomPolygon(n, algo) {
-    let points = SP.gen_polygon(n, algo);
+    if (n < 3) {
+        showError(`Too few vertices for generation: ${n} < 3`);
+        return;
+    }
+    if (n > maxPolygonSize(algo)) {
+        showError(
+            `Too many vertices for the ${$("#algo-btn").text()} algorithm: \
+            ${n} > ${maxPolygonSize(algo)}`,
+        );
+        return;
+    }
+    let points = SP.gen_polygon(n, 100, algo);
     console.log(n, algo, points);
-    console.log(SP.is_ccw(points));
-    console.log(SP.is_simple_polygon(points));
     draw.clearCanvas();
     draw.drawPolygon(points, { color: getRandomColor(), vertexSize: 3 });
     draw.autoScale(points);

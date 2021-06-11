@@ -15,10 +15,18 @@ pub fn greet(name: &str) {
 }
 
 #[wasm_bindgen]
-pub fn gen_polygon(n: usize, algo_str: Option<String>) -> JsValue {
-    let poly = sp::gen::gen_polygon(n, &algo_str.unwrap_or_else(|| "2opt".into()));
-    let points: Vec<[f64; 2]> = poly.points.iter().map(|p| [p.x, p.y]).collect();
-    JsValue::from_serde(&points).unwrap()
+pub fn gen_polygon(n: usize, range: usize, algo_str: Option<String>) -> JsValue {
+    if let Ok(algo) = algo_str
+        .unwrap_or_else(|| "2opt".into())
+        .as_str()
+        .try_into()
+    {
+        let poly = sp::gen::gen_polygon(n, range, algo);
+        let points: Vec<[f64; 2]> = poly.points.iter().map(|p| [p.x, p.y]).collect();
+        JsValue::from_serde(&points).unwrap()
+    } else {
+        JsValue::null()
+    }
 }
 
 #[wasm_bindgen]

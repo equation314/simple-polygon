@@ -20,12 +20,21 @@ fn main() {
                         .help("Number of vertices"),
                 )
                 .arg(
+                    Arg::with_name("range")
+                        .value_name("RANGE")
+                        .long("range")
+                        .short("r")
+                        .takes_value(true)
+                        .default_value("100")
+                        .help("The coordinate range of the generated polygon"),
+                )
+                .arg(
                     Arg::with_name("algorithm")
                         .value_name("ALGORITHM")
                         .long("algo")
                         .short("a")
                         .takes_value(true)
-                        .possible_values(&["growth", "space", "2opt"])
+                        .possible_values(&["growth", "space", "2opt", "permute"])
                         .default_value("2opt")
                         .help("The algorithm of the generator"),
                 )
@@ -89,9 +98,10 @@ fn main() {
     match matches.subcommand() {
         ("gen", Some(m)) => {
             let n: usize = m.value_of("n").unwrap().parse().unwrap();
+            let range: usize = m.value_of("range").unwrap().parse().unwrap();
             let algo = m.value_of("algorithm").unwrap();
             let output = m.value_of("output");
-            let poly = sp::gen::gen_polygon(n, algo);
+            let poly = sp::gen::gen_polygon(n, range, algo.try_into().unwrap());
             if let Some(fname) = output {
                 poly.save_to_file(fname).unwrap();
             } else {
