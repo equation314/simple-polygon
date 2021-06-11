@@ -9,10 +9,12 @@ var draw = new Draw();
 draw.onPolygonDrawn(points => {
     $("#tri-btn").removeClass("disabled");
     $("#path-btn").removeClass("disabled");
+    $("#export-btn").removeClass("disabled");
 });
 draw.onPolygonDestroyed(() => {
     $("#tri-btn").addClass("disabled");
     $("#path-btn").addClass("disabled");
+    $("#export-btn").addClass("disabled");
 });
 draw.onEndpointsDrawn(points => showShortestPath(points[0], points[1]));
 
@@ -45,14 +47,46 @@ function randomPolygon(n, algo) {
 }
 
 function loadPolygon() {
-    document.getElementById("file-opt").click();
-    var file = $("#file-opt")[0].files;
-    var reader = new FileReader();
-    reader.readAsText(file[0], "UTF-8"); //read file
+    let input = $("#file-opt")[0];
+    let reader = new FileReader();
+    reader.readAsText(input.files[0]);
     reader.onload = function (e) {
-        var fileString = e.target.result; // read content
-        console.log("file content is", fileString);
+        let content = e.target.result;
+        let points = [];
+        for (let line of content.split("\n")) {
+            let p = line.trim().split(/\s+/);
+            if (p == "") {
+                continue;
+            } else if (p.length == 2) {
+                let point = [parseFloat(p[0]), parseFloat(p[1])];
+                if (isNaN(point[0]) || isNaN(point[1])) {
+                    showError("Invalid polygon file format!");
+                    return;
+                }
+                points.push(point);
+            } else {
+                showError("Invalid polygon file format!");
+                return;
+            }
+        }
+        draw.clearCanvas();
+        draw.drawPolygon(points, { color: getRandomColor(), vertexSize: 3 });
+        draw.autoScale(points);
     };
+    input.value = null;
+}
+
+function exportPolygon() {
+    let points = draw.getCurrentPolygon();
+    if (!SP.is_ccw(points)) {
+        points.reverse();
+    }
+    let context = points.map(p => p.join(" ")).join("\n");
+    let link = document.getElementById("export-link");
+    let blob = new Blob([context], { type: "text/plain" });
+    link.href = URL.createObjectURL(blob);
+    link.download = "polygon.pts";
+    link.click();
 }
 
 function showError(message) {
@@ -122,7 +156,6 @@ $(() => {
                 $("#draw-opts").hide();
                 $("#gen-opts").hide();
                 draw.setMode("move");
-                loadPolygon();
                 break;
         }
     });
@@ -142,9 +175,17 @@ $(() => {
         } else if (draw.currentEndpoints.length) {
             showShortestPath(draw.currentEndpoints[0], draw.currentEndpoints[1]);
         } else {
-            draw.setMode("draw-points");
+            let points = draw.getCurrentPolygon();
+            if (!SP.is_simple_polygon(points)) {
+                showError("Not a simple polygon!");
+            } else {
+                draw.setMode("draw-points");
+            }
         }
     });
+    $("#load-btn").on("click", () => document.getElementById("file-opt").click());
+    $("#export-btn").on("click", exportPolygon);
+    $("#file-opt").on("change", loadPolygon);
 
     $("#algo-btn")
         .next()
