@@ -54,12 +54,15 @@ impl Polygon {
         true
     }
 
-    pub fn from_slice<T>(points: &[[T; 2]]) -> Self
+    pub fn from_slice<T>(points: &[T]) -> Self
     where
-        T: Copy + Into<f64>,
+        T: Copy + Into<Point>,
     {
-        let points = points.iter().map(|&p| p.into()).collect();
-        Self::new(points)
+        Self::new(points.iter().map(|&p| p.into()).collect())
+    }
+
+    pub fn from_indices(points: &[Point], indices: &[usize]) -> Self {
+        Self::new(indices.iter().map(|&i| points[i]).collect())
     }
 
     pub fn from_file<P: AsRef<Path>>(path: P) -> io::Result<Self> {

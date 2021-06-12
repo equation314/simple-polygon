@@ -38,7 +38,7 @@ function maxPolygonSize(algo) {
         growth: 1000,
         space: 1000,
         "2opt": 200,
-        permute: 10,
+        permute: 15,
     }[algo];
 }
 
