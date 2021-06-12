@@ -119,7 +119,7 @@ export class Draw {
                     if (this.currentDrawPoints.length <= 2) {
                         return;
                     }
-                    this.canvas.select("g.drawing").remove();
+                    this.removeShape("polygon-drawing");
                     let rgba = $("#pick-color").val() + "77";
                     this.drawPolygon(this.currentDrawPoints, {
                         color: rgba,
@@ -130,15 +130,11 @@ export class Draw {
                     this.drawing = false;
                 } else {
                     this.currentDrawPoints.push(point);
-                    this.canvas.select("g.drawing").remove();
-                    this.drawPolygon(
-                        this.currentDrawPoints,
-                        {
-                            vertexColor: POLY_VERTEX_COLOR_DRAWING,
-                            close: false,
-                        },
-                        "drawing",
-                    );
+                    this.removeShape("polygon-drawing");
+                    this.drawPolygon(this.currentDrawPoints, {
+                        vertexColor: POLY_VERTEX_COLOR_DRAWING,
+                        close: false,
+                    });
                 }
             } else if (this.mode == "draw-points") {
                 this.currentDrawPoints.push(point);
@@ -158,7 +154,7 @@ export class Draw {
             let ity = this.invertTransY();
             let cursor = d3.pointer(event);
             let point = [itx(cursor[0]), ity(cursor[1])];
-            let g = this.canvas.select("g.drawing");
+            let g = this.canvas.select("g.polygon-drawing");
             g.select("line").remove();
             g.insert("line", ":first-child")
                 .data([[lastDrawPoint, point]])
@@ -227,7 +223,6 @@ export class Draw {
         this.drawing = false;
         this.removeShape("polygon");
         this.removeShape("endpoint");
-        this.removeShape("drawing");
         this.polygonDestroyedCallback(this.currentPolygon);
         this.currentDrawPoints = [];
         this.currentPolygon = [];
@@ -291,20 +286,25 @@ export class Draw {
         this.svg.call(this.zoom.transform, this.currentTransform);
     }
 
-    hasShape(classname) {
-        return !this.canvas.selectAll(`g.${classname}`).empty();
+    hasShape(className) {
+        return !this.canvas.selectAll(`g.${className}`).empty();
     }
 
-    removeShape(classname) {
-        this.canvas.selectAll(`g.${classname}`).remove();
+    removeShape(className) {
+        this.canvas.selectAll(`g.${className}`).remove();
     }
 
-    toggleShape(classname) {
-        let shape = this.canvas.selectAll(`g.${classname}`);
+    toggleShape(className) {
+        let shape = this.canvas.selectAll(`g.${className}`);
         shape.attr("opacity", 1 - shape.attr("opacity"));
     }
 
-    drawPolygon(points, config, classname = "") {
+    setShapeStyle(className, shapeName, styleName, styleValue) {
+        console.log(this.canvas.selectAll(`g.${className}`).selectAll(shapeName));
+        this.canvas.selectAll(`g.${className}`).selectAll(shapeName).style(styleName, styleValue);
+    }
+
+    drawPolygon(points, config, className = "") {
         const defaultConfig = {
             color: "red",
             vertexColor: POLY_VERTEX_COLOR,
@@ -317,10 +317,12 @@ export class Draw {
             ...config,
         };
 
-        if (c.close && c.fixed) {
-            classname += " fixed-polygon";
+        if (c.close) {
+            className += "polygon-drawn";
+        } else {
+            className += "polygon-drawing";
         }
-        let g = this.canvas.append("g").attr("class", "polygon " + classname);
+        let g = this.canvas.append("g").attr("class", "polygon " + className);
         if (c.close) {
             g.append("polyline")
                 .data([points.concat([points[0]])])
@@ -353,11 +355,11 @@ export class Draw {
         }
     }
 
-    drawLines(lines, lineColor = "#FDBC07", classname = "lines") {
-        this.removeShape(classname);
+    drawLines(lines, lineColor = "#FDBC07", className = "lines") {
+        this.removeShape(className);
         let parent = this.canvas.select(".polygon");
         let before = !parent.selectChild(".path-lines").empty() ? ".path-lines" : "circle";
-        let g = parent.insert("g", before).attr("opacity", 1).attr("class", classname);
+        let g = parent.insert("g", before).attr("opacity", 1).attr("class", className);
         g.selectAll("line")
             .data(lines)
             .join("line")
@@ -370,7 +372,7 @@ export class Draw {
         this.applyTransform();
     }
 
-    drawPoints(points, config, classname = "endpoint") {
+    drawPoints(points, config, className = "endpoint") {
         const defaultConfig = {
             color: ENDPOINT_COLOR,
             size: 5,
@@ -381,7 +383,7 @@ export class Draw {
             ...config,
         };
 
-        let g = this.canvas.append("g").attr("class", classname);
+        let g = this.canvas.append("g").attr("class", className);
         let circle = g
             .selectAll("circle")
             .data(points)
@@ -402,15 +404,4 @@ export class Draw {
     getCurrentEndpoints() {
         return this.currentEndpoints;
     }
-}
-
-export function getRandomColor() {
-    let r, g, b;
-    while (true) {
-        r = Math.floor(Math.random() * 256);
-        g = Math.floor(Math.random() * 256);
-        b = Math.floor(Math.random() * 256);
-        if (r + g + b < 224 * 3) break;
-    }
-    return `rgba(${r},${g},${b},0.5)`;
 }

@@ -1,6 +1,6 @@
 import * as SP from "simple-polygon-wasm";
 import $ from "jquery";
-import { Draw, getRandomColor } from "./draw.js";
+import { Draw } from "./draw.js";
 
 const DIAGONAL_COLOR = "#9c3829";
 const PATH_COLOR = "#2c507b";
@@ -17,6 +17,21 @@ draw.onPolygonDestroyed(() => {
     $("#export-btn").addClass("disabled");
 });
 draw.onEndpointsDrawn(points => showShortestPath(points[0], points[1]));
+
+function randomColor() {
+    let r, g, b;
+    while (true) {
+        r = Math.floor(Math.random() * 256);
+        g = Math.floor(Math.random() * 256);
+        b = Math.floor(Math.random() * 256);
+        if (r + g + b < 224 * 3) break;
+    }
+    return `rgba(${r},${g},${b},0.5)`;
+}
+
+function pickedColor() {
+    return $("#pick-color").val() + "77";
+}
 
 function maxPolygonSize(algo) {
     return {
@@ -42,7 +57,7 @@ function randomPolygon(n, algo) {
     let points = SP.gen_polygon(n, 100, algo);
     console.log(n, algo, points);
     draw.clearCanvas();
-    draw.drawPolygon(points, { color: getRandomColor(), vertexSize: 3 });
+    draw.drawPolygon(points, { color: randomColor(), vertexSize: 3 });
     draw.autoScale(points);
 }
 
@@ -70,7 +85,7 @@ function loadPolygon() {
             }
         }
         draw.clearCanvas();
-        draw.drawPolygon(points, { color: getRandomColor(), vertexSize: 3 });
+        draw.drawPolygon(points, { color: pickedColor("#pick-color"), vertexSize: 3 });
         draw.autoScale(points);
     };
     input.value = null;
@@ -141,19 +156,22 @@ $(() => {
     $("#polygon-btn").on("change", () => {
         switch ($("#polygon-btn").val()) {
             case "draw":
-                $("#draw-opts").show();
+                $("#color-opts").show();
+                $("#clear-opts").show();
                 $("#gen-opts").hide();
                 draw.setMode("draw-polygon");
                 draw.clearCanvas();
                 break;
             case "random":
-                $("#draw-opts").hide();
+                $("#color-opts").hide();
+                $("#clear-opts").hide();
                 $("#gen-opts").show();
                 draw.setMode("move");
                 draw.clearCanvas();
                 break;
             case "load":
-                $("#draw-opts").hide();
+                $("#color-opts").show();
+                $("#clear-opts").hide();
                 $("#gen-opts").hide();
                 draw.setMode("move");
                 break;
@@ -196,7 +214,7 @@ $(() => {
         });
     $("#polygon-btn")
         .next()
-        .children()
+        .find("li > button.switch-mode")
         .on("click", function (e) {
             let target = $(e.target);
             if (target.val() != $("#polygon-btn").val()) {
@@ -204,6 +222,9 @@ $(() => {
             }
         });
 
+    $("#pick-color").on("change", () => {
+        draw.setShapeStyle("polygon-drawn", "polyline", "fill", pickedColor());
+    });
     $("#clear-btn").on("click", () => {
         draw.clearCanvas();
         draw.setMode("draw-polygon");

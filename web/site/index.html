@@ -48,12 +48,19 @@
         <div class="m-1">
           <div class="dropdown">
             <button class="btn btn-outline-secondary btn-action dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" id="polygon-btn" value="random">Random</button>
-            <ul class="dropdown-menu" aria-labelledby="polygon-btn">
-              <li><button class="dropdown-item" id="random-btn" value="random">Random</button></li>
-              <li><button class="dropdown-item" id="draw-btn" value="draw">Draw</button></li>
-              <li><button class="dropdown-item" id="load-btn" value="load">Load from...</button></li>
+            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="polygon-btn">
+              <li><button class="dropdown-item switch-mode" id="random-btn" value="random">Random</button></li>
+              <li><button class="dropdown-item switch-mode" id="draw-btn" value="draw">Draw</button></li>
+              <li><button class="dropdown-item switch-mode" id="load-btn" value="load">Load from...</button></li>
+              <li>
+                <hr class="dropdown-divider">
+              </li>
+              <li>
+                <button class="dropdown-item disabled" id="export-btn">Export</button>
+                <a id="export-link" hidden></a>
+              </li>
             </ul>
-            <input id="file-opt" type="file" hidden />
+            <input id="file-opt" type="file" hidden>
           </div>
         </div>
         <div class="m-1">
@@ -62,44 +69,39 @@
         <div class="m-1">
           <button class="btn btn-outline-secondary disabled" id="path-btn">Path</button>
         </div>
-        <div class="m-1">
-          <button class="btn btn-outline-secondary disabled" id="export-btn">Export</button>
-          <a id="export-link" hidden></a>
-        </div>
       </div>
 
-      <div id="draw-opts" style="display: none">
-        <div class="d-flex">
-          <div class="m-1">
-            <input type="color" class="form-control form-control-color" style="width:3rem" id="pick-color" value="#5A7D29" title="Polygon color">
-          </div>
-          <div class="m-1">
-            <button class="btn btn-outline-secondary" id="clear-btn">Clear</button>
+      <div class="d-flex">
+        <div id="gen-opts">
+          <div class="d-flex">
+            <div class="m-1">
+              <div style="width: 6rem">
+                <input type="number" class="form-control bg-dark btn-outline-secondary text-secondary" id="pick-size" placeholder="Vertices" min="3" max="1000" value="5" title="Number of polygon vertices">
+              </div>
+            </div>
+            <div class="m-1">
+              <div class="dropdown">
+                <button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" id="algo-btn" value="growth">Steady Growth</button>
+                <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="algo-btn">
+                  <li><button class="dropdown-item" value="growth">Steady Growth</button></li>
+                  <li><button class="dropdown-item" value="space">Space Partitioning</button></li>
+                  <li><button class="dropdown-item" value="2opt">2-opt Moves</button></li>
+                  <li><button class="dropdown-item" value="permute">Permute & Reject</button></li>
+                </ul>
+              </div>
+            </div>
+            <div class="m-1">
+              <button class="btn btn-outline-secondary" id="gen-btn">Gen</button>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div id="gen-opts">
-        <div class="d-flex">
-          <div class="m-1">
-            <div style="width: 7rem">
-              <input type="number" class="form-control" id="pick-size" placeholder="Vertices" min="3" max="1000" value="5" title="Number of polygon vertices">
-            </div>
-          </div>
-          <div class="m-1">
-            <div class="dropdown">
-              <button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" id="algo-btn" value="growth">Steady Growth</button>
-              <ul class="dropdown-menu" aria-labelledby="algo-btn">
-                <li><button class="dropdown-item" value="growth">Steady Growth</button></li>
-                <li><button class="dropdown-item" value="space">Space Partitioning</button></li>
-                <li><button class="dropdown-item" value="2opt">2-opt Moves</button></li>
-                <li><button class="dropdown-item" value="permute">Permute & Reject</button></li>
-              </ul>
-            </div>
-          </div>
-          <div class="m-1">
-            <button class="btn btn-outline-secondary" id="gen-btn">Gen</button>
-          </div>
+        <div id="color-opts" class="m-1" style="display: none">
+          <input type="color" class="form-control form-control-color" style="width: 3rem" id="pick-color" value="#5A7D29" title="Polygon color">
+        </div>
+
+        <div id="clear-opts" class="m-1" style="display: none">
+          <button class="btn btn-outline-secondary" id="clear-btn">Clear</button>
         </div>
       </div>
 
