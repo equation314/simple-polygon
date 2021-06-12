@@ -37,6 +37,9 @@ impl Polygon {
     #[allow(clippy::many_single_char_names)]
     pub fn is_simple(&self) -> bool {
         let n = self.size();
+        if n <= 2 {
+            return false;
+        }
         for i in 0..n {
             let a = &self.points[i];
             let b = &self.points[(i + 1) % n];

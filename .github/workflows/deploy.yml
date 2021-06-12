@@ -20,7 +20,7 @@ jobs:
         use-tool-cache: true
     - name: Build
       run: |
-        make build
+        make build_wasm
         cd web/site
         npm install
         npm run build

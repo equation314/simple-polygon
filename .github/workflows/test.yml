@@ -43,7 +43,9 @@ jobs:
         version: latest
         use-tool-cache: true
     - name: Build
-      run: make build
+      run: |
+        make build_cli
+        make build_wasm
     - name: Build website
       run: |
         cd web/site

@@ -64,38 +64,36 @@ impl Point {
         }
     }
 
-    /// Does the segment AB contain the point C? (not at the end point)
-    pub fn segment_contains(a: &Self, b: &Self, c: &Self) -> bool {
-        let ca = *a - *c;
-        let cb = *b - *c;
-        (ca * cb).abs() < Self::EPS && ca.dot(&cb) < -Self::EPS
-    }
-
     /// Do the two segments AB and CD intersect? (not at the end point)
     pub fn segment_intersection(a: &Self, b: &Self, c: &Self, d: &Self) -> bool {
-        if a == c && b == d || a == d && b == c {
-            return true;
-        }
-        if Self::segment_contains(a, b, c)
-            || Self::segment_contains(a, b, d)
-            || Self::segment_contains(c, d, a)
-            || Self::segment_contains(c, d, b)
-        {
-            return true;
-        }
         let ac = *c - *a;
         let ab = *b - *a;
         let ad = *d - *a;
-        if (ac * ab) * (ab * ad) < Self::EPS {
+        let abc = ac * ab;
+        let abd = ab * ad;
+        if abc * abd < -Self::EPS {
             return false;
         }
-        let ca = *a - *c;
+        let ca = -ac;
         let cb = *b - *c;
         let cd = *d - *c;
-        if (ca * cd) * (cd * cb) < Self::EPS {
+        let acd = ca * cd;
+        let bcd = cd * cb;
+        if acd * bcd < -Self::EPS {
             return false;
         }
-        true
+
+        if abc.abs() > Self::EPS
+            && abd.abs() > Self::EPS
+            && acd.abs() > Self::EPS
+            && bcd.abs() > Self::EPS
+        {
+            return true;
+        }
+        abc.abs() < Self::EPS && ca.dot(&cb) < -Self::EPS || // AB contains C
+        acd.abs() < Self::EPS && ac.dot(&ad) < -Self::EPS || // CD contains A
+        abd.abs() < Self::EPS && ad.dot(&(*b - *d)) > Self::EPS || // AB contains D
+        bcd.abs() < Self::EPS && cb.dot(&(*d - *b)) > Self::EPS // CD contains B
     }
 }
 
@@ -137,6 +135,14 @@ impl ops::Mul<Point> for Point {
     }
 }
 
+impl ops::Neg for Point {
+    type Output = Point;
+
+    fn neg(self) -> Self::Output {
+        Self::new(-self.x, -self.y)
+    }
+}
+
 impl<T> From<[T; 2]> for Point
 where
     T: Copy + Into<f64>,
@@ -149,30 +155,6 @@ where
 #[cfg(test)]
 mod test {
     use super::Point;
-
-    #[test]
-    fn test_segment_contains() {
-        assert!(Point::segment_contains(
-            &[-1, 0].into(),
-            &[1, 0].into(),
-            &[0, 0].into()
-        ));
-        assert!(!Point::segment_contains(
-            &[-1, 0].into(),
-            &[1, 0].into(),
-            &[1, 0].into(),
-        ));
-        assert!(!Point::segment_contains(
-            &[1, 1].into(),
-            &[1, 0].into(),
-            &[0, 0].into()
-        ));
-        assert!(!Point::segment_contains(
-            &[1, 0].into(),
-            &[1, 1].into(),
-            &[1.0 + 1e-10, 0.0].into(),
-        ));
-    }
 
     #[test]
     fn test_segment_intersection() {
@@ -200,7 +182,7 @@ mod test {
             &[-1, 0].into(),
             &[1, 0].into(),
         ));
-        assert!(Point::segment_intersection(
+        assert!(!Point::segment_intersection(
             &[1, 0].into(),
             &[-1, 0].into(),
             &[-1, 0].into(),

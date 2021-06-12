@@ -1,10 +1,10 @@
 use rand::Rng;
-use std::cell::RefCell;
 use std::collections::HashSet;
 use std::convert::TryFrom;
 
 use crate::geo::{Point, Polygon};
 
+mod backtracking;
 mod permute;
 
 #[derive(Debug, Clone, Copy)]
@@ -29,29 +29,19 @@ impl<'a> TryFrom<&'a str> for Algorithm {
 }
 
 pub struct RandomPolygonGenerator<R: Rng> {
-    n: usize,
-    range: usize,
-    algo: Algorithm,
-    rng: RefCell<R>,
+    rng: R,
 }
 
 impl<R: Rng> RandomPolygonGenerator<R> {
-    pub fn new(n: usize, range: usize, algo: Algorithm, rng: R) -> Self {
-        assert!(n >= 3);
-        Self {
-            n,
-            range,
-            algo,
-            rng: RefCell::new(rng),
-        }
+    pub fn new(rng: R) -> Self {
+        Self { rng }
     }
 
-    pub fn random_points(&self, n: usize, range: usize) -> Vec<Point> {
-        let mut rng = self.rng.borrow_mut();
+    pub fn random_points(&mut self, n: usize, range: usize) -> Vec<Point> {
         let mut visited = HashSet::new();
         (0..n)
             .map(|_| loop {
-                let p = (rng.gen::<usize>() % range, rng.gen::<usize>() % range);
+                let p = (self.rng.gen_range(0, range), self.rng.gen_range(0, range));
                 if !visited.contains(&p) {
                     visited.insert(p);
                     return Point::new(p.0 as _, p.1 as _);
@@ -61,17 +51,20 @@ impl<R: Rng> RandomPolygonGenerator<R> {
     }
 
     pub fn uniform_indices(indices: &mut [usize], points: &[Point]) {
-        if !Polygon::new(points.to_vec()).is_ccw() {
+        if !Polygon::from_indices(points, indices).is_ccw() {
             indices.reverse();
         }
         indices.rotate_left(indices.iter().position(|&i| i == 0).unwrap());
-        println!("{:?}", indices);
     }
 
-    pub fn generate_indices_from(&mut self, points: &[Point]) -> Option<Vec<usize>> {
-        use std::ops::DerefMut;
-        match self.algo {
-            _ => permute::generate(points, self.rng.borrow_mut().deref_mut()),
+    pub fn generate_indices_from(
+        &mut self,
+        points: &[Point],
+        algo: Algorithm,
+    ) -> Option<Vec<usize>> {
+        assert!(points.len() >= 3);
+        match algo {
+            _ => permute::generate(points, &mut self.rng),
         }
         .map(|mut indices| {
             Self::uniform_indices(&mut indices, points);
@@ -79,23 +72,55 @@ impl<R: Rng> RandomPolygonGenerator<R> {
         })
     }
 
-    pub fn generate_from(&mut self, points: &[Point]) -> Option<Polygon> {
-        self.generate_indices_from(points)
+    pub fn generate_from(&mut self, points: &[Point], algo: Algorithm) -> Option<Polygon> {
+        self.generate_indices_from(points, algo)
             .map(|ref indices| Polygon::from_indices(points, indices))
     }
 
-    pub fn generate(&mut self) -> Polygon {
+    pub fn generate(&mut self, n: usize, range: usize, algo: Algorithm) -> Polygon {
         loop {
-            let points = self.random_points(self.n, self.range);
-            println!("{:?}", points);
-            if let Some(poly) = self.generate_from(&points) {
+            let points = self.random_points(n, range);
+            if let Some(poly) = self.generate_from(&points, algo) {
                 return poly;
             }
         }
     }
 }
 
+pub fn gen_all_polygon_from(points: &[Point]) -> Vec<Vec<usize>> {
+    assert!(points.len() >= 2);
+    backtracking::generate_all(points)
+}
+
 pub fn gen_polygon(n: usize, range: usize, algo: Algorithm) -> Polygon {
     let rng = rand::thread_rng();
-    RandomPolygonGenerator::new(n, range, algo, rng).generate()
+    RandomPolygonGenerator::new(rng).generate(n, range, algo)
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    fn grid_points(n: usize, m: usize) -> Vec<Point> {
+        let mut points: Vec<Point> = Vec::new();
+        for i in 0..n {
+            for j in 0..m {
+                points.push(Point::new(i as _, j as _));
+            }
+        }
+        points
+    }
+
+    #[test]
+    fn test_generate_all() {
+        assert_eq!(gen_all_polygon_from(&grid_points(1, 20)).len(), 0);
+        assert_eq!(gen_all_polygon_from(&grid_points(2, 2)).len(), 1);
+        assert_eq!(gen_all_polygon_from(&grid_points(2, 3)).len(), 1);
+        assert_eq!(gen_all_polygon_from(&grid_points(8, 2)).len(), 1);
+        assert_eq!(gen_all_polygon_from(&grid_points(3, 3)).len(), 8);
+        assert_eq!(gen_all_polygon_from(&grid_points(3, 4)).len(), 62);
+        assert_eq!(gen_all_polygon_from(&grid_points(5, 3)).len(), 532);
+        assert_eq!(gen_all_polygon_from(&grid_points(4, 4)).len(), 1930);
+        // assert_eq!(gen_all_polygon_from(&grid_points(3, 6)).len(), 4846);
+    }
 }
