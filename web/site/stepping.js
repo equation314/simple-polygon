@@ -86,15 +86,15 @@ export function init() {
         .on("click", function (e) {
             let target = $(e.target);
             if (showSteppingResult(target.val())) {
-                $("#polygon-btn").addClass("disabled");
-                $("#tri-btn").addClass("disabled");
-                $("#path-btn").addClass("disabled");
+                $("#polygon-btn").prop("disabled", true);
+                $("#tri-btn").prop("disabled", true);
+                $("#path-btn").prop("disabled", true);
                 $("#color-opts").hide();
                 $("#clear-opts").hide();
                 $("#gen-opts").hide();
                 $("#step-opts").show();
-                $("#step-prev-btn").addClass("disabled");
-                $("#step-next-btn").removeClass("disabled");
+                $("#step-prev-btn").prop("disabled", true);
+                $("#step-next-btn").prop("disabled", false);
                 $("#step-btn-div").hide();
                 $("#stop-btn-div").show();
                 draw.setMode("fixed");
@@ -102,9 +102,9 @@ export function init() {
         });
     $("#stop-btn").on("click", () => {
         gIsPlaying = false;
-        $("#polygon-btn").removeClass("disabled");
-        $("#tri-btn").removeClass("disabled");
-        $("#path-btn").removeClass("disabled");
+        $("#polygon-btn").prop("disabled", false);
+        $("#tri-btn").prop("disabled", false);
+        $("#path-btn").prop("disabled", false);
         $("#step-opts").hide();
         $("#stop-btn-div").hide();
         $("#step-btn-div").show();
@@ -127,23 +127,23 @@ export function init() {
     $("#step-first-btn").on("click", () => {
         gCurrentStep = 0;
         showOneStep(gCurrentStep);
-        $("#step-prev-btn").addClass("disabled");
-        $("#step-next-btn").removeClass("disabled");
+        $("#step-prev-btn").prop("disabled", true);
+        $("#step-next-btn").prop("disabled", false);
     });
     $("#step-last-btn").on("click", () => {
         gCurrentStep = gMaxStep;
         showOneStep(gCurrentStep);
-        $("#step-prev-btn").removeClass("disabled");
-        $("#step-next-btn").addClass("disabled");
+        $("#step-prev-btn").prop("disabled", false);
+        $("#step-next-btn").prop("disabled", true);
     });
     $("#step-prev-btn").on("click", () => {
         if (gCurrentStep == 0) {
             return;
         }
         if (--gCurrentStep == 0) {
-            $("#step-prev-btn").addClass("disabled");
+            $("#step-prev-btn").prop("disabled", true);
         }
-        $("#step-next-btn").removeClass("disabled");
+        $("#step-next-btn").prop("disabled", false);
         showOneStep(gCurrentStep);
     });
     $("#step-next-btn").on("click", () => {
@@ -151,9 +151,9 @@ export function init() {
             return;
         }
         if (++gCurrentStep == gMaxStep) {
-            $("#step-next-btn").addClass("disabled");
+            $("#step-next-btn").prop("disabled", true);
         }
-        $("#step-prev-btn").removeClass("disabled");
+        $("#step-prev-btn").prop("disabled", false);
         showOneStep(gCurrentStep);
     });
 

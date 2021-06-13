@@ -8,21 +8,21 @@ const PATH_COLOR = "#2c507b";
 
 export var draw = new Draw();
 draw.onPolygonDrawn(() => {
-    $("#tri-btn").removeClass("disabled");
-    $("#path-btn").removeClass("disabled");
-    $("#export-btn").removeClass("disabled");
-    $("#step-tri-btn").removeClass("disabled");
+    $("#tri-btn").prop("disabled", false);
+    $("#path-btn").prop("disabled", false);
+    $("#export-btn").prop("disabled", false);
+    $("#step-tri-btn").prop("disabled", false);
 });
 draw.onPolygonDestroyed(() => {
-    $("#tri-btn").addClass("disabled");
-    $("#path-btn").addClass("disabled");
-    $("#export-btn").addClass("disabled");
-    $("#step-tri-btn").addClass("disabled");
-    $("#step-path-btn").addClass("disabled");
+    $("#tri-btn").prop("disabled", true);
+    $("#path-btn").prop("disabled", true);
+    $("#export-btn").prop("disabled", true);
+    $("#step-tri-btn").prop("disabled", true);
+    $("#step-path-btn").prop("disabled", true);
 });
 draw.onEndpointsDrawn(points => {
     showShortestPath(points[0], points[1]);
-    $("#step-path-btn").removeClass("disabled");
+    $("#step-path-btn").prop("disabled", false);
 });
 
 export function showError(message) {
