@@ -152,6 +152,20 @@ where
     }
 }
 
+use serde::ser::{Serialize, SerializeTuple, Serializer};
+
+impl Serialize for Point {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut s = serializer.serialize_tuple(2)?;
+        s.serialize_element(&self.x)?;
+        s.serialize_element(&self.y)?;
+        s.end()
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::Point;

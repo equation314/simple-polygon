@@ -3,6 +3,8 @@ use std::collections::VecDeque;
 use crate::geo::{Point, Polygon};
 use crate::tri::{Algorithm, Triangulation};
 
+mod stepping;
+
 fn find_shortest_path_in_sleeve(
     poly: &Polygon,
     start: Point,
@@ -21,7 +23,7 @@ fn find_shortest_path_in_sleeve(
     let mut cusp_idx = n;
     let (mut prev_u, mut prev_v) = diagonals[0]; // the previous diagonal.
     let mut chain_l = VecDeque::from(vec![cusp_idx]); // the left inward-convex chain.
-    let mut chain_r = VecDeque::from(vec![cusp_idx]); // tbe right inward-convex chain.
+    let mut chain_r = VecDeque::from(vec![cusp_idx]); // the right inward-convex chain.
     if points[prev_u] != start {
         chain_l.push_back(prev_u);
     }
@@ -71,7 +73,7 @@ fn find_shortest_path_in_sleeve(
     }
 
     // deal with the end point.
-    let (cl, cr) = (&mut chain_l, &mut chain_r);
+    let (cl, cr) = (&chain_l, &chain_r);
     if cl.len() > 1 && cr.len() > 1 {
         let mut i = 0;
         while i < cl.len() - 1 && end.to_left(&points[cl[i]], &points[cl[i + 1]]) <= 0 {
@@ -110,3 +112,5 @@ pub fn find_shortest_path(
     }
     None
 }
+
+pub use stepping::find_shortest_path_stepping;

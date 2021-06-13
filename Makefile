@@ -7,6 +7,8 @@ ifeq ($(MODE), release)
 build_args += --release
 endif
 
+all: build_cli build_wasm
+
 env:
 	cargo install wasm-pack
 

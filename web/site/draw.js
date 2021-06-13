@@ -75,7 +75,7 @@ export class Draw {
             gGrid.call(grid, tx, ty);
         };
         let ondrag = (target, event) => {
-            if (this.drawing) return;
+            if (this.drawing || this.mode == "fixed") return;
             dragging = true;
             let itx = this.invertTransX();
             let ity = this.invertTransY();
@@ -128,6 +128,7 @@ export class Draw {
                     });
                     this.currentDrawPoints = [];
                     this.drawing = false;
+                    this.mode = "move";
                 } else {
                     this.currentDrawPoints.push(point);
                     this.removeShape("polygon-drawing");
@@ -138,7 +139,7 @@ export class Draw {
                 }
             } else if (this.mode == "draw-points") {
                 this.currentDrawPoints.push(point);
-                this.drawPoints([point]);
+                this.drawPoint(point, { fixed: false }, "endpoint");
                 if (this.currentDrawPoints.length == 2) {
                     this.currentEndpoints = this.currentDrawPoints;
                     this.onEndpointsDrawnCallback(this.currentEndpoints);
@@ -173,9 +174,7 @@ export class Draw {
             .on("zoom", zoomed)
             .on("end", () => svg.attr("cursor", "default"))
             .filter(event => {
-                if (this.mode == "move") return true;
-                else if (this.mode == "draw-polygon" && this.currentPolygon.length) return true;
-                else if (this.mode == "draw-points" && this.currentEndpoints.length) return true;
+                if (this.mode == "move" || this.mode == "fixed") return true;
                 else return event.type != "mouseup" && event.type != "mousedown";
             });
 
@@ -229,8 +228,14 @@ export class Draw {
         this.currentEndpoints = [];
     }
 
+    clearAlgorithmResult() {
+        this.removeShape("stepping");
+        this.removeShape("tri-lines");
+        this.removeShape("path-lines");
+    }
+
     setMode(mode) {
-        if (["move", "draw-polygon", "draw-points"].includes(mode)) {
+        if (["move", "draw-polygon", "draw-points", "fixed"].includes(mode)) {
             this.mode = mode;
         }
     }
@@ -355,39 +360,69 @@ export class Draw {
         }
     }
 
-    drawLines(lines, lineColor = "#FDBC07", className = "lines") {
-        this.removeShape(className);
-        let parent = this.canvas.select(".polygon");
-        let before = !parent.selectChild(".path-lines").empty() ? ".path-lines" : "circle";
-        let g = parent.insert("g", before).attr("opacity", 1).attr("class", className);
-        g.selectAll("line")
-            .data(lines)
-            .join("line")
-            .attr("x1", d => d[0][0])
-            .attr("y1", d => d[0][1])
-            .attr("x2", d => d[1][0])
-            .attr("y2", d => d[1][1])
-            .attr("stroke", lineColor)
-            .attr("stroke-width", 1);
-        this.applyTransform();
-    }
-
-    drawPoints(points, config, className = "endpoint") {
+    drawPath(points, config, className = "") {
         const defaultConfig = {
-            color: ENDPOINT_COLOR,
-            size: 5,
-            fixed: false,
+            color: "#000",
+            dashed: false,
+            width: 1,
         };
         let c = {
             ...defaultConfig,
             ...config,
         };
+        let parent = this.canvas.select(".polygon");
+        let g = parent.insert("g", "circle").attr("opacity", 1).attr("class", className);
+        let path = g
+            .append("polyline")
+            .data([points])
+            .style("fill", "none")
+            .attr("stroke", c.color)
+            .attr("stroke-width", c.width);
+        if (c.dashed) {
+            path.style("stroke-dasharray", "5 5");
+        }
+        this.applyTransform();
+    }
 
+    drawLines(lines, config, className = "") {
+        const defaultConfig = {
+            color: "#000",
+            dashed: false,
+            width: 1,
+        };
+        let c = {
+            ...defaultConfig,
+            ...config,
+        };
+        let parent = this.canvas.select(".polygon");
+        let before = !parent.selectChild(".path-lines").empty() ? ".path-lines" : "circle";
+        let g = parent.insert("g", before).attr("opacity", 1).attr("class", className);
+        let l = g
+            .selectAll("line")
+            .data(lines)
+            .join("line")
+            .attr("stroke", c.color)
+            .attr("stroke-width", c.width);
+        if (c.dashed) {
+            l.style("stroke-dasharray", "5 5");
+        }
+        this.applyTransform();
+    }
+
+    drawPoint(point, config, className = "") {
+        const defaultConfig = {
+            color: ENDPOINT_COLOR,
+            size: 5,
+            fixed: true,
+        };
+        let c = {
+            ...defaultConfig,
+            ...config,
+        };
         let g = this.canvas.append("g").attr("class", className);
         let circle = g
-            .selectAll("circle")
-            .data(points)
-            .join("circle")
+            .append("circle")
+            .data([point])
             .attr("r", c.size)
             .attr("fill", c.color)
             .attr("stroke", "#000");

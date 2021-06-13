@@ -1,22 +1,35 @@
 import * as SP from "simple-polygon-wasm";
 import $ from "jquery";
 import { Draw } from "./draw.js";
+import * as stepping from "./stepping.js";
 
 const DIAGONAL_COLOR = "#9c3829";
 const PATH_COLOR = "#2c507b";
 
-var draw = new Draw();
-draw.onPolygonDrawn(points => {
+export var draw = new Draw();
+draw.onPolygonDrawn(() => {
     $("#tri-btn").removeClass("disabled");
     $("#path-btn").removeClass("disabled");
     $("#export-btn").removeClass("disabled");
+    $("#step-tri-btn").removeClass("disabled");
 });
 draw.onPolygonDestroyed(() => {
     $("#tri-btn").addClass("disabled");
     $("#path-btn").addClass("disabled");
     $("#export-btn").addClass("disabled");
+    $("#step-tri-btn").addClass("disabled");
+    $("#step-path-btn").addClass("disabled");
 });
-draw.onEndpointsDrawn(points => showShortestPath(points[0], points[1]));
+draw.onEndpointsDrawn(points => {
+    showShortestPath(points[0], points[1]);
+    $("#step-path-btn").removeClass("disabled");
+});
+
+export function showError(message) {
+    let alert = $("#alert");
+    alert.text(message);
+    alert.slideDown("slow", () => setTimeout(() => alert.slideUp("slow"), 1000));
+}
 
 function randomColor() {
     let r, g, b;
@@ -104,12 +117,6 @@ function exportPolygon() {
     link.click();
 }
 
-function showError(message) {
-    let alert = $("#alert");
-    alert.text(message);
-    alert.slideDown("slow", () => setTimeout(() => alert.slideUp("slow"), 1000));
-}
-
 function showTriangulation() {
     let points = draw.getCurrentPolygon();
     if (!SP.is_simple_polygon(points)) {
@@ -121,7 +128,7 @@ function showTriangulation() {
     }
     let diagonals = SP.triangulation(points, "mono_partition");
     let lines = diagonals.map(d => [points[d[0]], points[d[1]]]);
-    draw.drawLines(lines, DIAGONAL_COLOR, "tri-lines");
+    draw.drawLines(lines, { color: DIAGONAL_COLOR }, "tri-lines");
 }
 
 function showShortestPath(start, end) {
@@ -144,12 +151,7 @@ function showShortestPath(start, end) {
         pathIdx.map(idx => points[idx]),
         [end],
     );
-
-    let lines = [];
-    for (let i = 0; i < path.length - 1; i++) {
-        lines.push([path[i], path[i + 1]]);
-    }
-    draw.drawLines(lines, PATH_COLOR, "path-lines");
+    draw.drawPath(path, { color: PATH_COLOR }, "path-lines");
 }
 
 $(() => {
@@ -190,8 +192,8 @@ $(() => {
         let pathClassname = "path-lines";
         if (draw.hasShape(pathClassname)) {
             draw.toggleShape(pathClassname);
-        } else if (draw.currentEndpoints.length) {
-            showShortestPath(draw.currentEndpoints[0], draw.currentEndpoints[1]);
+        } else if (draw.getCurrentEndpoints().length) {
+            showShortestPath(draw.getCurrentEndpoints()[0], draw.getCurrentEndpoints()[1]);
         } else {
             let points = draw.getCurrentPolygon();
             if (!SP.is_simple_polygon(points)) {
@@ -201,6 +203,7 @@ $(() => {
             }
         }
     });
+
     $("#load-btn").on("click", () => document.getElementById("file-opt").click());
     $("#export-btn").on("click", exportPolygon);
     $("#file-opt").on("change", loadPolygon);
@@ -232,4 +235,6 @@ $(() => {
     $("#gen-btn").on("click", () => {
         randomPolygon($("#pick-size").val(), $("#algo-btn").val());
     });
+
+    stepping.init();
 });

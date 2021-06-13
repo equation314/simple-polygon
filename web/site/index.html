@@ -47,7 +47,7 @@
       <div class="d-flex align-items-center" style="height: 3rem">
         <div class="m-1">
           <div class="dropdown">
-            <button class="btn btn-outline-secondary btn-action dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" id="polygon-btn" value="random">Random</button>
+            <button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" id="polygon-btn" value="random">Random</button>
             <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="polygon-btn">
               <li><button class="dropdown-item switch-mode" id="random-btn" value="random">Random</button></li>
               <li><button class="dropdown-item switch-mode" id="draw-btn" value="draw">Draw</button></li>
@@ -69,6 +69,18 @@
         <div class="m-1">
           <button class="btn btn-outline-secondary disabled" id="path-btn">Path</button>
         </div>
+        <div id="step-btn-div" class="m-1">
+          <div class="dropdown">
+            <button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" id="step-btn">Step</button>
+            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="step-btn">
+              <li><button class="dropdown-item disabled" id="step-tri-btn" value="tri">Triangulation</button></li>
+              <li><button class="dropdown-item disabled" id="step-path-btn" value="path">Shortest Path</button></li>
+            </ul>
+          </div>
+        </div>
+        <div id="stop-btn-div" class="m-1" style="display: none">
+          <button class="btn btn-outline-secondary" id="stop-btn">Stop</button>
+        </div>
       </div>
 
       <div class="d-flex">
@@ -76,7 +88,7 @@
           <div class="d-flex">
             <div class="m-1">
               <div style="width: 6rem">
-                <input type="number" class="form-control bg-dark btn-outline-secondary text-secondary" id="pick-size" placeholder="Vertices" min="3" max="1000" value="5" title="Number of polygon vertices">
+                <input type="number" class="form-control bg-dark btn-outline-secondary text-secondary" id="pick-size" placeholder="Vertices" min="3" max="1000" value="10" title="Number of polygon vertices">
               </div>
             </div>
             <div class="m-1">
@@ -102,6 +114,26 @@
 
         <div id="clear-opts" class="m-1" style="display: none">
           <button class="btn btn-outline-secondary" id="clear-btn">Clear</button>
+        </div>
+
+        <div id="step-opts" style="display: none">
+          <div class="d-flex">
+            <div class="m-1">
+              <button class="btn btn-outline-secondary" id="step-play-btn">Play</button>
+            </div>
+            <div class="m-1">
+              <button class="btn btn-outline-secondary" id="step-first-btn">First</button>
+            </div>
+            <div class="m-1">
+              <button class="btn btn-outline-secondary" id="step-prev-btn">Prev</button>
+            </div>
+            <div class="m-1">
+              <button class="btn btn-outline-secondary" id="step-next-btn">Next</button>
+            </div>
+            <div class="m-1">
+              <button class="btn btn-outline-secondary" id="step-last-btn">Last</button>
+            </div>
+          </div>
         </div>
       </div>
 

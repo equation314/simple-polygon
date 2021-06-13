@@ -65,6 +65,7 @@ pub fn find_shortest_path(
     start: &JsValue,
     end: &JsValue,
     algo_str: Option<String>,
+    stepping: Option<bool>,
 ) -> JsValue {
     let points: Vec<[f64; 2]> = points.into_serde().unwrap();
     let start: [f64; 2] = start.into_serde().unwrap();
@@ -76,8 +77,14 @@ pub fn find_shortest_path(
         .as_str()
         .try_into()
     {
-        let path = sp::shortest::find_shortest_path(&poly, start.into(), end.into(), algo);
-        JsValue::from_serde(&path).unwrap()
+        if stepping.unwrap_or(false) {
+            let res =
+                sp::shortest::find_shortest_path_stepping(&poly, start.into(), end.into(), algo);
+            JsValue::from_serde(&res).unwrap()
+        } else {
+            let path = sp::shortest::find_shortest_path(&poly, start.into(), end.into(), algo);
+            JsValue::from_serde(&path).unwrap()
+        }
     } else {
         JsValue::null()
     }
