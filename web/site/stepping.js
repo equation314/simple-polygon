@@ -13,6 +13,7 @@ var gSteppingAlgorithm = "shortest";
 var gSteppingResult = null;
 var gCurrentStep = 0;
 var gMaxStep = 0;
+var gIsPlaying = false;
 
 function showOneStep(step) {
     if (gSteppingAlgorithm == "path") {
@@ -100,6 +101,7 @@ export function init() {
             }
         });
     $("#stop-btn").on("click", () => {
+        gIsPlaying = false;
         $("#polygon-btn").removeClass("disabled");
         $("#tri-btn").removeClass("disabled");
         $("#path-btn").removeClass("disabled");
@@ -153,5 +155,25 @@ export function init() {
         }
         $("#step-prev-btn").removeClass("disabled");
         showOneStep(gCurrentStep);
+    });
+
+    let play = () => {
+        if (gIsPlaying && gCurrentStep < gMaxStep) {
+            $("#step-next-btn").trigger("click");
+            setTimeout(play, 100);
+        } else {
+            gIsPlaying = false;
+            $("#step-play-btn").text("Play");
+        }
+    };
+    $("#step-play-btn").on("click", () => {
+        if (!gIsPlaying) {
+            gIsPlaying = true;
+            $("#step-play-btn").text("Pause");
+            play();
+        } else {
+            gIsPlaying = false;
+            $("#step-play-btn").text("Play");
+        }
     });
 }
