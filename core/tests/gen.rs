@@ -8,16 +8,20 @@ const TEST_TIMES: usize = 10;
 
 fn get_random_n_and_range(max_n: usize, rng: &mut impl Rng) -> (usize, usize) {
     let n = rng.gen_range(3, max_n + 1);
-    let range = *[10, 100, 1_000, 10_000, 100_000, 1_000_000]
-        .choose(rng)
-        .unwrap();
-    (n, range)
+    loop {
+        let range = *[10, 100, 1_000, 10_000, 100_000, 1_000_000]
+            .choose(rng)
+            .unwrap();
+        if range * range >= n {
+            return (n, range);
+        }
+    }
 }
 
-fn test_gen_polygon(algo: Algorithm) {
+fn test_gen_polygon(algo: Algorithm, max_n: usize) {
     let mut rng = rand::thread_rng();
     for _ in 0..TEST_TIMES {
-        let (n, range) = get_random_n_and_range(16, &mut rng);
+        let (n, range) = get_random_n_and_range(max_n, &mut rng);
         let poly = gen::gen_polygon(n, range, algo);
         assert!(poly.is_ccw());
         let is_simple = poly.is_simple();
@@ -54,10 +58,10 @@ fn gen_all_polygon() {
 
 #[test]
 fn gen_polygon_2opt() {
-    test_gen_polygon(Algorithm::TwoOptMoves);
+    test_gen_polygon(Algorithm::TwoOptMoves, 3000);
 }
 
 #[test]
 fn gen_polygon_permute() {
-    test_gen_polygon(Algorithm::PermuteReject);
+    test_gen_polygon(Algorithm::PermuteReject, 16);
 }

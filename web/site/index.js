@@ -226,6 +226,9 @@ $(() => {
         .on("click", function (e) {
             let target = $(e.target);
             $("#algo-btn").val(target.val()).text(target.text());
+            if ($("#pick-size").val() > maxPolygonSize(target.val())) {
+                $("#pick-size").val(maxPolygonSize(target.val()));
+            }
         });
     $("#polygon-btn")
         .next()
