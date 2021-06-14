@@ -58,11 +58,7 @@ impl Intersections {
     }
 }
 
-pub fn generate(points: &[Point], rng: &mut impl Rng) -> Option<Vec<usize>> {
-    if Point::collinear(points) {
-        return None;
-    }
-
+pub fn generate(points: &[Point], rng: &mut impl Rng) -> Vec<usize> {
     // use a random permutation as the initial polygon.
     let n = points.len();
     let mut indices = (0..n).collect::<Vec<_>>();
@@ -94,7 +90,7 @@ pub fn generate(points: &[Point], rng: &mut impl Rng) -> Option<Vec<usize>> {
         times += 1;
 
         // pick an intersection randomly.
-        let (a, b) = ints.nth(rng.gen::<usize>() % ints.len()).unwrap();
+        let (a, b) = ints.nth(rng.gen_range(0, ints.len())).unwrap();
         ints.remove_related(a);
         ints.remove_related(b);
 
@@ -141,5 +137,5 @@ pub fn generate(points: &[Point], rng: &mut impl Rng) -> Option<Vec<usize>> {
         "2-opt Moves: got a simple polygon after {} moves for {} points!",
         times, n
     );
-    Some(indices)
+    indices
 }

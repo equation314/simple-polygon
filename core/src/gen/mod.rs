@@ -58,32 +58,26 @@ impl<R: Rng> RandomPolygonGenerator<R> {
         indices.rotate_left(indices.iter().position(|&i| i == 0).unwrap());
     }
 
-    pub fn generate_indices_from(
-        &mut self,
-        points: &[Point],
-        algo: Algorithm,
-    ) -> Option<Vec<usize>> {
+    pub fn generate_indices_from(&mut self, points: &[Point], algo: Algorithm) -> Vec<usize> {
         assert!(points.len() >= 3);
-        match algo {
+        let mut indices = match algo {
             Algorithm::PermuteReject => permute::generate(points, &mut self.rng),
             _ => two_opt::generate(points, &mut self.rng),
-        }
-        .map(|mut indices| {
-            Self::uniform_indices(&mut indices, points);
-            indices
-        })
+        };
+        Self::uniform_indices(&mut indices, points);
+        indices
     }
 
-    pub fn generate_from(&mut self, points: &[Point], algo: Algorithm) -> Option<Polygon> {
-        self.generate_indices_from(points, algo)
-            .map(|ref indices| Polygon::from_indices(points, indices))
+    pub fn generate_from(&mut self, points: &[Point], algo: Algorithm) -> Polygon {
+        let indices = self.generate_indices_from(points, algo);
+        Polygon::from_indices(points, &indices)
     }
 
     pub fn generate(&mut self, n: usize, range: usize, algo: Algorithm) -> Polygon {
         loop {
             let points = self.random_points(n, range);
-            if let Some(poly) = self.generate_from(&points, algo) {
-                return poly;
+            if !Point::collinear(&points) {
+                return self.generate_from(&points, algo);
             }
         }
     }
