@@ -168,7 +168,7 @@ export class Draw {
 
         this.zoom = d3
             .zoom()
-            .scaleExtent([0.2, 70])
+            .scaleExtent([0.1, 70])
             .on("start", event => {
                 if (event.sourceEvent && event.sourceEvent.type != "wheel")
                     svg.attr("cursor", "grab");
@@ -285,6 +285,17 @@ export class Draw {
         if (shapes == undefined || shapes.includes("polyline")) {
             this.canvas.selectAll("polyline").attr("points", d => d.map(p => [tx(p[0]), ty(p[1])]));
         }
+        if (shapes == undefined || shapes.includes("path")) {
+            this.canvas.selectAll("path").attr("d", d => {
+                let path = d3.path();
+                for (let [p0, p1] of d) {
+                    path.moveTo(tx(p0[0]), ty(p0[1]));
+                    path.lineTo(tx(p1[0]), ty(p1[1]));
+                }
+                path.closePath();
+                return path;
+            });
+        }
     }
 
     autoScale(points) {
@@ -298,7 +309,7 @@ export class Draw {
                 Math.abs(this.width / (this.xScale(maxX - minX + 1) - this.xScale(0))),
                 Math.abs(this.height / (this.yScale(maxY - minY + 1) - this.yScale(0))),
             ) * 0.8;
-        k = Math.min(Math.max(k, 0.2), 50);
+        k = Math.min(Math.max(k, 0.1), 70);
         let x = (this.width - (this.xScale(minX) + this.xScale(maxX)) * k) / 2;
         let y = (this.height - (this.yScale(maxY) + this.yScale(minY)) * k) / 2;
         this.currentTransform = d3.zoomIdentity.translate(x, y).scale(k);
@@ -418,16 +429,15 @@ export class Draw {
         let before = !parent.selectChild(".path-lines").empty() ? ".path-lines" : "circle";
         let g = parent.insert("g", before).attr("opacity", 1).attr("class", className);
         let l = g
-            .selectAll("line")
-            .data(lines)
-            .join("line")
+            .append("path")
+            .data([lines])
             .attr("class", className)
             .attr("stroke", c.color)
             .attr("stroke-width", c.width);
         if (c.dashed) {
             l.style("stroke-dasharray", "5 5");
         }
-        this.applyTransform(["line"]);
+        this.applyTransform(["path"]);
     }
 
     drawPoint(point, config, className = "") {

@@ -70,7 +70,7 @@ function maxPolygonSize(algo) {
     return {
         "2opt": 2000,
         growth: 2000,
-        space: 10000,
+        space: 50000,
         permute: 15,
     }[algo];
 }
@@ -87,7 +87,8 @@ function randomPolygon(n, algo) {
         );
         return;
     }
-    let points = SP.gen_polygon(n, 1000, algo);
+    let range = n <= 100 ? 100 : n <= 1000 ? 1000 : 10000;
+    let points = SP.gen_polygon(n, range, algo);
     draw.clearCanvas();
     draw.drawPolygon(points, { color: randomColor(), vertexSize: n > 200 ? 0 : 2 });
     draw.autoScale(points);
