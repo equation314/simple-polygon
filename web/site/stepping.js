@@ -1,6 +1,6 @@
 import * as SP from "simple-polygon-wasm";
 import $ from "jquery";
-import { draw, showError } from "./index.js";
+import { checkSimplePolygon, draw, showError } from "./index.js";
 
 const DIAGONAL_COLOR = "#ce6a5b";
 const BOUNDARY_COLOR = "#777";
@@ -51,13 +51,7 @@ function showOneStep(step) {
 
 function showSteppingResult(algo) {
     let points = draw.getCurrentPolygon();
-    if (!SP.is_simple_polygon(points)) {
-        showError("Not a simple polygon!");
-        return false;
-    }
-    if (!SP.is_ccw(points)) {
-        points.reverse();
-    }
+    checkSimplePolygon(points);
 
     gSteppingAlgorithm = algo;
     if (algo == "path") {

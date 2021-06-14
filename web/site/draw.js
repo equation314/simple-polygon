@@ -89,6 +89,7 @@ export class Draw {
                 let newPoints = parent.selectAll(".polygon > circle").data();
                 parent.select("polyline").data([newPoints.concat([newPoints[0]])]);
                 this.currentPolygon = newPoints;
+                this.onPolygonUpdatedCallback(newPoints);
             } else if (parent.classed("endpoint")) {
                 this.removeShape("path-lines");
                 let newPoints = this.canvas.selectAll(".endpoint > circle").data();
@@ -192,7 +193,7 @@ export class Draw {
         this.currentDrawPoints = [];
         this.currentPolygon = [];
         this.currentEndpoints = [];
-        this.polygonDrawnCallback = this.polygonDestroyedCallback = this.onEndpointsDrawnCallback = () => {};
+        this.polygonDrawnCallback = this.polygonDestroyedCallback = this.onPolygonUpdatedCallback = this.onEndpointsDrawnCallback = () => {};
 
         this.mode = "move";
         this.width = width;
@@ -212,6 +213,10 @@ export class Draw {
 
     onPolygonDestroyed(callback) {
         this.polygonDestroyedCallback = callback;
+    }
+
+    onPolygonUpdated(callback) {
+        this.onPolygonUpdatedCallback = callback;
     }
 
     onEndpointsDrawn(callback) {
