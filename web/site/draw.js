@@ -90,12 +90,13 @@ export class Draw {
                 parent.select("polyline").data([newPoints.concat([newPoints[0]])]);
                 this.currentPolygon = newPoints;
                 this.onPolygonUpdatedCallback(newPoints);
+                this.applyTransform(["circle", "polyline"]);
             } else if (parent.classed("endpoint")) {
                 this.removeShape("path-lines");
                 let newPoints = this.canvas.selectAll(".endpoint > circle").data();
                 this.currentEndpoints = newPoints;
+                this.applyTransform(["circle"]);
             }
-            this.applyTransform();
         };
         let onmouseup = event => {
             if (dragging) return;
@@ -162,7 +163,7 @@ export class Draw {
                 .data([[lastDrawPoint, point]])
                 .attr("stroke", POLY_EDGE_COLOR_CURRENT)
                 .attr("stroke-width", 1);
-            this.applyTransform();
+            this.applyTransform(["line"]);
         };
 
         this.zoom = d3
@@ -261,21 +262,29 @@ export class Draw {
         return this.currentTransform.rescaleY(this.yScale).invert;
     }
 
-    applyTransform() {
+    applyTransform(shapes) {
         let tx = this.transX();
         let ty = this.transY();
-        this.canvas
-            .selectAll("circle")
-            .attr("cx", d => tx(d[0]))
-            .attr("cy", d => ty(d[1]));
-        this.canvas
-            .selectAll("line")
-            .attr("x1", d => tx(d[0][0]))
-            .attr("y1", d => ty(d[0][1]))
-            .attr("x2", d => tx(d[1][0]))
-            .attr("y2", d => ty(d[1][1]));
-        this.canvas.selectAll("polygon").attr("points", d => d.map(p => [tx(p[0]), ty(p[1])]));
-        this.canvas.selectAll("polyline").attr("points", d => d.map(p => [tx(p[0]), ty(p[1])]));
+        if (shapes == undefined || shapes.includes("circle")) {
+            this.canvas
+                .selectAll("circle")
+                .attr("cx", d => tx(d[0]))
+                .attr("cy", d => ty(d[1]));
+        }
+        if (shapes == undefined || shapes.includes("line")) {
+            this.canvas
+                .selectAll("line")
+                .attr("x1", d => tx(d[0][0]))
+                .attr("y1", d => ty(d[0][1]))
+                .attr("x2", d => tx(d[1][0]))
+                .attr("y2", d => ty(d[1][1]));
+        }
+        if (shapes == undefined || shapes.includes("polygon")) {
+            this.canvas.selectAll("polygon").attr("points", d => d.map(p => [tx(p[0]), ty(p[1])]));
+        }
+        if (shapes == undefined || shapes.includes("polyline")) {
+            this.canvas.selectAll("polyline").attr("points", d => d.map(p => [tx(p[0]), ty(p[1])]));
+        }
     }
 
     autoScale(points) {
@@ -364,7 +373,7 @@ export class Draw {
             }
         }
 
-        this.applyTransform();
+        this.applyTransform(["polyline", "circle"]);
         if (c.close) {
             this.polygonDrawnCallback(points);
         }
@@ -392,7 +401,7 @@ export class Draw {
         if (c.dashed) {
             path.style("stroke-dasharray", "5 5");
         }
-        this.applyTransform();
+        this.applyTransform(["polyline"]);
     }
 
     drawLines(lines, config, className = "") {
@@ -418,7 +427,7 @@ export class Draw {
         if (c.dashed) {
             l.style("stroke-dasharray", "5 5");
         }
-        this.applyTransform();
+        this.applyTransform(["line"]);
     }
 
     drawPoint(point, config, className = "") {
@@ -442,7 +451,7 @@ export class Draw {
         if (!c.fixed) {
             circle.style("cursor", "move").call(this.pointDragger);
         }
-        this.applyTransform();
+        this.applyTransform(["circle"]);
     }
 
     getCurrentPolygon() {
