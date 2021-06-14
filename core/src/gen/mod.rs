@@ -6,6 +6,7 @@ use crate::geo::{Point, Polygon};
 
 mod backtracking;
 mod permute;
+mod space;
 mod two_opt;
 
 #[derive(Debug, Clone, Copy)]
@@ -62,6 +63,7 @@ impl<R: Rng> RandomPolygonGenerator<R> {
         assert!(points.len() >= 3);
         let mut indices = match algo {
             Algorithm::PermuteReject => permute::generate(points, &mut self.rng),
+            Algorithm::SpacePartitioning => space::generate(points, &mut self.rng),
             _ => two_opt::generate(points, &mut self.rng),
         };
         Self::uniform_indices(&mut indices, points);
@@ -76,7 +78,7 @@ impl<R: Rng> RandomPolygonGenerator<R> {
     pub fn generate(&mut self, n: usize, range: usize, algo: Algorithm) -> Polygon {
         loop {
             let points = self.random_points(n, range);
-            if !Point::collinear(&points) {
+            if !Point::collinear_many(&points) {
                 return self.generate_from(&points, algo);
             }
         }
@@ -84,39 +86,16 @@ impl<R: Rng> RandomPolygonGenerator<R> {
 }
 
 pub fn gen_all_polygon_from(points: &[Point]) -> Vec<Vec<usize>> {
-    assert!(points.len() >= 2);
+    assert!(points.len() >= 3);
     backtracking::generate_all(points)
+}
+
+pub fn gen_polygon_from(points: &[Point], algo: Algorithm) -> Polygon {
+    let rng = rand::thread_rng();
+    RandomPolygonGenerator::new(rng).generate_from(points, algo)
 }
 
 pub fn gen_polygon(n: usize, range: usize, algo: Algorithm) -> Polygon {
     let rng = rand::thread_rng();
     RandomPolygonGenerator::new(rng).generate(n, range, algo)
-}
-
-#[cfg(test)]
-mod test {
-    use super::*;
-
-    fn grid_points(n: usize, m: usize) -> Vec<Point> {
-        let mut points: Vec<Point> = Vec::new();
-        for i in 0..n {
-            for j in 0..m {
-                points.push(Point::new(i as _, j as _));
-            }
-        }
-        points
-    }
-
-    #[test]
-    fn test_generate_all() {
-        assert_eq!(gen_all_polygon_from(&grid_points(1, 20)).len(), 0);
-        assert_eq!(gen_all_polygon_from(&grid_points(2, 2)).len(), 1);
-        assert_eq!(gen_all_polygon_from(&grid_points(2, 3)).len(), 1);
-        assert_eq!(gen_all_polygon_from(&grid_points(8, 2)).len(), 1);
-        assert_eq!(gen_all_polygon_from(&grid_points(3, 3)).len(), 8);
-        assert_eq!(gen_all_polygon_from(&grid_points(3, 4)).len(), 62);
-        assert_eq!(gen_all_polygon_from(&grid_points(5, 3)).len(), 532);
-        assert_eq!(gen_all_polygon_from(&grid_points(4, 4)).len(), 1930);
-        // assert_eq!(gen_all_polygon_from(&grid_points(3, 6)).len(), 4846);
-    }
 }

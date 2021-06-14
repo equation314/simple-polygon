@@ -8,7 +8,7 @@ const PATH_COLOR = "#2c507b";
 
 const SMALL_POLYGON_SIZE = 1000;
 
-var gPolygonIsChecked = undefined;
+var gPolygonIsSimple = undefined;
 
 export var draw = new Draw();
 draw.onPolygonDrawn(() => {
@@ -18,14 +18,14 @@ draw.onPolygonDrawn(() => {
     $("#step-tri-btn").prop("disabled", false);
 });
 draw.onPolygonDestroyed(() => {
-    gPolygonIsChecked = undefined;
+    gPolygonIsSimple = undefined;
     $("#tri-btn").prop("disabled", true);
     $("#path-btn").prop("disabled", true);
     $("#export-btn").prop("disabled", true);
     $("#step-tri-btn").prop("disabled", true);
     $("#step-path-btn").prop("disabled", true);
 });
-draw.onPolygonUpdated(() => (gPolygonIsChecked = undefined));
+draw.onPolygonUpdated(() => (gPolygonIsSimple = undefined));
 draw.onEndpointsDrawn(points => {
     showShortestPath(points[0], points[1]);
     $("#step-path-btn").prop("disabled", false);
@@ -38,15 +38,17 @@ export function showError(message) {
 }
 
 export function checkSimplePolygon(points) {
-    if (gPolygonIsChecked === undefined && !SP.is_simple_polygon(points)) {
+    if (gPolygonIsSimple === undefined) {
+        gPolygonIsSimple = points.length > SMALL_POLYGON_SIZE || SP.is_simple_polygon(points);
+    }
+    if (gPolygonIsSimple === false) {
         showError("Not a simple polygon!");
-        gPolygonIsChecked = false;
         return false;
     }
     if (!SP.is_ccw(points)) {
         points.reverse();
     }
-    gPolygonIsChecked = true;
+    return true;
 }
 
 function randomColor() {
@@ -139,7 +141,9 @@ function exportPolygon() {
 
 function showTriangulation() {
     let points = draw.getCurrentPolygon();
-    checkSimplePolygon(points);
+    if (!checkSimplePolygon(points)) {
+        return;
+    }
     let diagonals = SP.triangulation(points, "mono_partition");
     let lines = diagonals.map(d => [points[d[0]], points[d[1]]]);
     draw.drawLines(lines, { color: DIAGONAL_COLOR }, "tri-lines");
@@ -147,7 +151,9 @@ function showTriangulation() {
 
 function showShortestPath(start, end) {
     let points = draw.getCurrentPolygon();
-    checkSimplePolygon(points);
+    if (!checkSimplePolygon(points)) {
+        return;
+    }
 
     let pathIdx = SP.find_shortest_path(points, start, end, "mono_partition");
     if (pathIdx == null) {

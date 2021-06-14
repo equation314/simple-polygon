@@ -96,8 +96,13 @@ impl Point {
         bcd.abs() < Self::EPS && cb.dot(&(*d - *b)) > Self::EPS // CD contains B
     }
 
+    /// Whether the given 3 points are collinear.
+    pub fn collinear(a: &Self, b: &Self, c: &Self) -> bool {
+        ((*b - *a) * (*c - *a)).abs() < Self::EPS
+    }
+
     /// Whether the given points are collinear.
-    pub fn collinear(points: &[Self]) -> bool {
+    pub fn collinear_many(points: &[Self]) -> bool {
         let n = points.len();
         if n <= 2 {
             return false;

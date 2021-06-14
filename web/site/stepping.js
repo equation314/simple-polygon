@@ -51,7 +51,9 @@ function showOneStep(step) {
 
 function showSteppingResult(algo) {
     let points = draw.getCurrentPolygon();
-    checkSimplePolygon(points);
+    if (!checkSimplePolygon(points)) {
+        return;
+    }
 
     gSteppingAlgorithm = algo;
     if (algo == "path") {

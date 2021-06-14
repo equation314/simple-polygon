@@ -21,12 +21,12 @@ fn main() {
                 )
                 .arg(
                     Arg::with_name("range")
-                        .value_name("RANGE")
+                        .value_name("R")
                         .long("range")
                         .short("r")
                         .takes_value(true)
-                        .default_value("100")
-                        .help("The coordinate range of the generated polygon"),
+                        .default_value("1000")
+                        .help("The coordinate range [0, R) of the generated polygon"),
                 )
                 .arg(
                     Arg::with_name("algorithm")
