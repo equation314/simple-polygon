@@ -6,6 +6,7 @@ use crate::geo::{Point, Polygon};
 
 mod backtracking;
 mod permute;
+mod two_opt;
 
 #[derive(Debug, Clone, Copy)]
 pub enum Algorithm {
@@ -64,7 +65,8 @@ impl<R: Rng> RandomPolygonGenerator<R> {
     ) -> Option<Vec<usize>> {
         assert!(points.len() >= 3);
         match algo {
-            _ => permute::generate(points, &mut self.rng),
+            Algorithm::PermuteReject => permute::generate(points, &mut self.rng),
+            _ => two_opt::generate(points, &mut self.rng),
         }
         .map(|mut indices| {
             Self::uniform_indices(&mut indices, points);

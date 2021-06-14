@@ -48,9 +48,9 @@ function pickedColor() {
 
 function maxPolygonSize(algo) {
     return {
-        growth: 1000,
-        space: 1000,
-        "2opt": 200,
+        "2opt": 2000,
+        growth: 2000,
+        space: 10000,
         permute: 15,
     }[algo];
 }
@@ -67,10 +67,9 @@ function randomPolygon(n, algo) {
         );
         return;
     }
-    let points = SP.gen_polygon(n, 100, algo);
-    console.log(n, algo, points);
+    let points = SP.gen_polygon(n, 1000, algo);
     draw.clearCanvas();
-    draw.drawPolygon(points, { color: randomColor(), vertexSize: 3 });
+    draw.drawPolygon(points, { color: randomColor(), vertexSize: n > 200 ? 0 : 2 });
     draw.autoScale(points);
 }
 
@@ -98,7 +97,10 @@ function loadPolygon() {
             }
         }
         draw.clearCanvas();
-        draw.drawPolygon(points, { color: pickedColor("#pick-color"), vertexSize: 3 });
+        draw.drawPolygon(points, {
+            color: pickedColor("#pick-color"),
+            vertexSize: points.length > 200 ? 0 : 2,
+        });
         draw.autoScale(points);
     };
     input.value = null;
@@ -183,7 +185,11 @@ $(() => {
     $("#tri-btn").on("click", () => {
         let triClassname = "tri-lines";
         if (draw.hasShape(triClassname)) {
-            draw.toggleShape(triClassname);
+            if (draw.getCurrentPolygon().length > 1000) {
+                draw.removeShape("tri-lines");
+            } else {
+                draw.toggleShape(triClassname);
+            }
         } else {
             showTriangulation();
         }
@@ -226,7 +232,7 @@ $(() => {
         });
 
     $("#pick-color").on("change", () => {
-        draw.setShapeStyle("polygon-drawn", "polyline", "fill", pickedColor());
+        draw.setShapeStyle("polyline", "polygon-drawn", "fill", pickedColor());
     });
     $("#clear-btn").on("click", () => {
         draw.clearCanvas();

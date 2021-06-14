@@ -84,15 +84,15 @@ export class Draw {
 
             let parent = d3.select(target.parentNode);
             if (parent.classed("polygon")) {
+                this.removeShape("tri-lines");
+                this.removeShape("path-lines");
                 let newPoints = parent.selectAll(".polygon > circle").data();
                 parent.select("polyline").data([newPoints.concat([newPoints[0]])]);
                 this.currentPolygon = newPoints;
-                this.removeShape("tri-lines");
-                this.removeShape("path-lines");
             } else if (parent.classed("endpoint")) {
+                this.removeShape("path-lines");
                 let newPoints = this.canvas.selectAll(".endpoint > circle").data();
                 this.currentEndpoints = newPoints;
-                this.removeShape("path-lines");
             }
             this.applyTransform();
         };
@@ -166,7 +166,7 @@ export class Draw {
 
         this.zoom = d3
             .zoom()
-            .scaleExtent([0.2, 50])
+            .scaleExtent([0.2, 70])
             .on("start", event => {
                 if (event.sourceEvent && event.sourceEvent.type != "wheel")
                     svg.attr("cursor", "grab");
@@ -304,9 +304,8 @@ export class Draw {
         shape.attr("opacity", 1 - shape.attr("opacity"));
     }
 
-    setShapeStyle(className, shapeName, styleName, styleValue) {
-        console.log(this.canvas.selectAll(`g.${className}`).selectAll(shapeName));
-        this.canvas.selectAll(`g.${className}`).selectAll(shapeName).style(styleName, styleValue);
+    setShapeStyle(shapeName, className, styleName, styleValue) {
+        this.canvas.selectAll(`${shapeName}.${className}`).style(styleName, styleValue);
     }
 
     drawPolygon(points, config, className = "") {
@@ -323,35 +322,41 @@ export class Draw {
         };
 
         if (c.close) {
-            className += "polygon-drawn";
+            className += " polygon-drawn";
         } else {
-            className += "polygon-drawing";
+            className += " polygon-drawing";
         }
-        let g = this.canvas.append("g").attr("class", "polygon " + className);
+        className += " polygon";
+        let g = this.canvas.append("g").attr("class", className);
         if (c.close) {
             g.append("polyline")
                 .data([points.concat([points[0]])])
+                .attr("class", className)
                 .style("fill", c.color)
                 .attr("stroke", POLY_EDGE_COLOR);
             this.currentPolygon = points;
         } else {
             g.append("polyline")
                 .data([points])
+                .attr("class", className)
                 .style("fill", "none")
                 .attr("stroke", POLY_EDGE_COLOR_DRAWING);
         }
 
-        let circles = g
-            .selectAll("circle")
-            .data(points)
-            .join("circle")
-            .attr("r", c.vertexSize)
-            .attr("fill", c.vertexColor)
-            .attr("stroke", "#000");
-        if (c.close && !c.fixed) {
-            circles.style("cursor", "move").call(this.pointDragger);
-        } else if (!c.close) {
-            circles.attr("is-handle", true).style("cursor", "pointer");
+        if (c.vertexSize > 0) {
+            let circles = g
+                .selectAll("circle")
+                .data(points)
+                .join("circle")
+                .attr("class", className)
+                .attr("r", c.vertexSize)
+                .attr("fill", c.vertexColor)
+                .attr("stroke", "#000");
+            if (c.close && !c.fixed) {
+                circles.style("cursor", "move").call(this.pointDragger);
+            } else if (!c.close) {
+                circles.attr("is-handle", true).style("cursor", "pointer");
+            }
         }
 
         this.applyTransform();
@@ -376,6 +381,7 @@ export class Draw {
             .append("polyline")
             .data([points])
             .style("fill", "none")
+            .attr("class", className)
             .attr("stroke", c.color)
             .attr("stroke-width", c.width);
         if (c.dashed) {
@@ -401,6 +407,7 @@ export class Draw {
             .selectAll("line")
             .data(lines)
             .join("line")
+            .attr("class", className)
             .attr("stroke", c.color)
             .attr("stroke-width", c.width);
         if (c.dashed) {
@@ -423,6 +430,7 @@ export class Draw {
         let circle = g
             .append("circle")
             .data([point])
+            .attr("class", className)
             .attr("r", c.size)
             .attr("fill", c.color)
             .attr("stroke", "#000");

@@ -34,7 +34,6 @@ impl Polygon {
     }
 
     /// Whether the polygon is a simple polygon.
-    #[allow(clippy::many_single_char_names)]
     pub fn is_simple(&self) -> bool {
         let n = self.size();
         if n <= 2 {

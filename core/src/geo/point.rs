@@ -95,6 +95,22 @@ impl Point {
         abd.abs() < Self::EPS && ad.dot(&(*b - *d)) > Self::EPS || // AB contains D
         bcd.abs() < Self::EPS && cb.dot(&(*d - *b)) > Self::EPS // CD contains B
     }
+
+    /// Whether the given points are collinear.
+    pub fn collinear(points: &[Self]) -> bool {
+        let n = points.len();
+        if n <= 2 {
+            return false;
+        }
+
+        let base = points[1] - points[0];
+        for i in 2..n {
+            if (base * (points[i] - points[0])).abs() > Self::EPS {
+                return false;
+            }
+        }
+        true
+    }
 }
 
 impl PartialEq for Point {

@@ -53,6 +53,11 @@ fn gen_all_polygon() {
 }
 
 #[test]
+fn gen_polygon_2opt() {
+    test_gen_polygon(Algorithm::TwoOptMoves);
+}
+
+#[test]
 fn gen_polygon_permute() {
     test_gen_polygon(Algorithm::PermuteReject);
 }
