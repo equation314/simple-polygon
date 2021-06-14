@@ -174,6 +174,9 @@ int p_isSimplePolygon(tom_polygon *poly, tom_points *points)
         for (int j = i + 1; j < nOfPolyPoints && isSPG; j++)
         {
             idx2 = j;
+            // cout <<"line1: "<< p_getPIndexOfPoly(poly,idx1) <<" "<< p_getPIndexOfPoly(poly, idx1 +1) <<" line2: "<< p_getPIndexOfPoly(poly,idx2) <<" "<< p_getPIndexOfPoly(poly,(idx2 + 1) % nOfPolyPoints) << endl;
+            // cout <<"intersect condition: ";
+            // cout << p_isIntersectSegments(points, p_getPIndexOfPoly(poly, idx1), p_getPIndexOfPoly(poly, idx1 + 1), p_getPIndexOfPoly(poly, idx2), p_getPIndexOfPoly(poly, (idx2 + 1) % nOfPolyPoints))<< endl;
             isSPG = (!p_isIntersectSegments(points, p_getPIndexOfPoly(poly, idx1), p_getPIndexOfPoly(poly, idx1 + 1), p_getPIndexOfPoly(poly, idx2), p_getPIndexOfPoly(poly, (idx2 + 1) % nOfPolyPoints)));
         }
     }
@@ -298,10 +301,16 @@ int p_isIntersectSegments(tom_points *points, int edge1s, int edge1e, int edge2s
     e2max = max(edge2e, edge2s);
 
     //Q: points的idx按照x轴/y轴维护过顺序？【否则下述不一定成立？】
-    if (e1max <= e2min) //挨着共线认为是不相交
+    if (e1max <= e2min){    //挨着共线认为是不相交
+        //cout<<"in type1"<<endl;
         return false;
-    if(e2max <= e1min)
+    } 
+        
+    if(e2max <= e1min){
+        //cout<<"in type2"<<endl;
         return false;
+    }
+        
 
     tom_point e1spoint, e1epoint, e2spoint, e2epoint;
     e1spoint = p_getPointOfArray(points, e1min);

@@ -38,13 +38,14 @@ tom_points tom_initPoint(vector<pair<double, double> > &pointVec){
     points.array = (tom_point *)calloc(sz, sizeof(tom_point));
     points.numOfPoints = sz;
     for(int i = 0; i < sz; i++){
+        //cout <<pointVec[i].first <<" "<< pointVec[i].second<<endl;
         points.array[i] = tom_point(pointVec[i].first, pointVec[i].second);
     }
     return points;
 }
 //@argv: polygon-> alloc self(not include inside); points-> alloc all and have value
 void tom_polyToFile(tom_polygon *polygon, tom_points *points, int numOfpolys, FILE *outFile){
-    randomSeed();   
+    //randomSeed();   
     int numOfPoints = p_NumOfPoints(points);
     //小于三个点的不处理
     //Q: 【甚至等于3个点的也可以不处理，因为只有一种类型的poly】
@@ -59,7 +60,10 @@ void tom_polyToFile(tom_polygon *polygon, tom_points *points, int numOfpolys, FI
 
             // do two opts moves [ less than O(n^3) operations ]
             tom_do2optMoves(polygon, points, numOfPoints);
-
+            // for(int i = 0; i <numOfPoints; i++){
+            //     cout<<polygon->array[i]<<endl;
+            // }
+            // cout << "============================================="<<endl;
             //check
             if(!p_isSimplePolygon(polygon, points)){
                 printf("WRONG ANS of RPG!");

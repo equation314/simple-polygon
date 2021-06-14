@@ -4,19 +4,21 @@ points = []
 px = []
 py = []
 plt.figure('Poly Out')
-with open("../in.txt") as inf:
+with open("../in_sorted.txt") as inf:
     line = inf.readline()
     while line:
         x, y = line.strip().split(' ')
-        points.append([int(x),int(y)])
-        px.append(int(x))
-        py.append(int(y))
+        points.append([float(x),float(y)])
+        px.append(float(x))
+        py.append(float(y))
         line = inf.readline()
     # print(points)
     plt.plot(px,py,'ro')
 
 sz = len(points)
-numOfPoly = 10
+with open("../in.txt") as numOfPolyf:
+    numOfPoly = int(numOfPolyf.readline())
+
 with open("../ans.txt") as ansf:
     for num in range(numOfPoly):
         line = ansf.readline()

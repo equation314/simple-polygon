@@ -1,6 +1,6 @@
 
 # RPG_2OptMoves Algorithm
-Generate random simply polygons based on 2-OptMoves Algorithm.
+Generate random simple polygons based on 2-OptMoves Algorithm.
 
 ```
 #    _______                ________                 _____ ______      
@@ -15,7 +15,22 @@ Generate random simply polygons based on 2-OptMoves Algorithm.
 #                                                                      
 ```
 
-### Compile
+## Usage
 
-`g++ g++ test_main.cpp 2-Opt-Move.cpp basicOperation.cpp -o a.out `
+Using 2-OptMoves Algorithm to generate random simple polygons with **random input data**:
+`./test_data.sh <anythings>`
 
+Using 2-OptMoves Algorithm to generate random simple polygons again with **old data**:
+`./test_data.sh`
+
+## Configure the value of random data：
+
+
+```python
+# in ./test_cases/random_data.py
+# you need to modify the following lines:
+maxnode = <the number of nodes you want>
+maxval = <the range of the coordinates >
+maxPoly = <the number of polygons you want to generate>
+
+```
