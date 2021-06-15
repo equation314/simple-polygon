@@ -1,6 +1,9 @@
 .PHONY: build clean
 
 MODE ?= release
+LOG ?= info
+
+export LOG
 
 build_args :=
 ifeq ($(MODE), release)

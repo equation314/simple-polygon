@@ -68,7 +68,7 @@ impl<'a> BacktrackingGenerator<'a> {
 pub fn generate_all(points: &[Point]) -> Vec<Vec<usize>> {
     let mut g = BacktrackingGenerator::new(points);
     g.generate_all();
-    println!(
+    info!(
         "Backtracking: got {} simple polygons for given {} points!",
         g.result.len(),
         points.len()

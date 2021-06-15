@@ -9,7 +9,7 @@ mod permute;
 mod space;
 mod two_opt;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum Algorithm {
     SteadyGrowth,
     SpacePartitioning,
@@ -30,12 +30,12 @@ impl<'a> TryFrom<&'a str> for Algorithm {
     }
 }
 
-pub struct RandomPolygonGenerator<R: Rng> {
-    rng: R,
+pub struct RandomPolygonGenerator<'a, R: Rng> {
+    rng: &'a mut R,
 }
 
-impl<R: Rng> RandomPolygonGenerator<R> {
-    pub fn new(rng: R) -> Self {
+impl<'a, R: Rng> RandomPolygonGenerator<'a, R> {
+    pub fn new(rng: &'a mut R) -> Self {
         Self { rng }
     }
 
@@ -91,11 +91,11 @@ pub fn gen_all_polygon_from(points: &[Point]) -> Vec<Vec<usize>> {
 }
 
 pub fn gen_polygon_from(points: &[Point], algo: Algorithm) -> Polygon {
-    let rng = rand::thread_rng();
-    RandomPolygonGenerator::new(rng).generate_from(points, algo)
+    let mut rng = rand::thread_rng();
+    RandomPolygonGenerator::new(&mut rng).generate_from(points, algo)
 }
 
 pub fn gen_polygon(n: usize, range: usize, algo: Algorithm) -> Polygon {
-    let rng = rand::thread_rng();
-    RandomPolygonGenerator::new(rng).generate(n, range, algo)
+    let mut rng = rand::thread_rng();
+    RandomPolygonGenerator::new(&mut rng).generate(n, range, algo)
 }

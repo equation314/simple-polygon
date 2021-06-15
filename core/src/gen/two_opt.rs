@@ -133,7 +133,7 @@ pub fn generate(points: &[Point], rng: &mut impl Rng) -> Vec<usize> {
         e = next_edge[e];
     }
 
-    println!(
+    info!(
         "2-opt Moves: got a simple polygon after {} moves for {} points!",
         times, n
     );

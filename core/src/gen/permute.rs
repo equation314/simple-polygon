@@ -13,7 +13,7 @@ pub fn generate(points: &[Point], rng: &mut impl Rng) -> Vec<usize> {
             poly.points[i] = points[j];
         }
         if poly.is_simple() {
-            println!(
+            info!(
                 "Permute & Reject: got a simple polygon after the {}-th attempt for {} points!",
                 times,
                 points.len(),

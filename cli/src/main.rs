@@ -3,7 +3,10 @@ use simple_polygon_core as sp;
 use sp::geo::{Point, Polygon};
 use std::convert::TryInto;
 
+mod logging;
+
 fn main() {
+    logging::init();
     let matches = App::new("Simple polygon generator and find the shortest paths")
         .setting(AppSettings::ArgRequiredElseHelp)
         .subcommand(

@@ -3,9 +3,11 @@ name = "simple-polygon-cli"
 version = "0.1.0"
 authors = ["equation314 <equation618@gmail.com>"]
 edition = "2018"
+default-run = "simple-polygon-cli"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 simple-polygon-core = { path = "../core" }
 clap = "2.33"
+log = "0.4"

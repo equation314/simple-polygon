@@ -38,46 +38,44 @@ fn get_random_grid_points(max_n: usize, rng: &mut impl Rng) -> (usize, usize, Ve
     }
 }
 
-fn test_gen_polygon(algo: Algorithm, max_n: usize) {
+fn check_simple_polygon(poly: &Polygon) {
+    assert!(poly.is_ccw());
+    let is_simple = poly.is_simple();
+    if !is_simple {
+        println!("Not a simple polygon!");
+        for p in &poly.points {
+            println!("{} {}", p.x, p.y);
+        }
+        assert!(is_simple);
+    }
+}
+
+fn test_gen_polygon(algo: Algorithm, max_n: usize, gen_times: usize) {
     let mut rng = rand::thread_rng();
     for _ in 0..TEST_TIMES {
         let (n, range) = get_random_n_and_range(max_n, &mut rng);
         println!(
-            "{:?}: test simple poylgon generation for {} random points ...",
-            algo, n
+            "{:?}: test simple poylgon generation for {} random points for {} times ...",
+            algo, n, gen_times
         );
-
-        let poly = gen::gen_polygon(n, range, algo);
-        assert!(poly.is_ccw());
-        let is_simple = poly.is_simple();
-        if !is_simple {
-            println!("Not a simple polygon!");
-            for p in poly.points {
-                println!("{} {}", p.x, p.y);
-            }
-            assert!(is_simple);
+        for _ in 0..gen_times {
+            let poly = gen::gen_polygon(n, range, algo);
+            check_simple_polygon(&poly);
         }
     }
 }
 
-fn test_gen_polygon_from_grid(algo: Algorithm, max_n: usize) {
+fn test_gen_polygon_from_grid(algo: Algorithm, max_n: usize, gen_times: usize) {
     let mut rng = rand::thread_rng();
     for _ in 0..TEST_TIMES {
         let (n, m, points) = get_random_grid_points(max_n, &mut rng);
         println!(
-            "{:?}: test simple poylgon generation for {}x{} grid ...",
-            algo, n, m
+            "{:?}: test simple poylgon generation for {}x{} grid for {} times ...",
+            algo, n, m, gen_times
         );
-
-        let poly = gen::gen_polygon_from(&points, algo);
-        assert!(poly.is_ccw());
-        let is_simple = poly.is_simple();
-        if !is_simple {
-            println!("Not a simple polygon!");
-            for p in poly.points {
-                println!("{} {}", p.x, p.y);
-            }
-            assert!(is_simple);
+        for _ in 0..gen_times {
+            let poly = gen::gen_polygon_from(&points, algo);
+            check_simple_polygon(&poly);
         }
     }
 }
@@ -87,18 +85,10 @@ fn gen_all_polygon() {
     let mut rng = rand::thread_rng();
     for _ in 0..TEST_TIMES {
         let (n, range) = get_random_n_and_range(14, &mut rng);
-        let points = RandomPolygonGenerator::new(rng).random_points(n, range);
+        let points = RandomPolygonGenerator::new(&mut rng).random_points(n, range);
         for indices in gen::gen_all_polygon_from(&points) {
             let poly = Polygon::from_indices(&points, &indices);
-            assert!(poly.is_ccw());
-            let is_simple = poly.is_simple();
-            if !is_simple {
-                println!("Not a simple polygon!");
-                for p in poly.points {
-                    println!("{} {}", p.x, p.y);
-                }
-                assert!(is_simple);
-            }
+            check_simple_polygon(&poly);
         }
     }
 }
@@ -118,17 +108,22 @@ fn test_generate_all_grid() {
 
 #[test]
 fn gen_polygon_2opt() {
-    test_gen_polygon(Algorithm::TwoOptMoves, 3000);
-    test_gen_polygon_from_grid(Algorithm::TwoOptMoves, 2000);
+    test_gen_polygon(Algorithm::TwoOptMoves, 2000, 2);
+    test_gen_polygon(Algorithm::TwoOptMoves, 300, 100);
+    test_gen_polygon_from_grid(Algorithm::TwoOptMoves, 1000, 2);
+    test_gen_polygon_from_grid(Algorithm::TwoOptMoves, 300, 50);
 }
 
 #[test]
 fn gen_polygon_space() {
-    test_gen_polygon(Algorithm::SpacePartitioning, 20000);
-    test_gen_polygon_from_grid(Algorithm::SpacePartitioning, 20000);
+    test_gen_polygon(Algorithm::SpacePartitioning, 10000, 3);
+    test_gen_polygon(Algorithm::SpacePartitioning, 2000, 100);
+    test_gen_polygon_from_grid(Algorithm::SpacePartitioning, 10000, 3);
+    test_gen_polygon_from_grid(Algorithm::SpacePartitioning, 2000, 100);
 }
 
 #[test]
 fn gen_polygon_permute() {
-    test_gen_polygon(Algorithm::PermuteReject, 16);
+    test_gen_polygon(Algorithm::PermuteReject, 16, 2);
+    test_gen_polygon(Algorithm::PermuteReject, 14, 100);
 }

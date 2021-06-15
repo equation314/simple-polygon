@@ -12,11 +12,9 @@ struct SpacePartitionGenerator<'a, R: Rng> {
 impl<'a, R: Rng> SpacePartitionGenerator<'a, R> {
     pub fn new(points: &'a [Point], rng: &'a mut R) -> Self {
         let n = points.len();
-        let mut idx = (0..n + 1).collect::<Vec<_>>();
-        idx[n] = 0;
         Self {
             n,
-            idx,
+            idx: (0..n).collect::<Vec<_>>(),
             points,
             rng,
         }
@@ -87,12 +85,20 @@ impl<'a, R: Rng> SpacePartitionGenerator<'a, R> {
 
     pub fn generate(&mut self) {
         let mut a;
+        let mut b;
         loop {
             // make sure no other points are collinear with the initial two points.
-            a = self.rng.gen_range(1, self.n);
+            a = self.rng.gen_range(0, self.n);
+            b = self.rng.gen_range(0, self.n);
+            if a >= b {
+                continue;
+            }
             let mut ok = true;
-            for i in 1..self.n {
-                if i != a && Point::collinear(&self.points[0], &self.points[a], &self.points[i]) {
+            for i in 0..self.n {
+                if i == a || i == b {
+                    continue;
+                }
+                if Point::collinear(&self.points[a], &self.points[b], &self.points[i]) {
                     ok = false;
                     break;
                 }
@@ -102,9 +108,13 @@ impl<'a, R: Rng> SpacePartitionGenerator<'a, R> {
             }
         }
 
-        let b = self.split_points(1, self.n - 1, a, (&self.points[0], &self.points[a]));
-        self.partition(0, b);
-        self.partition(b, self.n);
+        self.idx.swap(0, a);
+        self.idx.push(self.idx[0]);
+
+        let c = self.split_points(1, self.n - 1, b, (&self.points[a], &self.points[b]));
+        self.partition(0, c);
+        self.partition(c, self.n);
+
         self.idx.pop();
     }
 }
