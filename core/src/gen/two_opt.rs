@@ -1,19 +1,23 @@
 use rand::{prelude::SliceRandom, Rng};
-use std::collections::HashSet;
+use std::collections::{hash_map::DefaultHasher, HashSet};
+use std::hash::BuildHasherDefault;
 
 use crate::geo::Point;
+
+type RandomState = BuildHasherDefault<DefaultHasher>;
 
 #[derive(Debug)]
 struct Intersections {
     count: usize,
-    inner: Vec<HashSet<usize>>,
+    inner: Vec<HashSet<usize, RandomState>>,
 }
 
 impl Intersections {
     pub fn new(n: usize) -> Self {
+        let hasher = RandomState::default();
         Self {
             count: 0,
-            inner: vec![HashSet::new(); n],
+            inner: vec![HashSet::with_hasher(hasher); n],
         }
     }
 

@@ -56,6 +56,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "experiments"
+version = "0.1.0"
+dependencies = [
+ "rand",
+ "simple-polygon-core",
+]
+
+[[package]]
 name = "getrandom"
 version = "0.1.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
