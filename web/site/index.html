@@ -73,6 +73,7 @@
           <div class="dropdown">
             <button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" id="step-btn">Step</button>
             <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="step-btn">
+              <li><button class="dropdown-item" id="step-gen-btn" value="2opt" disabled>2-opt Moves</button></li>
               <li><button class="dropdown-item" id="step-tri-btn" value="tri" disabled>Triangulation</button></li>
               <li><button class="dropdown-item" id="step-path-btn" value="path" disabled>Shortest Path</button></li>
             </ul>
@@ -88,7 +89,7 @@
           <div class="d-flex">
             <div class="m-1">
               <div style="width: 6rem">
-                <input type="number" class="form-control bg-dark btn-outline-secondary text-secondary" id="pick-size" placeholder="Vertices" min="3" max="10000" value="100" title="Number of polygon vertices">
+                <input type="number" class="form-control bg-dark btn-outline-secondary text-secondary" id="pick-size" placeholder="Vertices" min="3" max="50000" value="100" title="Number of polygon vertices">
               </div>
             </div>
             <div class="m-1">
@@ -96,7 +97,7 @@
                 <button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" id="algo-btn" value="2opt">2-opt Moves</button>
                 <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="algo-btn">
                   <li><button class="dropdown-item" value="2opt">2-opt Moves</button></li>
-                  <li><button class="dropdown-item" value="growth">Steady Growth</button></li>
+                  <!-- <li><button class="dropdown-item" value="growth">Steady Growth</button></li> -->
                   <li><button class="dropdown-item" value="space">Space Partitioning</button></li>
                   <li><button class="dropdown-item" value="permute">Permute & Reject</button></li>
                 </ul>

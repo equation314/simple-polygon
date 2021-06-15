@@ -6,25 +6,33 @@ import * as stepping from "./stepping.js";
 const DIAGONAL_COLOR = "#9c3829";
 const PATH_COLOR = "#2c507b";
 
-const SMALL_POLYGON_SIZE = 1000;
+const SMALL_POLYGON_SIZE = 2000;
+
+const ALLOWED_STEP_ALGOS = ["2opt", "space"];
 
 var gPolygonIsSimple = undefined;
+export var gLastRandomPolygonState = undefined;
 
 export var draw = new Draw();
-draw.onPolygonDrawn(() => {
+
+function onPolygonShow() {
     $("#tri-btn").prop("disabled", false);
     $("#path-btn").prop("disabled", false);
     $("#export-btn").prop("disabled", false);
-    $("#step-tri-btn").prop("disabled", false);
-});
-draw.onPolygonDestroyed(() => {
+    // $("#step-tri-btn").prop("disabled", false);
+}
+
+function onPolygonClear() {
     gPolygonIsSimple = undefined;
     $("#tri-btn").prop("disabled", true);
     $("#path-btn").prop("disabled", true);
     $("#export-btn").prop("disabled", true);
     $("#step-tri-btn").prop("disabled", true);
     $("#step-path-btn").prop("disabled", true);
-});
+}
+
+draw.onPolygonDrawn(onPolygonShow);
+draw.onPolygonClear(onPolygonClear);
 draw.onPolygonUpdated(() => (gPolygonIsSimple = undefined));
 draw.onEndpointsDrawn(points => {
     showShortestPath(points[0], points[1]);
@@ -87,11 +95,14 @@ function randomPolygon(n, algo) {
         );
         return;
     }
-    let range = n <= 100 ? 100 : n <= 1000 ? 1000 : 10000;
-    let points = SP.gen_polygon(n, range, algo);
+    let seed = Math.floor(Math.random() * 0xffffffff);
+    let range = n <= 100 ? 100 : n <= 2000 ? 1000 : 10000;
+    gLastRandomPolygonState = [n, range, seed];
+    let points = SP.gen_polygon(n, range, algo, seed);
     draw.clearCanvas();
     draw.drawPolygon(points, { color: randomColor(), vertexSize: n > 200 ? 0 : 2 });
     draw.autoScale(points);
+    onPolygonShow();
 }
 
 function loadPolygon() {
@@ -123,6 +134,7 @@ function loadPolygon() {
             vertexSize: points.length > 200 ? 0 : 2,
         });
         draw.autoScale(points);
+        onPolygonShow();
     };
     input.value = null;
 }
@@ -176,6 +188,7 @@ $(() => {
                 $("#color-opts").show();
                 $("#clear-opts").show();
                 $("#gen-opts").hide();
+                $("#step-gen-btn").prop("disabled", true);
                 draw.setMode("draw-polygon");
                 draw.clearCanvas();
                 break;
@@ -190,6 +203,7 @@ $(() => {
                 $("#color-opts").show();
                 $("#clear-opts").hide();
                 $("#gen-opts").hide();
+                $("#step-gen-btn").prop("disabled", true);
                 draw.setMode("move");
                 break;
         }
@@ -255,7 +269,15 @@ $(() => {
         draw.setMode("draw-polygon");
     });
     $("#gen-btn").on("click", () => {
-        randomPolygon($("#pick-size").val(), $("#algo-btn").val());
+        let n = $("#pick-size").val();
+        let algo = $("#algo-btn").val();
+        randomPolygon(n, algo);
+        let disabled = true;
+        if (algo == "2opt") {
+            disabled = n > 500;
+        } else if (algo == "space") {
+        }
+        $("#step-gen-btn").val(algo).text($("#algo-btn").text()).prop("disabled", disabled);
     });
 
     stepping.init();

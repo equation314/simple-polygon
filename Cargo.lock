@@ -245,6 +245,7 @@ dependencies = [
 name = "simple-polygon-wasm"
 version = "0.1.0"
 dependencies = [
+ "rand",
  "simple-polygon-core",
  "wasm-bindgen",
 ]

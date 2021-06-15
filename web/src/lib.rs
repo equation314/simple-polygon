@@ -1,8 +1,8 @@
-use simple_polygon_core as sp;
-use sp::geo::Polygon;
-use sp::tri::Triangulation;
 use std::convert::TryInto;
 use wasm_bindgen::prelude::*;
+
+use simple_polygon_core as sp;
+use sp::geo::Polygon;
 
 #[wasm_bindgen]
 extern "C" {
@@ -15,15 +15,38 @@ pub fn greet(name: &str) {
 }
 
 #[wasm_bindgen]
-pub fn gen_polygon(n: usize, range: usize, algo_str: Option<String>) -> JsValue {
+pub fn gen_polygon(
+    n: usize,
+    range: usize,
+    algo_str: Option<String>,
+    seed: Option<usize>,
+    stepping: Option<bool>,
+) -> JsValue {
+    use rand::{rngs::StdRng, SeedableRng};
+    use sp::gen::{RandomPolygonGenerator, SteppingResult};
     if let Ok(algo) = algo_str
         .unwrap_or_else(|| "2opt".into())
         .as_str()
         .try_into()
     {
-        let poly = sp::gen::gen_polygon(n, range, algo);
-        let points: Vec<[f64; 2]> = poly.points.iter().map(|p| [p.x, p.y]).collect();
-        JsValue::from_serde(&points).unwrap()
+        let mut rng = if let Some(seed) = seed {
+            StdRng::seed_from_u64(seed as _)
+        } else {
+            StdRng::from_entropy()
+        };
+        if stepping.unwrap_or(false) {
+            let mut rpg = RandomPolygonGenerator::new_stepping(&mut rng);
+            rpg.generate(n, range, algo);
+            match rpg.into_stepping_result() {
+                SteppingResult::SpacePartitioning(res) => JsValue::from_serde(&res).unwrap(),
+                SteppingResult::TwoOptMoves(res) => JsValue::from_serde(&res).unwrap(),
+                _ => JsValue::null(),
+            }
+        } else {
+            let poly = RandomPolygonGenerator::new(&mut rng).generate(n, range, algo);
+            let points: Vec<[f64; 2]> = poly.points.iter().map(|p| [p.x, p.y]).collect();
+            JsValue::from_serde(&points).unwrap()
+        }
     } else {
         JsValue::null()
     }
@@ -52,7 +75,7 @@ pub fn triangulation(points: &JsValue, algo_str: Option<String>) -> JsValue {
         .as_str()
         .try_into()
     {
-        let tri = Triangulation::build(&poly, algo);
+        let tri = sp::tri::Triangulation::build(&poly, algo);
         JsValue::from_serde(&tri.result().diagonals).unwrap()
     } else {
         JsValue::null()

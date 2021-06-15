@@ -1,6 +1,10 @@
 use rand::Rng;
+use serde::Serialize;
 
 use crate::geo::Point;
+
+#[derive(Serialize, Debug, Default)]
+pub struct SpacePartitionSteppingResult;
 
 struct SpacePartitionGenerator<'a, R: Rng> {
     n: usize,
@@ -123,4 +127,13 @@ pub fn generate(points: &[Point], rng: &mut impl Rng) -> Vec<usize> {
     let mut sp = SpacePartitionGenerator::new(points, rng);
     sp.generate();
     sp.idx
+}
+
+pub fn generate_stepping(
+    points: &[Point],
+    rng: &mut impl Rng,
+) -> (Vec<usize>, SpacePartitionSteppingResult) {
+    let mut sp = SpacePartitionGenerator::new(points, rng);
+    sp.generate();
+    (sp.idx, SpacePartitionSteppingResult)
 }

@@ -1,6 +1,6 @@
 import * as SP from "simple-polygon-wasm";
 import $ from "jquery";
-import { checkSimplePolygon, draw, showError } from "./index.js";
+import { checkSimplePolygon, draw, showError, gLastRandomPolygonState } from "./index.js";
 
 const DIAGONAL_COLOR = "#ce6a5b";
 const BOUNDARY_COLOR = "#777";
@@ -9,14 +9,56 @@ const PATH_COLOR = "#2c507b";
 const CUSP_POINT_COLOR = "green";
 const CURRENT_POINT_COLOR = "red";
 
+const TWO_OPT_EDGES_COLOR = "#9c3829";
+const TWO_OPT_POINT_COLOR = "#FDBC07";
+
 var gSteppingAlgorithm = "shortest";
 var gSteppingResult = null;
 var gCurrentStep = 0;
 var gMaxStep = 0;
 var gIsPlaying = false;
 
+var gCurrentPolygonColor = undefined;
+var gSavedPolygon = [];
+
 function showOneStep(step) {
-    if (gSteppingAlgorithm == "path") {
+    if (gSteppingAlgorithm == "2opt") {
+        let points = gSteppingResult.steps[step - (step % 2)].poly;
+        draw.removeShape("stepping");
+        draw.drawPolygon(
+            points,
+            { color: gCurrentPolygonColor, vertexSize: points.length > 200 ? 0 : 2 },
+            "stepping step-polygon",
+        );
+        if (step % 2 == 1) {
+            let data = gSteppingResult.steps[step];
+            draw.drawLines(
+                [data.e0, data.e1],
+                { color: TWO_OPT_EDGES_COLOR },
+                "stepping step-edges",
+            );
+            draw.drawLines(
+                [
+                    [data.e0[0], data.e1[0]],
+                    [data.e0[1], data.e1[1]],
+                ],
+                { color: TWO_OPT_EDGES_COLOR, dashed: true },
+                "stepping step-edges",
+            );
+            for (let i = 0; i < 2; i++) {
+                draw.drawPoint(
+                    data.e0[i],
+                    { color: TWO_OPT_POINT_COLOR, size: 4 },
+                    "stepping step-point",
+                );
+                draw.drawPoint(
+                    data.e1[i],
+                    { color: TWO_OPT_POINT_COLOR, size: 4 },
+                    "stepping step-point",
+                );
+            }
+        }
+    } else if (gSteppingAlgorithm == "path") {
         if (step == 0) {
             draw.removeShape("stepping");
             draw.drawLines(
@@ -50,20 +92,34 @@ function showOneStep(step) {
 }
 
 function showSteppingResult(algo) {
-    let points = draw.getCurrentPolygon();
-    if (!checkSimplePolygon(points)) {
-        return;
-    }
-
+    gCurrentStep = 0;
     gSteppingAlgorithm = algo;
-    if (algo == "path") {
+    if (algo == "2opt") {
+        let [n, range, seed] = gLastRandomPolygonState;
+        gSteppingResult = SP.gen_polygon(n, range, algo, seed, true);
+        if (gSteppingResult == null) {
+            return false;
+        }
+        gMaxStep = gSteppingResult.steps.length - 1;
+        gSavedPolygon = draw.getCurrentPolygon();
+        gCurrentPolygonColor = draw.getShapeStyle("polyline", "polygon", "fill");
+        draw.removeShape("polygon");
+        console.log(algo, gMaxStep, gCurrentPolygonColor, gSteppingResult);
+
+        draw.clearAlgorithmResult();
+        showOneStep(0);
+        return true;
+    } else if (algo == "path") {
+        let points = draw.getCurrentPolygon();
+        if (!checkSimplePolygon(points)) {
+            return;
+        }
         let [start, end] = draw.getCurrentEndpoints();
         gSteppingResult = SP.find_shortest_path(points, start, end, "mono_partition", true);
         if (gSteppingResult == null) {
             showError("Unreachable!");
             return false;
         }
-        gCurrentStep = 0;
         gMaxStep = gSteppingResult.steps.length - 1;
         console.log(algo, gMaxStep, gSteppingResult);
 
@@ -118,6 +174,12 @@ export function init() {
         }
         draw.removeShape("stepping");
         draw.setMode("move");
+        if (["2opt", "space"].includes(gSteppingAlgorithm)) {
+            draw.drawPolygon(gSavedPolygon, {
+                color: gCurrentPolygonColor,
+                vertexSize: gSavedPolygon.length > 200 ? 0 : 2,
+            });
+        }
     });
 
     $("#step-first-btn").on("click", () => {

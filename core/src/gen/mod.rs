@@ -17,6 +17,12 @@ pub enum Algorithm {
     PermuteReject,
 }
 
+pub enum SteppingResult {
+    None,
+    SpacePartitioning(space::SpacePartitionSteppingResult),
+    TwoOptMoves(two_opt::TwoOptMovesSteppingResult),
+}
+
 impl<'a> TryFrom<&'a str> for Algorithm {
     type Error = &'a str;
     fn try_from(algo_str: &'a str) -> Result<Self, Self::Error> {
@@ -32,11 +38,29 @@ impl<'a> TryFrom<&'a str> for Algorithm {
 
 pub struct RandomPolygonGenerator<'a, R: Rng> {
     rng: &'a mut R,
+    is_stepping: bool,
+    stepping_result: SteppingResult,
 }
 
 impl<'a, R: Rng> RandomPolygonGenerator<'a, R> {
     pub fn new(rng: &'a mut R) -> Self {
-        Self { rng }
+        Self {
+            rng,
+            is_stepping: false,
+            stepping_result: SteppingResult::None,
+        }
+    }
+
+    pub fn new_stepping(rng: &'a mut R) -> Self {
+        Self {
+            rng,
+            is_stepping: true,
+            stepping_result: SteppingResult::None,
+        }
+    }
+
+    pub fn into_stepping_result(self) -> SteppingResult {
+        self.stepping_result
     }
 
     pub fn random_points(&mut self, n: usize, range: usize) -> Vec<Point> {
@@ -61,10 +85,28 @@ impl<'a, R: Rng> RandomPolygonGenerator<'a, R> {
 
     pub fn generate_indices_from(&mut self, points: &[Point], algo: Algorithm) -> Vec<usize> {
         assert!(points.len() >= 3);
-        let mut indices = match algo {
-            Algorithm::PermuteReject => permute::generate(points, &mut self.rng),
-            Algorithm::SpacePartitioning => space::generate(points, &mut self.rng),
-            _ => two_opt::generate(points, &mut self.rng),
+        let mut indices = if self.is_stepping {
+            match algo {
+                Algorithm::PermuteReject => permute::generate(points, &mut self.rng),
+                Algorithm::SpacePartitioning => {
+                    let (idx, res) = space::generate_stepping(points, &mut self.rng);
+                    self.stepping_result = SteppingResult::SpacePartitioning(res);
+                    idx
+                }
+                Algorithm::TwoOptMoves => {
+                    let (idx, res) = two_opt::generate_stepping(points, &mut self.rng);
+                    self.stepping_result = SteppingResult::TwoOptMoves(res);
+                    idx
+                }
+                _ => unreachable!(),
+            }
+        } else {
+            match algo {
+                Algorithm::PermuteReject => permute::generate(points, &mut self.rng),
+                Algorithm::SpacePartitioning => space::generate(points, &mut self.rng),
+                Algorithm::TwoOptMoves => two_opt::generate(points, &mut self.rng),
+                _ => unreachable!(),
+            }
         };
         Self::uniform_indices(&mut indices, points);
         indices
