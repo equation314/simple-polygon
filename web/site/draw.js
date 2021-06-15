@@ -195,7 +195,7 @@ export class Draw {
         this.currentDrawPoints = [];
         this.currentPolygon = [];
         this.currentEndpoints = [];
-        this.polygonDrawnCallback = this.polygonClearCallback = this.polygonUpdatedCallback = this.endpointsDrawnCallback = () => {};
+        this.polygonDrawnCallback = this.polygonClearCallback = this.polygonUpdatedCallback = this.endpointsDrawnCallback = this.endpointsClearCallback = () => {};
 
         this.mode = "move";
         this.width = width;
@@ -225,6 +225,10 @@ export class Draw {
         this.endpointsDrawnCallback = callback;
     }
 
+    onEndpointsClear(callback) {
+        this.endpointsClearCallback = callback;
+    }
+
     clearCanvas() {
         this.drawing = false;
         this.removeShape("polygon");
@@ -232,6 +236,12 @@ export class Draw {
         this.polygonClearCallback(this.currentPolygon);
         this.currentDrawPoints = [];
         this.currentPolygon = [];
+        this.currentEndpoints = [];
+    }
+
+    clearEndpoints() {
+        this.removeShape("endpoint");
+        this.endpointsClearCallback(this.currentEndpoints);
         this.currentEndpoints = [];
     }
 
@@ -363,7 +373,9 @@ export class Draw {
                 .data([points.concat([points[0]])])
                 .attr("class", className)
                 .style("fill", c.color)
-                .attr("stroke", POLY_EDGE_COLOR);
+                .attr("stroke", "#000")
+                .attr("stroke-width", 0.5)
+                .attr("stroke-opacity", 0.5);
             this.currentPolygon = points;
         } else {
             g.append("polyline")
@@ -381,6 +393,7 @@ export class Draw {
                 .attr("class", className)
                 .attr("r", c.vertexSize)
                 .attr("fill", c.vertexColor)
+                .attr("stroke-width", 0.5)
                 .attr("stroke", "#000");
             if (c.close && !c.fixed) {
                 circles.style("cursor", "move").call(this.pointDragger);
@@ -459,6 +472,7 @@ export class Draw {
             .attr("class", className)
             .attr("r", c.size)
             .attr("fill", c.color)
+            .attr("stroke-width", 0.5)
             .attr("stroke", "#000");
         if (!c.fixed) {
             circle.style("cursor", "move").call(this.pointDragger);

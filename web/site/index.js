@@ -4,11 +4,9 @@ import { Draw } from "./draw.js";
 import * as stepping from "./stepping.js";
 
 const DIAGONAL_COLOR = "#9c3829";
-const PATH_COLOR = "#2c507b";
+const PATH_COLOR = "#3159E4";
 
 const SMALL_POLYGON_SIZE = 2000;
-
-const ALLOWED_STEP_ALGOS = ["2opt", "space"];
 
 var gPolygonIsSimple = undefined;
 export var gLastRandomPolygonState = undefined;
@@ -38,6 +36,7 @@ draw.onEndpointsDrawn(points => {
     showShortestPath(points[0], points[1]);
     $("#step-path-btn").prop("disabled", false);
 });
+draw.onEndpointsClear(() => $("#step-path-btn").prop("disabled", true));
 
 export function showError(message) {
     let alert = $("#alert");
@@ -159,7 +158,7 @@ function showTriangulation() {
     }
     let diagonals = SP.triangulation(points, "mono_partition");
     let lines = diagonals.map(d => [points[d[0]], points[d[1]]]);
-    draw.drawLines(lines, { color: DIAGONAL_COLOR }, "tri-lines");
+    draw.drawLines(lines, { color: DIAGONAL_COLOR, width: "0.5" }, "tri-lines");
 }
 
 function showShortestPath(start, end) {

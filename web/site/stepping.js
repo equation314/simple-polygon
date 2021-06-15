@@ -3,14 +3,14 @@ import $ from "jquery";
 import { checkSimplePolygon, draw, showError, gLastRandomPolygonState } from "./index.js";
 
 const DIAGONAL_COLOR = "#ce6a5b";
-const BOUNDARY_COLOR = "#777";
+const BOUNDARY_COLOR = "#333";
 const FUNNEL_COLOR = "#000";
-const PATH_COLOR = "#2c507b";
+const PATH_COLOR = "#3159E4";
 const CUSP_POINT_COLOR = "green";
 const CURRENT_POINT_COLOR = "red";
 
 const TWO_OPT_EDGES_COLOR = "#9c3829";
-const TWO_OPT_POINT_COLOR = "#FDBC07";
+const TWO_OPT_POINT_COLOR = "red";
 
 var gSteppingAlgorithm = "shortest";
 var gSteppingResult = null;
@@ -48,12 +48,12 @@ function showOneStep(step) {
             for (let i = 0; i < 2; i++) {
                 draw.drawPoint(
                     data.e0[i],
-                    { color: TWO_OPT_POINT_COLOR, size: 4 },
+                    { color: TWO_OPT_POINT_COLOR, size: 3 },
                     "stepping step-point",
                 );
                 draw.drawPoint(
                     data.e1[i],
-                    { color: TWO_OPT_POINT_COLOR, size: 4 },
+                    { color: TWO_OPT_POINT_COLOR, size: 3 },
                     "stepping step-point",
                 );
             }
@@ -63,12 +63,12 @@ function showOneStep(step) {
             draw.removeShape("stepping");
             draw.drawLines(
                 gSteppingResult.sleeve_diagonals,
-                { color: DIAGONAL_COLOR },
+                { color: DIAGONAL_COLOR, width: 0.5 },
                 "stepping all-steps",
             );
             draw.drawLines(
                 gSteppingResult.sleeve_boundary,
-                { color: BOUNDARY_COLOR },
+                { color: BOUNDARY_COLOR, width: 0.5 },
                 "stepping all-steps",
             );
         } else {
@@ -104,6 +104,7 @@ function showSteppingResult(algo) {
         gSavedPolygon = draw.getCurrentPolygon();
         gCurrentPolygonColor = draw.getShapeStyle("polyline", "polygon", "fill");
         draw.removeShape("polygon");
+        draw.clearEndpoints();
         console.log(algo, gMaxStep, gCurrentPolygonColor, gSteppingResult);
 
         draw.clearAlgorithmResult();
