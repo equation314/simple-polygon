@@ -158,7 +158,7 @@ function showTriangulation() {
     }
     let diagonals = SP.triangulation(points, "mono_partition");
     let lines = diagonals.map(d => [points[d[0]], points[d[1]]]);
-    draw.drawLines(lines, { color: DIAGONAL_COLOR, width: "0.5" }, "tri-lines");
+    draw.drawManyLines(lines, { color: DIAGONAL_COLOR, width: 0.5 }, "tri-lines");
 }
 
 function showShortestPath(start, end) {
@@ -275,6 +275,7 @@ $(() => {
         if (algo == "2opt") {
             disabled = n > 500;
         } else if (algo == "space") {
+            disabled = n > 1000;
         }
         $("#step-gen-btn").val(algo).text($("#algo-btn").text()).prop("disabled", disabled);
     });

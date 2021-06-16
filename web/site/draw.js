@@ -142,7 +142,7 @@ export class Draw {
                 }
             } else if (this.mode == "draw-points") {
                 this.currentDrawPoints.push(point);
-                this.drawPoint(point, { fixed: false }, "endpoint");
+                this.drawPoints([point], { fixed: false }, "endpoint");
                 if (this.currentDrawPoints.length == 2) {
                     this.currentEndpoints = this.currentDrawPoints;
                     this.endpointsDrawnCallback(this.currentEndpoints);
@@ -406,9 +406,13 @@ export class Draw {
     }
 
     drawPath(points, config, className = "") {
+        if (points.length <= 1) {
+            return;
+        }
         const defaultConfig = {
             color: "#000",
             dashed: false,
+            opacity: 1,
             width: 1,
         };
         let c = {
@@ -416,14 +420,21 @@ export class Draw {
             ...config,
         };
         let parent = this.canvas.select(".polygon");
-        let g = parent.insert("g", "circle").attr("opacity", 1).attr("class", className);
+        let before = null;
+        if (parent.empty()) {
+            parent = this.canvas;
+        } else {
+            before = !parent.selectChild(".path-lines").empty() ? ".path-lines" : "circle";
+        }
+        let g = parent.insert("g", before).attr("opacity", 1).attr("class", className);
         let path = g
             .append("polyline")
             .data([points])
             .style("fill", "none")
             .attr("class", className)
             .attr("stroke", c.color)
-            .attr("stroke-width", c.width);
+            .attr("stroke-width", c.width)
+            .attr("stroke-opacity", c.opacity);
         if (c.dashed) {
             path.style("stroke-dasharray", "5 5");
         }
@@ -431,9 +442,13 @@ export class Draw {
     }
 
     drawLines(lines, config, className = "") {
+        if (lines.length == 0) {
+            return;
+        }
         const defaultConfig = {
             color: "#000",
             dashed: false,
+            opacity: 1,
             width: 1,
         };
         let c = {
@@ -441,21 +456,59 @@ export class Draw {
             ...config,
         };
         let parent = this.canvas.select(".polygon");
-        let before = !parent.selectChild(".path-lines").empty() ? ".path-lines" : "circle";
+        let before = null;
+        if (parent.empty()) {
+            parent = this.canvas;
+        } else {
+            before = !parent.selectChild(".path-lines").empty() ? ".path-lines" : "circle";
+        }
         let g = parent.insert("g", before).attr("opacity", 1).attr("class", className);
         let l = g
-            .append("path")
+            .selectAll("line")
+            .data(lines)
+            .join("line")
+            .attr("class", className)
+            .attr("stroke", c.color)
+            .attr("stroke-width", c.width)
+            .attr("stroke-opacity", c.opacity);
+        if (c.dashed) {
+            l.style("stroke-dasharray", "5 5");
+        }
+        this.applyTransform(["line"]);
+    }
+
+    drawManyLines(lines, config, className = "") {
+        if (lines.length == 0) {
+            return;
+        }
+        const defaultConfig = {
+            color: "#000",
+            width: 1,
+        };
+        let c = {
+            ...defaultConfig,
+            ...config,
+        };
+        let parent = this.canvas.select(".polygon");
+        let before = null;
+        if (parent.empty()) {
+            parent = this.canvas;
+        } else {
+            before = !parent.selectChild(".path-lines").empty() ? ".path-lines" : "circle";
+        }
+        let g = parent.insert("g", before).attr("opacity", 1).attr("class", className);
+        g.append("path")
             .data([lines])
             .attr("class", className)
             .attr("stroke", c.color)
             .attr("stroke-width", c.width);
-        if (c.dashed) {
-            l.style("stroke-dasharray", "5 5");
-        }
         this.applyTransform(["path"]);
     }
 
-    drawPoint(point, config, className = "") {
+    drawPoints(points, config, className = "") {
+        if (points.length == 0) {
+            return;
+        }
         const defaultConfig = {
             color: ENDPOINT_COLOR,
             size: 5,
@@ -467,8 +520,9 @@ export class Draw {
         };
         let g = this.canvas.append("g").attr("class", className);
         let circle = g
-            .append("circle")
-            .data([point])
+            .selectAll("circle")
+            .data(points)
+            .join("circle")
             .attr("class", className)
             .attr("r", c.size)
             .attr("fill", c.color)

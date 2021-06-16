@@ -17,6 +17,7 @@ pub enum Algorithm {
     PermuteReject,
 }
 
+#[derive(Debug)]
 pub enum SteppingResult {
     None,
     SpacePartitioning(space::SpacePartitionSteppingResult),

@@ -21,13 +21,25 @@ var gIsPlaying = false;
 var gCurrentPolygonColor = undefined;
 var gSavedPolygon = [];
 
+function segmentToLine(segment) {
+    let maxLen = 1e5;
+    let [a, b] = segment;
+    let dx = b[0] - a[0];
+    let dy = b[1] - a[1];
+    let len = Math.sqrt(dx * dx + dy * dy);
+    let t = maxLen / len;
+    let aa = [a[0] - dx * t, a[1] - dy * t];
+    let bb = [a[0] + dx * t, a[1] + dy * t];
+    return [aa, bb];
+}
+
 function showOneStep(step) {
     if (gSteppingAlgorithm == "2opt") {
         let points = gSteppingResult.steps[step - (step % 2)].poly;
         draw.removeShape("stepping");
         draw.drawPolygon(
             points,
-            { color: gCurrentPolygonColor, vertexSize: points.length > 200 ? 0 : 2 },
+            { color: gCurrentPolygonColor, vertexSize: 1 },
             "stepping step-polygon",
         );
         if (step % 2 == 1) {
@@ -45,28 +57,88 @@ function showOneStep(step) {
                 { color: TWO_OPT_EDGES_COLOR, dashed: true },
                 "stepping step-edges",
             );
-            for (let i = 0; i < 2; i++) {
-                draw.drawPoint(
-                    data.e0[i],
-                    { color: TWO_OPT_POINT_COLOR, size: 3 },
-                    "stepping step-point",
+            draw.drawPoints(
+                [data.e0[0], data.e0[1], data.e1[0], data.e1[1]],
+                { color: TWO_OPT_POINT_COLOR, size: 3 },
+                "stepping step-point",
+            );
+        }
+    } else if (gSteppingAlgorithm == "space") {
+        if (step == gMaxStep) {
+            draw.removeShape("stepping");
+            draw.drawPolygon(
+                gSteppingResult.polygon,
+                { color: gCurrentPolygonColor, vertexSize: 1 },
+                "stepping one-step",
+            );
+        } else {
+            draw.removeShape("one-step");
+            if (!draw.hasShape("all-steps")) {
+                draw.drawPoints(
+                    gSteppingResult.points,
+                    { color: "#000", size: 1 },
+                    "stepping all-steps",
                 );
-                draw.drawPoint(
-                    data.e1[i],
-                    { color: TWO_OPT_POINT_COLOR, size: 3 },
-                    "stepping step-point",
+            }
+            if (step == 0) {
+                return;
+            }
+            let data = gSteppingResult.steps[step - 1];
+            draw.drawPath(
+                gSteppingResult.polygon.slice(0, data.current_chain_len),
+                { color: "#000", width: 0.5, opacity: 0.5 },
+                "stepping one-step",
+            );
+            if (data.is_leaf) {
+                draw.drawLines(
+                    [data.base_segment],
+                    { color: "#000", width: 2 },
+                    "stepping one-step",
                 );
+            } else {
+                draw.drawLines(
+                    [data.base_segment],
+                    { color: "red", dashed: true },
+                    "stepping one-step",
+                );
+                if (data.split_line != null) {
+                    draw.drawLines(
+                        [segmentToLine(data.split_line)],
+                        { color: "green" },
+                        "stepping one-step",
+                    );
+                    draw.drawPoints(
+                        data.left_points,
+                        { color: "yellow", size: 3 },
+                        "stepping one-step",
+                    );
+                    draw.drawPoints(
+                        data.right_points,
+                        { color: "blue", size: 3 },
+                        "stepping one-step",
+                    );
+                } else {
+                    draw.drawPoints(
+                        data.left_points,
+                        { color: "#ddd", size: 3 },
+                        "stepping one-step",
+                    );
+                }
+            }
+            draw.drawPoints(data.base_segment, { color: "red", size: 3 }, "stepping one-step");
+            if (data.mid_point != null) {
+                draw.drawPoints([data.mid_point], { color: "green", size: 3 }, "stepping one-step");
             }
         }
     } else if (gSteppingAlgorithm == "path") {
         if (step == 0) {
             draw.removeShape("stepping");
-            draw.drawLines(
+            draw.drawManyLines(
                 gSteppingResult.sleeve_diagonals,
                 { color: DIAGONAL_COLOR, width: 0.5 },
                 "stepping all-steps",
             );
-            draw.drawLines(
+            draw.drawManyLines(
                 gSteppingResult.sleeve_boundary,
                 { color: BOUNDARY_COLOR, width: 0.5 },
                 "stepping all-steps",
@@ -78,8 +150,8 @@ function showOneStep(step) {
         draw.drawPath(data.left_chain, { color: FUNNEL_COLOR, width: 2 }, "stepping one-step");
         draw.drawPath(data.right_chain, { color: FUNNEL_COLOR, width: 2 }, "stepping one-step");
         draw.drawPath(data.path, { color: PATH_COLOR, width: 2 }, "stepping one-step");
-        draw.drawPoint(data.cusp, { color: CUSP_POINT_COLOR }, "stepping one-step");
-        draw.drawPoint(data.current, { color: CURRENT_POINT_COLOR }, "stepping one-step");
+        draw.drawPoints([data.cusp], { color: CUSP_POINT_COLOR }, "stepping one-step");
+        draw.drawPoints([data.current], { color: CURRENT_POINT_COLOR }, "stepping one-step");
         if (data.tangent != null) {
             draw.drawLines(
                 [[data.tangent, data.current]],
@@ -105,9 +177,26 @@ function showSteppingResult(algo) {
         gCurrentPolygonColor = draw.getShapeStyle("polyline", "polygon", "fill");
         draw.removeShape("polygon");
         draw.clearEndpoints();
-        console.log(algo, gMaxStep, gCurrentPolygonColor, gSteppingResult);
-
         draw.clearAlgorithmResult();
+        console.log(algo, gMaxStep);
+
+        showOneStep(0);
+        return true;
+    }
+    if (algo == "space") {
+        let [n, range, seed] = gLastRandomPolygonState;
+        gSteppingResult = SP.gen_polygon(n, range, algo, seed, true);
+        if (gSteppingResult == null) {
+            return false;
+        }
+        gMaxStep = gSteppingResult.steps.length + 1;
+        gSavedPolygon = draw.getCurrentPolygon();
+        gCurrentPolygonColor = draw.getShapeStyle("polyline", "polygon", "fill");
+        console.log(algo, gMaxStep);
+        draw.removeShape("polygon");
+        draw.clearEndpoints();
+        draw.clearAlgorithmResult();
+
         showOneStep(0);
         return true;
     } else if (algo == "path") {
@@ -122,9 +211,9 @@ function showSteppingResult(algo) {
             return false;
         }
         gMaxStep = gSteppingResult.steps.length - 1;
-        console.log(algo, gMaxStep, gSteppingResult);
-
         draw.clearAlgorithmResult();
+        console.log(algo, gMaxStep);
+
         showOneStep(0);
         return true;
     } else if (algo == "tri") {
