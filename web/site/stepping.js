@@ -311,17 +311,23 @@ export function init() {
             setTimeout(play, 100);
         } else {
             gIsPlaying = false;
-            $("#step-play-btn").text("Play");
+            //$("#step-play-btn").text("Play");
         }
     };
     $("#step-play-btn").on("click", () => {
+        var imageUrl;
         if (!gIsPlaying) {
             gIsPlaying = true;
-            $("#step-play-btn").text("Pause");
+            //$("#step-play-btn").text("Pause");
+            imageUrl = "images/Right/Pause.png";
+            $("#step-play-btn").css("background",'url(' + imageUrl + ')');
             play();
         } else {
             gIsPlaying = false;
-            $("#step-play-btn").text("Play");
+            imageUrl = "images/Right/Play.png";
+            $("#step-play-btn").css("background",'url(' + imageUrl + ')');
+
+            //$("#step-play-btn").text("Play");
         }
     });
 }

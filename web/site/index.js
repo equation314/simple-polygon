@@ -2,6 +2,7 @@ import * as SP from "simple-polygon-wasm";
 import $ from "jquery";
 import { Draw } from "./draw.js";
 import * as stepping from "./stepping.js";
+import { schemeDark2 } from "d3";
 
 const DIAGONAL_COLOR = "#9c3829";
 const PATH_COLOR = "#3159E4";
@@ -181,6 +182,8 @@ function showShortestPath(start, end) {
 }
 
 $(() => {
+    $('button').addClass('bg-light');
+    
     $("#polygon-btn").on("change", () => {
         switch ($("#polygon-btn").val()) {
             case "draw":
@@ -279,6 +282,6 @@ $(() => {
         }
         $("#step-gen-btn").val(algo).text($("#algo-btn").text()).prop("disabled", disabled);
     });
-
+    
     stepping.init();
 });
