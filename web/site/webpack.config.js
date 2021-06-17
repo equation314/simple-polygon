@@ -8,5 +8,13 @@ module.exports = {
         filename: "bundle.js",
     },
     mode: "development",
-    plugins: [new CopyWebpackPlugin(["index.html"])],
+    plugins: [
+        new CopyWebpackPlugin([
+            "index.html",
+            {
+                from: "images/",
+                to: "images/",
+            },
+        ]),
+    ],
 };

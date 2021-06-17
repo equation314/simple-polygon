@@ -23,83 +23,70 @@
       -ms-user-select: none;
       user-select: none;
       position: fixed;
-      height: calc(100vh - 4rem);
-      top: 4rem;
+      height: calc(100vh - 4.5rem);
+      top: 4.5rem;
       width: 100%;
       z-index: -1;
     }
 
     #algo-btn {
-      width: 12rem;
+      width: 11rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
-    #random-btn::before{
-      background-image: url('images/Left/Random.png');
+
+    .btn-action {
+      border-color: #ccc;
+      background-color: white;
+      color: #292f36;
     }
-    #draw-btn::before{
-      background-image: url('images/Left/Draw.png');
+
+    .btn-action:disabled {
+      opacity: 0.4;
     }
-    #load-btn::before{
-      background-image: url('images/Left/Load.png');
+
+    .btn-image {
+      padding: 0.375rem;
     }
-    #export-btn::before{
-      background-image: url('images/Left/Export.png');
+
+    .btn-image img {
+      user-drag: none;
+      user-select: none;
+      -webkit-user-drag: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
     }
-    #gen-btn::before{
-      background-image: url('images/Right/Generate.png');
+
+    .btn-action:hover,
+    .btn-action:focus {
+      color: #292f36;
+      border-color: #4ecdc4;
     }
-    #path-btn::before{
-      background-image: url('images/Left/Path.png');
+
+    .line-height-32 {
+      line-height: 32px;
     }
-    #tri-btn::before{
-      background-image: url('images/Left/Triangulation.png');
+
+    .dropdown-item {
+      color: #292f36;
     }
-    #step-btn::before{
-      background-image: url('images/Left/Step.png');
+
+    .dropdown-image {
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: start;
     }
-    #stop-btn::before{
-      background-image: url('images/Left/Stop.png');
+
+    .dropdown-image img {
+      margin-right: 0.5rem;
     }
-    #step-play-btn{
-      background: url('images/Right/Play.png');
-      background-repeat: no-repeat;
-      background-size: 50% 50%;
-      background-position: center center;
-      border: none;
-    }
-    #step-first-btn::before{
-      background-image: url('images/Right/First.png');
-    }
-    #step-prev-btn::before{
-      background-image: url('images/Right/Prev.png');
-    }
-    #step-next-btn::before{
-      background-image: url('images/Right/Next.png');
-    }
-    #step-last-btn::before{
-      background-image: url('images/Right/Last.png');
-    }
-    #clear-btn::before{
-      background-image: url('images/Right/ClearPoints.png');
-    }
-    #random-btn::before, #draw-btn::before, #load-btn::before, #export-btn::before, #gen-btn::before, #path-btn::before, #tri-btn::before, #step-btn::before,#stop-btn::before, #clear-btn::before{
-      background-size: 30px 30px;
-      display: inline-block;
-      width: 30px; 
-      height: 30px;
-      right: 10px;
-      content:"";
-    }
-    #step-play-btn::before, #step-first-btn::before, #step-prev-btn::before, #step-next-btn::before, #step-last-btn::before{
-      background-size: 30px 30px;
-      display: inline-block;
-      width: 30px; 
-      height: 30px;
-      right: 10px;
-      content:"";
-      /* border-radius: 70px; */
+
+    .dropdown-image:disabled img {
+      opacity: 0.4;
     }
 
   </style>
@@ -107,22 +94,38 @@
 
 <body>
   <div id="alert" class="alert alert-danger fixed-bottom mx-3" style="display: none" role="alert"></div>
-  <nav class="navbar navbar-dark bg-dark fixed-top">
+  <nav class="navbar navbar-light bg-light border-bottom fixed-top">
     <div class="container-fluid">
 
-      <div class="d-flex align-items-center" style="height: 3rem">
+      <div class="d-flex align-items-center" style="height: 3.5rem">
         <div class="m-1">
           <div class="dropdown">
-            <button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" id="polygon-btn" value="random">Random</button>
+            <button class="btn btn-image btn-action" data-bs-toggle="dropdown" aria-expanded="false" id="polygon-btn" value="random" title="Polygon">
+              <img src="images/Left/Random.png" width="32" height="32" />
+            </button>
             <ul class="dropdown-menu dropdown-menu-light" aria-labelledby="polygon-btn">
-              <li><button class="dropdown-item switch-mode" id="random-btn" value="random">Random</button></li>
-              <li><button class="dropdown-item switch-mode" id="draw-btn" value="draw">Draw</button></li>
-              <li><button class="dropdown-item switch-mode" id="load-btn" value="load">Load from...</button></li>
+              <li>
+                <button class="dropdown-item dropdown-image switch-mode" id="random-btn" value="random">
+                  <img src="images/Left/Random.png" width="32" height="32" />Random
+                </button>
+              </li>
+              <li>
+                <button class="dropdown-item dropdown-image switch-mode" id="draw-btn" value="draw">
+                  <img src="images/Left/Draw.png" width="32" height="32" />Draw
+                </button>
+              </li>
+              <li>
+                <button class="dropdown-item dropdown-image switch-mode" id="load-btn" value="load">
+                  <img src="images/Left/Load.png" width="32" height="32" />Load from...
+                </button>
+              </li>
               <li>
                 <hr class="dropdown-divider">
               </li>
               <li>
-                <button class="dropdown-item" id="export-btn" disabled>Export</button>
+                <button class="dropdown-item dropdown-image" id="export-btn" disabled>
+                  <img src="images/Left/Export.png" width="32" height="32" />Export
+                </button>
                 <a id="export-link" hidden></a>
               </li>
             </ul>
@@ -130,37 +133,47 @@
           </div>
         </div>
         <div class="m-1">
-          <button class="btn btn-outline-secondary" id="tri-btn" disabled></button>
+          <button class="btn btn-image btn-action" id="tri-btn" title="Triangulation" disabled>
+            <img src="images/Left/Triangulation.png" width="32" height="32" />
+          </button>
         </div>
         <div class="m-1">
-          <button class="btn btn-outline-secondary" id="path-btn" disabled></button>
+          <button class="btn btn-image btn-action" id="path-btn" title="Shorest path" disabled>
+            <img src="images/Left/Path.png" width="32" height="32" />
+          </button>
         </div>
         <div id="step-btn-div" class="m-1">
           <div class="dropdown">
-            <button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" id="step-btn"></button>
+            <button class="btn btn-image btn-action" data-bs-toggle="dropdown" aria-expanded="false" id="step-btn" title="Single step">
+              <img src="images/Left/Step.png" width="32" height="32" />
+            </button>
             <ul class="dropdown-menu dropdown-menu-light" aria-labelledby="step-btn">
-              <li><button class="dropdown-item" id="step-gen-btn" value="2opt" disabled>2-opt Moves</button></li>
+              <li><button class="dropdown-item" id="step-gen-btn" value="2opt" disabled>2-Opt Moves</button></li>
               <li><button class="dropdown-item" id="step-tri-btn" value="tri" disabled>Triangulation</button></li>
               <li><button class="dropdown-item" id="step-path-btn" value="path" disabled>Shortest Path</button></li>
             </ul>
           </div>
         </div>
         <div id="stop-btn-div" class="m-1" style="display: none">
-          <button class="btn btn-outline-secondary" id="stop-btn"></button>
+          <button class="btn btn-image btn-action" id="stop-btn">
+            <img src="images/Left/Stop.png" width="32" height="32" />
+          </button>
         </div>
       </div>
 
       <div class="d-flex">
         <div id="gen-opts">
-          <div class="d-flex">
+          <div class="d-flex align-items-center">
             <div class="m-1">
               <div style="width: 6rem">
-                <input type="number" class="form-control btn-outline-secondary text-secondary" id="pick-size" placeholder="Vertices" min="3" max="50000" value="100" title="Number of polygon vertices">
+                <input type="number" class="btn-action form-control line-height-32" id="pick-size" placeholder="Vertices" min="3" max="50000" value="100" title="Number of polygon vertices">
               </div>
             </div>
             <div class="m-1">
               <div class="dropdown">
-                <button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" id="algo-btn" value="2opt">2-Opt Moves</button>
+                <button class="btn btn-action dropdown-toggle line-height-32" data-bs-toggle="dropdown" aria-expanded="false" id="algo-btn" value="2opt" title="Polygon generation algorihtm">
+                  2-Opt Moves
+                </button>
                 <ul class="dropdown-menu dropdown-menu-light" aria-labelledby="algo-btn">
                   <li><button class="dropdown-item" value="2opt">2-Opt Moves</button></li>
                   <!-- <li><button class="dropdown-item" value="growth">Steady Growth</button></li> -->
@@ -170,35 +183,48 @@
               </div>
             </div>
             <div class="m-1">
-              <button class="btn btn-outline-secondary" id="gen-btn">Generate</button>
+              <button class="btn btn-image btn-action" id="gen-btn" title="Generate!">
+                <img src="images/Right/Generate.png" width="32" height="32" />
+              </button>
             </div>
           </div>
         </div>
 
-        <div id="color-opts" class="m-1" style="display: none">
-          <input type="color" class="form-control form-control-color" style="width: 3rem" id="pick-color" value="#5A7D29" title="Polygon color">
+        <div class="d-flex align-items-center">
+          <div id="color-opts" class="m-1" style="display: none;">
+            <input type="color" class="btn-action form-control form-control-color" style="width: 3rem; font-size: 21px;" id="pick-color" value="#457770" title="Polygon color">
+          </div>
         </div>
 
-        <div id="clear-opts" class="m-1" style="display: none">
-          <button class="btn btn-outline-secondary" id="clear-btn"></button>
+        <div class="d-flex align-items-center">
+          <div id="clear-opts" class="m-1" style="display: none">
+            <button class="btn btn-image btn-action" id="clear-btn" title="Clear polygon">
+              <img src="images/Right/ClearPoints.png" width="32" height="32" />
+            </button>
+          </div>
         </div>
 
         <div id="step-opts" style="display: none">
           <div class="d-flex">
             <div class="m-1">
-              <button class="btn btn-outline-secondary" id="step-play-btn"></button>
+              <button class="btn btn-image btn-action" id="step-play-btn" title="Play/Pause">
+                <img src="images/Right/Play.png" width="32" height="32" /></button>
             </div>
             <div class="m-1">
-              <button class="btn btn-outline-secondary" id="step-first-btn"></button>
+              <button class="btn btn-image btn-action" id="step-first-btn" title="First step">
+                <img src="images/Right/First.png" width="32" height="32" /></button>
             </div>
             <div class="m-1">
-              <button class="btn btn-outline-secondary" id="step-prev-btn"></button>
+              <button class="btn btn-image btn-action" id="step-prev-btn" title="Previous step">
+                <img src="images/Right/Prev.png" width="32" height="32" /></button>
             </div>
             <div class="m-1">
-              <button class="btn btn-outline-secondary" id="step-next-btn"></button>
+              <button class="btn btn-image btn-action" id="step-next-btn" title="Next step">
+                <img src="images/Right/Next.png" width="32" height="32" /></button>
             </div>
             <div class="m-1">
-              <button class="btn btn-outline-secondary" id="step-last-btn"></button>
+              <button class="btn btn-image btn-action" id="step-last-btn" title="Last step">
+                <img src="images/Right/Last.png" width="32" height="32" /></button>
             </div>
           </div>
         </div>

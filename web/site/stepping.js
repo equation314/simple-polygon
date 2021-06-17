@@ -82,8 +82,13 @@ function showOneStep(step) {
             }
             if (step == 0) {
                 return;
+            } else if (step == 1) {
+                let segment = gSteppingResult.steps[0].base_segment;
+                draw.drawLines([segmentToLine(segment)], { color: "green" }, "stepping one-step");
+                draw.drawPoints(segment, { color: "green", size: 3 }, "stepping one-step");
+                return;
             }
-            let data = gSteppingResult.steps[step - 1];
+            let data = gSteppingResult.steps[step - 2];
             draw.drawPath(
                 gSteppingResult.polygon.slice(0, data.current_chain_len),
                 { color: "#000", width: 0.5, opacity: 0.5 },
@@ -189,7 +194,7 @@ function showSteppingResult(algo) {
         if (gSteppingResult == null) {
             return false;
         }
-        gMaxStep = gSteppingResult.steps.length + 1;
+        gMaxStep = gSteppingResult.steps.length + 2;
         gSavedPolygon = draw.getCurrentPolygon();
         gCurrentPolygonColor = draw.getShapeStyle("polyline", "polygon", "fill");
         console.log(algo, gMaxStep);
@@ -311,23 +316,20 @@ export function init() {
             setTimeout(play, 100);
         } else {
             gIsPlaying = false;
-            //$("#step-play-btn").text("Play");
+            $("#step-play-btn img").attr("src", "images/Right/Play.png");
         }
     };
     $("#step-play-btn").on("click", () => {
-        var imageUrl;
+        if (gCurrentStep == gMaxStep) {
+            return;
+        }
         if (!gIsPlaying) {
             gIsPlaying = true;
-            //$("#step-play-btn").text("Pause");
-            imageUrl = "images/Right/Pause.png";
-            $("#step-play-btn").css("background",'url(' + imageUrl + ')');
+            $("#step-play-btn img").attr("src", "images/Right/Pause.png");
             play();
         } else {
             gIsPlaying = false;
-            imageUrl = "images/Right/Play.png";
-            $("#step-play-btn").css("background",'url(' + imageUrl + ')');
-
-            //$("#step-play-btn").text("Play");
+            $("#step-play-btn img").attr("src", "images/Right/Play.png");
         }
     });
 }
