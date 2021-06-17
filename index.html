@@ -50,6 +50,15 @@
       padding: 0.375rem;
     }
 
+    .btn-image img {
+      user-drag: none;
+      user-select: none;
+      -webkit-user-drag: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+    }
+
     .btn-action:hover,
     .btn-action:focus {
       color: #292f36;
@@ -91,7 +100,7 @@
       <div class="d-flex align-items-center" style="height: 3.5rem">
         <div class="m-1">
           <div class="dropdown">
-            <button class="btn btn-image btn-action" data-bs-toggle="dropdown" aria-expanded="false" id="polygon-btn" value="random">
+            <button class="btn btn-image btn-action" data-bs-toggle="dropdown" aria-expanded="false" id="polygon-btn" value="random" title="Polygon">
               <img src="images/Left/Random.png" width="32" height="32" />
             </button>
             <ul class="dropdown-menu dropdown-menu-light" aria-labelledby="polygon-btn">
@@ -124,18 +133,18 @@
           </div>
         </div>
         <div class="m-1">
-          <button class="btn btn-image btn-action" id="tri-btn" disabled>
+          <button class="btn btn-image btn-action" id="tri-btn" title="Triangulation" disabled>
             <img src="images/Left/Triangulation.png" width="32" height="32" />
           </button>
         </div>
         <div class="m-1">
-          <button class="btn btn-image btn-action" id="path-btn" disabled>
+          <button class="btn btn-image btn-action" id="path-btn" title="Shorest path" disabled>
             <img src="images/Left/Path.png" width="32" height="32" />
           </button>
         </div>
         <div id="step-btn-div" class="m-1">
           <div class="dropdown">
-            <button class="btn btn-image btn-action" data-bs-toggle="dropdown" aria-expanded="false" id="step-btn">
+            <button class="btn btn-image btn-action" data-bs-toggle="dropdown" aria-expanded="false" id="step-btn" title="Single step">
               <img src="images/Left/Step.png" width="32" height="32" />
             </button>
             <ul class="dropdown-menu dropdown-menu-light" aria-labelledby="step-btn">
@@ -162,7 +171,7 @@
             </div>
             <div class="m-1">
               <div class="dropdown">
-                <button class="btn btn-action dropdown-toggle line-height-32" data-bs-toggle="dropdown" aria-expanded="false" id="algo-btn" value="2opt">
+                <button class="btn btn-action dropdown-toggle line-height-32" data-bs-toggle="dropdown" aria-expanded="false" id="algo-btn" value="2opt" title="Polygon generation algorihtm">
                   2-Opt Moves
                 </button>
                 <ul class="dropdown-menu dropdown-menu-light" aria-labelledby="algo-btn">
@@ -174,7 +183,7 @@
               </div>
             </div>
             <div class="m-1">
-              <button class="btn btn-image btn-action" id="gen-btn">
+              <button class="btn btn-image btn-action" id="gen-btn" title="Generate!">
                 <img src="images/Right/Generate.png" width="32" height="32" />
               </button>
             </div>
@@ -189,7 +198,7 @@
 
         <div class="d-flex align-items-center">
           <div id="clear-opts" class="m-1" style="display: none">
-            <button class="btn btn-image btn-action" id="clear-btn">
+            <button class="btn btn-image btn-action" id="clear-btn" title="Clear polygon">
               <img src="images/Right/ClearPoints.png" width="32" height="32" />
             </button>
           </div>
@@ -198,23 +207,23 @@
         <div id="step-opts" style="display: none">
           <div class="d-flex">
             <div class="m-1">
-              <button class="btn btn-image btn-action" id="step-play-btn">
+              <button class="btn btn-image btn-action" id="step-play-btn" title="Play/Pause">
                 <img src="images/Right/Play.png" width="32" height="32" /></button>
             </div>
             <div class="m-1">
-              <button class="btn btn-image btn-action" id="step-first-btn">
+              <button class="btn btn-image btn-action" id="step-first-btn" title="First step">
                 <img src="images/Right/First.png" width="32" height="32" /></button>
             </div>
             <div class="m-1">
-              <button class="btn btn-image btn-action" id="step-prev-btn">
+              <button class="btn btn-image btn-action" id="step-prev-btn" title="Previous step">
                 <img src="images/Right/Prev.png" width="32" height="32" /></button>
             </div>
             <div class="m-1">
-              <button class="btn btn-image btn-action" id="step-next-btn">
+              <button class="btn btn-image btn-action" id="step-next-btn" title="Next step">
                 <img src="images/Right/Next.png" width="32" height="32" /></button>
             </div>
             <div class="m-1">
-              <button class="btn btn-image btn-action" id="step-last-btn">
+              <button class="btn btn-image btn-action" id="step-last-btn" title="Last step">
                 <img src="images/Right/Last.png" width="32" height="32" /></button>
             </div>
           </div>
