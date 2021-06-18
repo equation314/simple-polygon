@@ -31,7 +31,7 @@ simple-polygon-cli tri [OPTIONS] <IN_FILE>
 OPTIONS:
     -a, --algo <ALGORITHM>    The triangulation algorithm [default: mono_partition]  [possible values: ear_cutting,
                               mono_partition]
-    -o, --output <OUT_FILE>    Output diagonals to the file
+    -o, --output <OUT_FILE>   Output diagonals to the file
 
 ARGS:
     <IN_FILE>    The input polygon file

@@ -4,6 +4,50 @@
 
 ### 1.1 命令行执行
 
+直接在命令行执行二进制程序 `simple-polygon-cli`，通过参数指定算法和数据，具体如下：
+
+#### 简单多边形生成
+
+```
+simple-polygon-cli gen [OPTIONS] -n <N>
+
+OPTIONS:
+    -n <N>                    Number of vertices
+    -a, --algo <ALGORITHM>    The algorithm of the generator [default: 2opt]  [possible values: space, 2opt,
+                              permute]
+    -o, --output <FILE>       The output polygon file
+    -r, --range <R>           The coordinate range [0, R) of the generated polygon [default: 1000]
+```
+
+#### 简单多边形三角剖分
+
+```
+simple-polygon-cli tri [OPTIONS] <IN_FILE>
+
+OPTIONS:
+    -a, --algo <ALGORITHM>    The triangulation algorithm [default: mono_partition]  [possible values: ear_cutting,
+                              mono_partition]
+    -o, --output <OUT_FILE>   Output diagonals to the file
+
+ARGS:
+    <IN_FILE>    The input polygon file
+```
+
+#### 简单多边形内最短路
+
+```
+simple-polygon-cli sp [OPTIONS] <FILE> --start <x> <y> --end <x> <y>
+
+OPTIONS:
+    -s, --start <x> <y>       The start point
+    -e, --end <x> <y>         The end point
+    -a, --algo <ALGORITHM>    The triangulation algorithm [default: mono_partition]  [possible values: ear_cutting,
+                              mono_partition]
+
+ARGS:
+    <FILE>    The input polygon file
+```
+
 ### 1.2 Web 应用
 
 本项目同时提供了一个 Web 应用，可通过浏览器在网页上显示与交互，并支持 PC 端和移动端。
