@@ -33,6 +33,13 @@ impl Polygon {
         self.area() > Point::EPS
     }
 
+    /// If the polygon vertices are not in counterclockwise order, reverse them.
+    pub fn force_ccw(&mut self) {
+        if !self.is_ccw() {
+            self.points.reverse();
+        }
+    }
+
     /// Whether the polygon is a simple polygon.
     pub fn is_simple(&self) -> bool {
         let n = self.size();
