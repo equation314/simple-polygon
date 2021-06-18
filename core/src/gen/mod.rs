@@ -99,14 +99,14 @@ impl<'a, R: Rng> RandomPolygonGenerator<'a, R> {
                     self.stepping_result = SteppingResult::TwoOptMoves(res);
                     idx
                 }
-                _ => unreachable!(),
+                Algorithm::SteadyGrowth => unimplemented!(),
             }
         } else {
             match algo {
                 Algorithm::PermuteReject => permute::generate(points, &mut self.rng),
                 Algorithm::SpacePartitioning => space::generate(points, &mut self.rng),
                 Algorithm::TwoOptMoves => two_opt::generate(points, &mut self.rng),
-                _ => unreachable!(),
+                Algorithm::SteadyGrowth => unimplemented!(),
             }
         };
         Self::uniform_indices(&mut indices, points);

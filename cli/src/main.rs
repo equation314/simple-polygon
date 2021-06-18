@@ -51,9 +51,39 @@ fn main() {
                 ),
         )
         .subcommand(
+            SubCommand::with_name("tri")
+                .about("Triangulate a simple polygon")
+                .display_order(2)
+                .arg(
+                    Arg::with_name("input")
+                        .value_name("IN_FILE")
+                        .takes_value(true)
+                        .required(true)
+                        .help("The input polygon file"),
+                )
+                .arg(
+                    Arg::with_name("algorithm")
+                        .value_name("ALGORITHM")
+                        .long("algo")
+                        .short("a")
+                        .takes_value(true)
+                        .possible_values(&["ear_cutting", "mono_partition"])
+                        .default_value("mono_partition")
+                        .help("The triangulation algorithm"),
+                )
+                .arg(
+                    Arg::with_name("output")
+                        .value_name("OUT_FILE")
+                        .long("output")
+                        .short("o")
+                        .takes_value(true)
+                        .help("Output diagonals to the file"),
+                ),
+        )
+        .subcommand(
             SubCommand::with_name("sp")
                 .about("Find the shortest path inside a simple polygon")
-                .display_order(2)
+                .display_order(3)
                 .arg(
                     Arg::with_name("input")
                         .value_name("FILE")
@@ -113,6 +143,28 @@ fn main() {
                 }
             }
         }
+        ("tri", Some(m)) => {
+            let input = m.value_of("input").unwrap();
+            let algo = m.value_of("algorithm").unwrap();
+            let output = m.value_of("output");
+            let mut poly = Polygon::from_file(input).unwrap();
+            poly.force_ccw();
+            let tri = sp::tri::Triangulation::build(&poly, algo.try_into().unwrap());
+            let diagonals = &tri.result().diagonals;
+            if let Some(fname) = output {
+                use std::fs::File;
+                use std::io::{prelude::*, BufWriter};
+                let file = File::create(fname).unwrap();
+                let mut writer = BufWriter::new(file);
+                for (u, v) in diagonals {
+                    writeln!(writer, "{} {}", u, v).unwrap();
+                }
+            } else {
+                for (u, v) in diagonals {
+                    println!("{} {}", u, v);
+                }
+            }
+        }
         ("sp", Some(m)) => {
             let input = m.value_of("input").unwrap();
             let start: Vec<f64> = m
@@ -126,7 +178,8 @@ fn main() {
                 .map(|val| val.parse().unwrap())
                 .collect();
             let algo = m.value_of("algorithm").unwrap();
-            let poly = Polygon::from_file(input).unwrap();
+            let mut poly = Polygon::from_file(input).unwrap();
+            poly.force_ccw();
             let path = sp::shortest::find_shortest_path(
                 &poly,
                 Point::new(start[0], start[1]),
