@@ -102,6 +102,16 @@
       background: #4ecdc4;
     }
 
+    @media (min-width: 58rem) {
+      #buttons-left {
+        width: 25rem;
+      }
+
+      #buttons-right {
+        width: 25rem;
+      }
+    }
+
   </style>
 </head>
 
@@ -110,10 +120,7 @@
   <nav class="navbar navbar-light bg-light border-bottom fixed-top">
     <div class="container-fluid">
 
-      <div class="d-flex align-items-center" style="height: 3.5rem">
-        <a class="navbar-brand ms-1 me-3" href="/" title="Simple Polygon">
-          <img src="images/logo.png" alt="" height="40">
-        </a>
+      <div class="d-flex align-items-center" id="buttons-left" style="height: 3.5rem;">
         <div class="m-1">
           <div class="dropdown">
             <button class="btn btn-image btn-action" data-bs-toggle="dropdown" aria-expanded="false" id="polygon-btn" value="random" title="Polygon">
@@ -177,7 +184,11 @@
         </div>
       </div>
 
-      <div class="d-flex">
+      <a class="m-1" href="." title="Simple Polygon">
+        <img src="images/logo.png" alt="" height="40">
+      </a>
+
+      <div class="d-flex justify-content-end" id="buttons-right">
         <div id="gen-opts">
           <div class="d-flex align-items-center">
             <div class="m-1">
