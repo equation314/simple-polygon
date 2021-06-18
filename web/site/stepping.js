@@ -2,15 +2,15 @@ import * as SP from "simple-polygon-wasm";
 import $ from "jquery";
 import { checkSimplePolygon, draw, showError, gLastRandomPolygonState } from "./index.js";
 
-const DIAGONAL_COLOR = "#ce6a5b";
-const BOUNDARY_COLOR = "#333";
+const DIAGONAL_COLOR = "#fff894";
+const BOUNDARY_COLOR = "#777";
 const FUNNEL_COLOR = "#000";
-const PATH_COLOR = "#3159E4";
-const CUSP_POINT_COLOR = "green";
-const CURRENT_POINT_COLOR = "red";
+const PATH_COLOR = "#0000ff";
+const CUSP_POINT_COLOR = "#0000ff";
+const CURRENT_POINT_COLOR = "#fff894";
 
-const TWO_OPT_EDGES_COLOR = "#9c3829";
-const TWO_OPT_POINT_COLOR = "red";
+const TWO_OPT_EDGES_COLOR = "#ff0077";
+const TWO_OPT_POINT_COLOR = "#ff0077";
 
 var gSteppingAlgorithm = "shortest";
 var gSteppingResult = null;
@@ -84,8 +84,8 @@ function showOneStep(step) {
                 return;
             } else if (step == 1) {
                 let segment = gSteppingResult.steps[0].base_segment;
-                draw.drawLines([segmentToLine(segment)], { color: "green" }, "stepping one-step");
-                draw.drawPoints(segment, { color: "green", size: 3 }, "stepping one-step");
+                draw.drawLines([segmentToLine(segment)], { color: "#33b4a9" }, "stepping one-step");
+                draw.drawPoints(segment, { color: "#33b4a9", size: 3 }, "stepping one-step");
                 return;
             }
             let data = gSteppingResult.steps[step - 2];
@@ -103,23 +103,23 @@ function showOneStep(step) {
             } else {
                 draw.drawLines(
                     [data.base_segment],
-                    { color: "red", dashed: true },
+                    { color: "#ff0077", dashed: true },
                     "stepping one-step",
                 );
                 if (data.split_line != null) {
                     draw.drawLines(
                         [segmentToLine(data.split_line)],
-                        { color: "green" },
+                        { color: "#33b4a9" },
                         "stepping one-step",
                     );
                     draw.drawPoints(
                         data.left_points,
-                        { color: "yellow", size: 3 },
+                        { color: "#fff45c", size: 3 },
                         "stepping one-step",
                     );
                     draw.drawPoints(
                         data.right_points,
-                        { color: "blue", size: 3 },
+                        { color: "#0000ff", size: 3 },
                         "stepping one-step",
                     );
                 } else {
@@ -130,9 +130,13 @@ function showOneStep(step) {
                     );
                 }
             }
-            draw.drawPoints(data.base_segment, { color: "red", size: 3 }, "stepping one-step");
+            draw.drawPoints(data.base_segment, { color: "#ff0077", size: 3 }, "stepping one-step");
             if (data.mid_point != null) {
-                draw.drawPoints([data.mid_point], { color: "green", size: 3 }, "stepping one-step");
+                draw.drawPoints(
+                    [data.mid_point],
+                    { color: "#33b4a9", size: 3 },
+                    "stepping one-step",
+                );
             }
         }
     } else if (gSteppingAlgorithm == "path") {
@@ -140,12 +144,12 @@ function showOneStep(step) {
             draw.removeShape("stepping");
             draw.drawManyLines(
                 gSteppingResult.sleeve_diagonals,
-                { color: DIAGONAL_COLOR, width: 0.5 },
+                { color: DIAGONAL_COLOR, width: 1 },
                 "stepping all-steps",
             );
             draw.drawManyLines(
                 gSteppingResult.sleeve_boundary,
-                { color: BOUNDARY_COLOR, width: 0.5 },
+                { color: BOUNDARY_COLOR, width: 1 },
                 "stepping all-steps",
             );
         } else {

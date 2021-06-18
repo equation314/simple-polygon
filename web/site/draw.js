@@ -1,12 +1,11 @@
 import * as d3 from "d3";
 import $ from "jquery";
 
-const ENDPOINT_COLOR = "#996f6e";
-const POLY_EDGE_COLOR = "#ccc";
+const ENDPOINT_COLOR = "#00ffff";
 const POLY_EDGE_COLOR_DRAWING = "#000";
 const POLY_EDGE_COLOR_CURRENT = "#53DBF3";
-const POLY_VERTEX_COLOR = "#FDBC07";
-const POLY_VERTEX_COLOR_DRAWING = "yellow";
+const POLY_VERTEX_COLOR = "#ff6b6b";
+const POLY_VERTEX_COLOR_DRAWING = "#ffabab";
 
 export class Draw {
     constructor() {
@@ -122,7 +121,7 @@ export class Draw {
                         return;
                     }
                     this.removeShape("polygon-drawing");
-                    let rgba = $("#pick-color").val() + "77";
+                    let rgba = $("#pick-color").val() + "99";
                     this.drawPolygon(this.currentDrawPoints, {
                         color: rgba,
                         vertexColor: POLY_VERTEX_COLOR,
@@ -394,7 +393,7 @@ export class Draw {
                 .attr("r", c.vertexSize)
                 .attr("fill", c.vertexColor)
                 .attr("stroke-width", 0.5)
-                .attr("stroke", "#000");
+                .attr("stroke", "#777");
             if (c.close && !c.fixed) {
                 circles.style("cursor", "move").call(this.pointDragger);
             } else if (!c.close) {
@@ -512,6 +511,7 @@ export class Draw {
         const defaultConfig = {
             color: ENDPOINT_COLOR,
             size: 5,
+            strokeColor: "#000",
             fixed: true,
         };
         let c = {
@@ -527,7 +527,7 @@ export class Draw {
             .attr("r", c.size)
             .attr("fill", c.color)
             .attr("stroke-width", 0.5)
-            .attr("stroke", "#000");
+            .attr("stroke", c.strokeColor);
         if (!c.fixed) {
             circle.style("cursor", "move").call(this.pointDragger);
         }

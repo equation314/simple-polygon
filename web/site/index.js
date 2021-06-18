@@ -3,8 +3,8 @@ import $ from "jquery";
 import { Draw } from "./draw.js";
 import * as stepping from "./stepping.js";
 
-const DIAGONAL_COLOR = "#9c3829";
-const PATH_COLOR = "#3159E4";
+const DIAGONAL_COLOR = "#fff894";
+const PATH_COLOR = "#0000ff";
 
 const SMALL_POLYGON_SIZE = 2000;
 
@@ -25,7 +25,7 @@ function onPolygonClear() {
     $("#tri-btn").prop("disabled", true);
     $("#path-btn").prop("disabled", true);
     $("#export-btn").prop("disabled", true);
-    $("#step-tri-btn").prop("disabled", true);
+    // $("#step-tri-btn").prop("disabled", true);
     $("#step-path-btn").prop("disabled", true);
 }
 
@@ -59,18 +59,28 @@ export function checkSimplePolygon(points) {
 }
 
 function randomColor() {
-    let r, g, b;
-    while (true) {
-        r = Math.floor(Math.random() * 256);
-        g = Math.floor(Math.random() * 256);
-        b = Math.floor(Math.random() * 256);
-        if (r + g + b < 224 * 3) break;
-    }
-    return `rgba(${r},${g},${b},0.5)`;
+    const polygonColors = [
+        "#35e3cc",
+        "#9d98e6",
+        "#4fc5d3",
+        "#e569a3",
+        "#9c7ded",
+        "#35a9e3",
+        "#459b5c",
+        "#9e9e9e",
+        "#33b4a9",
+        "#7370a2",
+        "#3391b4",
+        "#bd65b7",
+        "#71459b",
+        "#2a7eb5",
+        "#9b4592",
+    ];
+    return polygonColors[Math.floor(Math.random() * polygonColors.length)] + "aa";
 }
 
 function pickedColor() {
-    return $("#pick-color").val() + "77";
+    return $("#pick-color").val() + "99";
 }
 
 function maxPolygonSize(algo) {
@@ -177,7 +187,7 @@ function showShortestPath(start, end) {
         pathIdx.map(idx => points[idx]),
         [end],
     );
-    draw.drawPath(path, { color: PATH_COLOR }, "path-lines");
+    draw.drawPath(path, { color: PATH_COLOR, width: 2 }, "path-lines");
 }
 
 $(() => {
