@@ -313,7 +313,7 @@ export function init() {
     let play = () => {
         if (gIsPlaying && gCurrentStep < gMaxStep) {
             $("#step-next-btn").trigger("click");
-            setTimeout(play, 100);
+            setTimeout(play, 300 - $("#step-play-speed").val());
         } else {
             gIsPlaying = false;
             $("#step-play-btn img").attr("src", "images/Right/Play.png");
