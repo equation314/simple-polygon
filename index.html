@@ -5,6 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <title>Simple Polygon Generation and Shortest Paths</title>
+  <link rel="shortcut icon" type="image/png" href="images/logo.png">
   <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.0.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
   <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.0.1/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
   <style>
@@ -89,6 +90,18 @@
       opacity: 0.4;
     }
 
+    input[type=range]::-webkit-slider-thumb {
+      background: #4ecdc4;
+    }
+
+    input[type=range]::-moz-range-thumb {
+      background: #4ecdc4;
+    }
+
+    input[type=range]::-ms-thumb {
+      background: #4ecdc4;
+    }
+
   </style>
 </head>
 
@@ -98,6 +111,9 @@
     <div class="container-fluid">
 
       <div class="d-flex align-items-center" style="height: 3.5rem">
+        <a class="navbar-brand ms-1 me-3" href="/" title="Simple Polygon">
+          <img src="images/logo.png" alt="" height="40">
+        </a>
         <div class="m-1">
           <div class="dropdown">
             <button class="btn btn-image btn-action" data-bs-toggle="dropdown" aria-expanded="false" id="polygon-btn" value="random" title="Polygon">
@@ -225,6 +241,9 @@
             <div class="m-1">
               <button class="btn btn-image btn-action" id="step-last-btn" title="Last step">
                 <img src="images/Right/Last.png" width="32" height="32" /></button>
+            </div>
+            <div class="m-1 d-flex align-items-center">
+              <input type="range" class="form-range" min="0" max="300" title="Play speed" id="step-play-speed">
             </div>
           </div>
         </div>
